@@ -2488,7 +2488,7 @@ export default function LexFlowColombia() {
   }, []);
 
   return (
-    <div className="flex h-screen text-white overflow-hidden"
+    <div className="flex w-full h-screen text-white overflow-hidden"
       style={{ fontFamily: "'Manrope', system-ui, -apple-system, sans-serif", background: "#080C1A" }}>
 
       {/* ── SIDEBAR ── */}
@@ -2497,35 +2497,40 @@ export default function LexFlowColombia() {
 
         {/* Logo */}
         <div className="flex items-center gap-3 px-4 py-5 border-b border-slate-800">
-          {/* LexFlow wave icon — brand kit */}
+          {/* LexFlow brand icon — 3-wave flowing ribbon */}
           <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
             style={{
-              background: "linear-gradient(145deg, #0E1EAB 0%, #6446E5 100%)",
-              border: "1px solid rgba(9,200,212,0.35)",
-              boxShadow: "0 0 14px rgba(100,70,229,0.5), 0 0 4px rgba(9,200,212,0.3)"
+              background: "linear-gradient(145deg, #0B1240 0%, #1a1060 100%)",
+              border: "1px solid rgba(9,200,212,0.4)",
+              boxShadow: "0 0 18px rgba(100,70,229,0.55), 0 0 6px rgba(9,200,212,0.35), inset 0 1px 0 rgba(255,255,255,0.06)"
             }}>
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="1">
+                <linearGradient id="lxGrad1" x1="0" y1="0" x2="21" y2="0" gradientUnits="userSpaceOnUse">
                   <stop offset="0%" stopColor="#09C8D4"/>
-                  <stop offset="100%" stopColor="#ffffff"/>
+                  <stop offset="100%" stopColor="#c4b5fd"/>
                 </linearGradient>
               </defs>
-              <path d="M2 15 C5 15 7 7 11 7 C15 7 17 15 20 15"
-                stroke="url(#waveGrad)" strokeWidth="2.8" strokeLinecap="round" fill="none"/>
-              <path d="M2 10 C5 10 7 2 11 2 C15 2 17 10 20 10"
-                stroke="url(#waveGrad)" strokeWidth="2.8" strokeLinecap="round" fill="none" strokeOpacity="0.45"/>
+              {/* Wave 1 — top, full opacity */}
+              <path d="M1.5 5 C4.5 5 4.5 2 8.5 2 C12.5 2 13 5 16 5 C17.5 5 18.5 4.2 19.5 3.5"
+                stroke="url(#lxGrad1)" strokeWidth="2" strokeLinecap="round" fill="none"/>
+              {/* Wave 2 — middle, 65% */}
+              <path d="M1.5 10.5 C4.5 10.5 4.5 7.5 8.5 7.5 C12.5 7.5 13 10.5 16 10.5 C17.5 10.5 18.5 9.7 19.5 9"
+                stroke="url(#lxGrad1)" strokeWidth="2" strokeLinecap="round" fill="none" strokeOpacity="0.65"/>
+              {/* Wave 3 — bottom, 35% */}
+              <path d="M1.5 16 C4.5 16 4.5 13 8.5 13 C12.5 13 13 16 16 16 C17.5 16 18.5 15.2 19.5 14.5"
+                stroke="url(#lxGrad1)" strokeWidth="2" strokeLinecap="round" fill="none" strokeOpacity="0.35"/>
             </svg>
           </div>
           {!collapsed && (
             <div className="flex flex-col">
               <p className="font-extrabold text-sm leading-tight tracking-tight"
-                style={{ fontFamily: "'Manrope', sans-serif" }}>
+                style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: "-0.01em" }}>
                 <span style={{ color: "#6446E5" }}>{"{"}</span>
                 <span style={{ color: "#ffffff" }}>LexFlow</span>
                 <span style={{ color: "#09C8D4" }}>{"}"}</span>
               </p>
-              <p className="text-xs font-medium" style={{ color: "#09C8D4", opacity: 0.7, fontFamily: "'Manrope', sans-serif" }}>
+              <p className="text-xs font-medium" style={{ color: "#09C8D4", opacity: 0.75, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.01em" }}>
                 Run Smarter with AI
               </p>
             </div>
