@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LexFlow Colombia: Suite Legal 360</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel para JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- COMPONENTE DE ICONOS ---
+        const Icon = ({ name, size = 20, className = "" }) => {
+            useEffect(() => {
+                lucide.createIcons();
+            }, [name]);
+            return <i data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
+        };
+
+        const LexFlowApp = () => {
+            const [activeTab, setActiveTab] = useState('dashboard');
+            const [activeConnector, setActiveConnector] = useState(null);
+            
+            // Estados para simular funcionalidad
+            const [contractText, setContractText] = useState('');
+            const [isAnalyzing, setIsAnalyzing] = useState(false);
+            const [showAnalysis, setShowAnalysis] = useState(false);
+            const [complianceQuery, setComplianceQuery] = useState('');
+            const [complianceResult, setComplianceResult] = useState(null);
+
+            const navItems = [
+                { id: 'dashboard', name: 'Dashboard', icon: 'layout-dashboard' },
+                { id: 'contratos', name: 'Contratos / NDA', icon: 'file-text' },
+                { id: 'jurisprudencia', name: 'Jurisprudencia', icon: 'scale' },
+                { id: 'compliance', name: 'Compliance', icon: 'shield-check' },
+                { id: 'firmas', name: 'Firmas', icon: 'pen-tool' },
+            ];
+
+            const simulateContractAnalysis = () => {
+                setIsAnalyzing(true);
+                setTimeout(() => {
+                    setIsAnalyzing(false);
+                    setShowAnalysis(true);
+                }, 2000);
+            };
+
+            const simulateComplianceSearch = (e) => {
+                e.preventDefault();
+                setIsAnalyzing(true);
+                setTimeout(() => {
+                    setIsAnalyzing(false);
+                    if (complianceQuery.includes("900.123.456-7")) {
+                        setComplianceResult({ status: 'warning', name: 'CONSTRUCTORA ANDINA S.A.S', score: 65 });
+                    } else {
+                        setComplianceResult({ status: 'success', name: 'LOGÍSTICA CAFETERA S.A.', score: 98 });
+                    }
+                }, 1500);
+            };
+
+            return (
+                <div className="flex h-screen overflow-hidden">
+                    {/* SIDEBAR */}
+                    <aside className="w-64 bg-slate-900 text-white flex flex-col shrink-0">
+                        <div className="p-6">
+                            <div className="flex items-center gap-2 mb-8">
+                                <div className="bg-blue-600 p-2 rounded-lg">
+                                    <Icon name="scale" className="text-white" />
+                                </div>
+                                <span className="text-xl font-bold tracking-tight">LexFlow <span className="text-blue-400">CO</span></span>
+                            </div>
+                            <nav className="space-y-1">
+                                {navItems.map(item => (
+                                    <button 
+                                        key={item.id} 
+                                        onClick={() => setActiveTab(item.id)}
+                                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === item.id ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800'}`}
+                                    >
+                                        <Icon name={item.icon} size={18} />
+                                        <span className="text-sm font-semibold">{item.name}</span>
+                                    </button>
+                                ))}
+                            </nav>
+                        </div>
+                    </aside>
+
+                    {/* MAIN CONTENT */}
+                    <main className="flex-1 flex flex-col overflow-hidden">
+                        {/* HEADER */}
+                        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 z-20">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-slate-100 px-3 py-1 rounded-full border border-slate-200 flex items-center gap-2">
+                                    <Icon name="globe" size={14} className="text-slate-500" />
+                                    <span className="text-xs font-bold text-slate-700 uppercase">Colombia</span>
+                                </div>
+                                <div className="flex gap-4 border-l pl-4 border-slate-200">
+                                    <button onClick={() => setActiveConnector('doc')} className="text-blue-600 relative"><Icon name="pen-tool" size={18} />
+                                        {activeConnector === 'doc' && <div className="absolute top-8 left-0 bg-white border p-2 rounded shadow-xl text-[10px] w-32 font-bold animate-fade-in">Docusign: Conectado</div>}
+                                    </button>
+                                    <button onClick={() => setActiveConnector('leg')} className="text-amber-600 relative"><Icon name="book-open" size={18} />
+                                        {activeConnector === 'leg' && <div className="absolute top-8 left-0 bg-white border p-2 rounded shadow-xl text-[10px] w-32 font-bold animate-fade-in">Legis: Sincronizado</div>}
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <Icon name="bell" size={20} className="text-slate-400" />
+                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs border border-blue-200">JD</div>
+                            </div>
+                        </header>
+
+                        {/* VIEWPORT */}
+                        <div className="flex-1 overflow-y-auto p-8">
+                            
+                            {/* DASHBOARD VIEW */}
+                            {activeTab === 'dashboard' && (
+                                <div className="animate-fade-in space-y-8">
+                                    <h1 className="text-2xl font-extrabold tracking-tight">Panel Principal LegalOps</h1>
+                                    <div className="grid grid-cols-4 gap-6">
+                                        <div className="bg-white p-6 rounded-2xl border shadow-sm border-slate-100">
+                                            <Icon name="file-text" size={24} className="text-blue-600 mb-4" />
+                                            <p className="text-3xl font-black">24</p>
+                                            <p className="text-xs font-bold text-slate-400 uppercase">Contratos en Revisión</p>
+                                        </div>
+                                        <div className="bg-white p-6 rounded-2xl border shadow-sm border-slate-100">
+                                            <Icon name="alert-triangle" size={24} className="text-amber-500 mb-4" />
+                                            <p className="text-3xl font-black">03</p>
+                                            <p className="text-xs font-bold text-slate-400 uppercase">Alertas Compliance</p>
+                                        </div>
+                                        <div className="bg-white p-6 rounded-2xl border shadow-sm border-slate-100">
+                                            <Icon name="pen-tool" size={24} className="text-emerald-500 mb-4" />
+                                            <p className="text-3xl font-black">12</p>
+                                            <p className="text-xs font-bold text-slate-400 uppercase">Firmas Pendientes</p>
+                                        </div>
+                                        <div className="bg-white p-6 rounded-2xl border shadow-sm border-slate-100">
+                                            <Icon name="shield-check" size={24} className="text-slate-600 mb-4" />
+                                            <p className="text-3xl font-black">Low</p>
+                                            <p className="text-xs font-bold text-slate-400 uppercase">Nivel de Riesgo</p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-white p-8 rounded-2xl border border-slate-200 h-64 flex flex-col">
+                                        <h3 className="font-bold mb-8">Carga de Trabajo Semanal</h3>
+                                        <div className="flex items-end gap-6 flex-1 px-4">
+                                            {[50, 80, 40, 95, 70, 20, 10].map((h, i) => (
+                                                <div key={i} className="flex-1 bg-blue-600 rounded-t-lg transition-all hover:bg-blue-400" style={{ height: `${h}%` }}></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* CONTRACTS VIEW */}
+                            {activeTab === 'contratos' && (
+                                <div className="animate-fade-in space-y-6 max-w-5xl mx-auto">
+                                    <div className="flex justify-between items-center">
+                                        <h1 className="text-2xl font-bold">Análisis Inteligente de Contratos</h1>
+                                        <button onClick={() => setContractText("CONTRATO DE CONFIDENCIALIDAD: Entre Inversiones Bogotá y Tech SAS. Cláusula Segunda: El contrato dura 6 meses. Cláusula Tercera: Multa de 1 millón.")} className="text-blue-600 text-xs font-bold">Cargar Ejemplo NDA</button>
+                                    </div>
+                                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                                        <textarea 
+                                            className="w-full h-64 p-4 bg-slate-50 rounded-xl border-none focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono mb-4"
+                                            placeholder="Pegue aquí el texto del contrato..."
+                                            value={contractText}
+                                            onChange={(e) => setContractText(e.target.value)}
+                                        />
+                                        <button 
+                                            onClick={simulateContractAnalysis}
+                                            disabled={isAnalyzing}
+                                            className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-700 disabled:opacity-50"
+                                        >
+                                            {isAnalyzing ? "Analizando..." : "Iniciar Análisis LexFlow IA"}
+                                        </button>
+                                    </div>
+                                    {showAnalysis && (
+                                        <div className="grid grid-cols-1 gap-6 animate-fade-in">
+                                            <div className="bg-white rounded-xl border border-red-100 overflow-hidden shadow-sm">
+                                                <div className="bg-red-50 p-4 border-b border-red-100 font-bold text-red-700 flex items-center gap-2">
+                                                    <Icon name="alert-triangle" size={18} /> Riesgo Detectado: Duración
+                                                </div>
+                                                <div className="p-4 text-sm text-slate-600">
+                                                    La vigencia de 6 meses es inferior a la recomendada para secretos industriales en Colombia (2 años).
+                                                </div>
+                                            </div>
+                                            <div className="bg-blue-900 text-white p-6 rounded-xl">
+                                                <h4 className="font-bold flex items-center gap-2 mb-2"><Icon name="info" size={18} /> Explicación Simple (No Jurídica)</h4>
+                                                <p className="text-sm text-blue-100">Este contrato dice que si cuentas secretos de la empresa antes de 6 meses, tendrás que pagar una multa, pero el tiempo de protección es muy cortito.</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* COMPLIANCE VIEW */}
+                            {activeTab === 'compliance' && (
+                                <div className="animate-fade-in max-w-4xl mx-auto space-y-8">
+                                    <h1 className="text-2xl font-bold">Módulo SAGRILAFT / Debida Diligencia</h1>
+                                    <form onSubmit={simulateComplianceSearch} className="flex gap-4">
+                                        <input 
+                                            className="flex-1 p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" 
+                                            placeholder="Ingrese NIT (Eje: 900.123.456-7)..."
+                                            value={complianceQuery}
+                                            onChange={(e) => setComplianceQuery(e.target.value)}
+                                        />
+                                        <button className="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold">Consultar Tercero</button>
+                                    </form>
+
+                                    {complianceResult && (
+                                        <div className={`p-8 rounded-3xl border-4 ${complianceResult.status === 'warning' ? 'bg-amber-50 border-amber-500' : 'bg-emerald-50 border-emerald-500'} animate-fade-in`}>
+                                            <div className="flex justify-between items-center mb-6">
+                                                <div>
+                                                    <h2 className="text-2xl font-black">{complianceResult.name}</h2>
+                                                    <p className="font-bold text-slate-500">Score de Confianza: {complianceResult.score}/100</p>
+                                                </div>
+                                                <div className={`px-6 py-2 rounded-full text-white font-black uppercase text-xs ${complianceResult.status === 'warning' ? 'bg-amber-500' : 'bg-emerald-500'}`}>
+                                                    {complianceResult.status === 'warning' ? 'Precaución: PEP' : 'Aprobado'}
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {["Lista Clinton", "Boletín Contraloría", "Interpol", "Procuraduría"].map(l => (
+                                                    <div key={l} className="bg-white/50 p-3 rounded-lg flex justify-between items-center">
+                                                        <span className="text-xs font-bold text-slate-600">{l}</span>
+                                                        <Icon name="check-circle" size={14} className="text-emerald-500" />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            {complianceResult.status === 'warning' && (
+                                                <p className="mt-6 text-xs text-amber-800 font-bold p-4 bg-amber-100 rounded-xl">ALERTA: El representante legal tiene vínculo con Persona Expuesta Políticamente (PEP).</p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* JURISPRUDENCIA & FIRMAS (Módulos de consulta) */}
+                            {(activeTab === 'jurisprudencia' || activeTab === 'firmas') && (
+                                <div className="flex flex-col items-center justify-center h-[60vh] space-y-4 animate-fade-in">
+                                    <div className="p-6 bg-blue-50 rounded-full text-blue-600 animate-pulse">
+                                        <Icon name={navItems.find(i => i.id === activeTab).icon} size={48} />
+                                    </div>
+                                    <h3 className="text-xl font-bold italic text-slate-400">Módulo {activeTab.toUpperCase()} Inyectado</h3>
+                                    <p className="text-sm text-slate-400">Lógica operativa LexFlow 1.0.4 Activa</p>
+                                </div>
+                            )}
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<LexFlowApp />);
+    </script>
+</body>
+</html>
