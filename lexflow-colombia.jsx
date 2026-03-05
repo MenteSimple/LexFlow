@@ -2488,30 +2488,33 @@ export default function LexFlowColombia() {
   }, []);
 
   return (
-    <div className="flex h-screen bg-slate-950 text-white overflow-hidden"
-      style={{ fontFamily: "'Manrope', system-ui, -apple-system, sans-serif" }}>
+    <div className="flex h-screen text-white overflow-hidden"
+      style={{ fontFamily: "'Manrope', system-ui, -apple-system, sans-serif", background: "#080C1A" }}>
 
       {/* ── SIDEBAR ── */}
-      <aside className="bg-slate-900 border-r border-slate-800 flex flex-col transition-all duration-300 flex-shrink-0"
-        style={{ width: collapsed ? 64 : 224 }}>
+      <aside className="border-r border-slate-800 flex flex-col transition-all duration-300 flex-shrink-0"
+        style={{ width: collapsed ? 64 : 224, background: "linear-gradient(180deg, #0A0F2E 0%, #0d1424 60%, #0f172a 100%)" }}>
 
         {/* Logo */}
         <div className="flex items-center gap-3 px-4 py-5 border-b border-slate-800">
-          {/* LexFlow wave icon — matches brand kit */}
+          {/* LexFlow wave icon — brand kit */}
           <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "linear-gradient(145deg, #0E1EAB 0%, #1a1a3e 100%)", border: "1px solid rgba(100,70,229,0.4)" }}>
+            style={{
+              background: "linear-gradient(145deg, #0E1EAB 0%, #6446E5 100%)",
+              border: "1px solid rgba(9,200,212,0.35)",
+              boxShadow: "0 0 14px rgba(100,70,229,0.5), 0 0 4px rgba(9,200,212,0.3)"
+            }}>
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
               <defs>
                 <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="1">
                   <stop offset="0%" stopColor="#09C8D4"/>
-                  <stop offset="100%" stopColor="#6446E5"/>
+                  <stop offset="100%" stopColor="#ffffff"/>
                 </linearGradient>
               </defs>
-              {/* Double S-wave ribbon — LexFlow brand icon */}
               <path d="M2 15 C5 15 7 7 11 7 C15 7 17 15 20 15"
                 stroke="url(#waveGrad)" strokeWidth="2.8" strokeLinecap="round" fill="none"/>
               <path d="M2 10 C5 10 7 2 11 2 C15 2 17 10 20 10"
-                stroke="url(#waveGrad)" strokeWidth="2.8" strokeLinecap="round" fill="none" strokeOpacity="0.5"/>
+                stroke="url(#waveGrad)" strokeWidth="2.8" strokeLinecap="round" fill="none" strokeOpacity="0.45"/>
             </svg>
           </div>
           {!collapsed && (
@@ -2538,7 +2541,7 @@ export default function LexFlowColombia() {
                   ? "text-white"
                   : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`}
-              style={module === id ? { background: "#6446E5" } : {}}>
+              style={module === id ? { background: "linear-gradient(90deg, #6446E5 0%, #0E1EAB 100%)", boxShadow: "0 0 12px rgba(100,70,229,0.4)" } : {}}>
               <Icon size={17} className="flex-shrink-0" />
               {!collapsed && <span className="text-sm font-medium">{label}</span>}
             </button>
@@ -2576,7 +2579,12 @@ export default function LexFlowColombia() {
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
         {/* HEADER */}
-        <header className="bg-slate-900 border-b border-slate-800 px-6 py-3 flex items-center gap-4 flex-shrink-0">
+        <header className="border-b border-slate-800 px-6 py-3 flex items-center gap-4 flex-shrink-0"
+          style={{
+            background: "#0d1117",
+            borderTop: "2px solid transparent",
+            borderImage: "linear-gradient(90deg, #6446E5, #09C8D4, #10B991) 1"
+          }}>
 
           {/* Jurisdiction selector */}
           <div className="relative">
