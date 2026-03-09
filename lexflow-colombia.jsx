@@ -1861,7 +1861,7 @@ const ContratosModule = () => {
         {/* ══════════════ LEFT SIDEBAR — Practice Areas Menu ══════════════ */}
         <div className="flex flex-col flex-shrink-0 overflow-y-auto border-r"
           style={{
-            width: practiceMenuOpen ? 260 : 52,
+            width: (practiceMenuOpen && !showViewer) ? 260 : 52,
             backgroundColor: "#060b14",
             borderColor: "rgba(30,41,59,0.5)",
             transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -2562,7 +2562,7 @@ const ContratosModule = () => {
               </div>
               {/* Word-like Document Viewer — right panel */}
               {showViewer && results && (
-                <div className="flex flex-col border-l overflow-hidden" style={{ width: "50%", flexShrink: 0, backgroundColor: "#0c1322", borderColor: "rgba(30,41,59,0.5)" }}>
+                <div className="flex flex-col border-l overflow-hidden" style={{ flex: 1, minWidth: 0, backgroundColor: "#0c1322", borderColor: "rgba(30,41,59,0.5)" }}>
                   {/* Viewer Toolbar — Word-like */}
                   <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: "rgba(30,41,59,0.4)", backgroundColor: "rgba(15,23,42,0.8)" }}>
                     <div className="flex items-center gap-3">
@@ -2601,9 +2601,9 @@ const ContratosModule = () => {
                   {/* Word-like document page */}
                   <div className="flex-1 overflow-y-auto" style={{ backgroundColor: "#1e293b", padding: "20px 24px" }}>
                     <div style={{
-                      maxWidth: 720, margin: "0 auto", backgroundColor: "#ffffff", borderRadius: 4,
+                      width: "100%", boxSizing: "border-box", backgroundColor: "#ffffff", borderRadius: 4,
                       boxShadow: "0 2px 20px rgba(0,0,0,0.4), 0 0 1px rgba(0,0,0,0.2)",
-                      padding: "48px 44px", minHeight: "calc(100vh - 200px)"
+                      padding: "40px 36px", minHeight: "calc(100vh - 200px)"
                     }}>
                       {/* Document header */}
                       <div style={{ borderBottom: "2px solid #e2e8f0", paddingBottom: 16, marginBottom: 24 }}>
