@@ -253,11 +253,11 @@ const ANALYSIS = {
       { clause: "Jurisdicción", standard: "Ley colombiana + mecanismo de resolución", actual: "Arbitramento CCB", deviation: "ninguna", recommendation: "Conforme al estándar" },
     ],
     suggestions: [
-      { title: "Agregar cláusula de datos personales", description: "Incluir autorización y tratamiento conforme a Ley 1581/2012. Obligatorio si se comparten datos de personas naturales.", priority: "critica", category: "compliance" },
-      { title: "Definir término de vigencia", description: "Establecer plazo de 3-5 años para la obligación de confidencialidad post-terminación.", priority: "critica", category: "temporal" },
-      { title: "Incluir cláusula de propiedad de información derivada", description: "Especificar que información derivada, compilaciones y análisis también están protegidos.", priority: "alta", category: "alcance" },
-      { title: "Ampliar excepciones de confidencialidad", description: "Agregar: conocimiento previo documentado, orden judicial con notificación previa, desarrollo independiente.", priority: "alta", category: "excepciones" },
-      { title: "Agregar cláusula de no-solicitación", description: "Proteger contra la contratación de empleados clave de la otra parte durante y después del NDA.", priority: "media", category: "proteccion" },
+      { title: "Agregar cláusula de datos personales", description: "Incluir autorización y tratamiento conforme a Ley 1581/2012. Obligatorio si se comparten datos de personas naturales.", priority: "critica", category: "compliance", location: "Art. 9 — después del párrafo sobre ley aplicable" },
+      { title: "Definir término de vigencia", description: "Establecer plazo de 3-5 años para la obligación de confidencialidad post-terminación.", priority: "critica", category: "temporal", location: "Art. 3 — Vigencia de la Reserva (reemplazar texto actual)" },
+      { title: "Incluir cláusula de propiedad de información derivada", description: "Especificar que información derivada, compilaciones y análisis también están protegidos.", priority: "alta", category: "alcance", location: "Art. 2 — al final de la definición de Información Confidencial" },
+      { title: "Ampliar excepciones de confidencialidad", description: "Agregar: conocimiento previo documentado, orden judicial con notificación previa, desarrollo independiente.", priority: "alta", category: "excepciones", location: "Art. 7 — Excepciones de Confidencialidad (ampliar lista)" },
+      { title: "Agregar cláusula de no-solicitación", description: "Proteger contra la contratación de empleados clave de la otra parte durante y después del NDA.", priority: "media", category: "proteccion", location: "Nuevo artículo — insertar después de Art. 8 (Responsabilidad)" },
     ],
   },
 
@@ -312,10 +312,10 @@ const ANALYSIS = {
       { clause: "Intereses de Mora", standard: "Tasa máxima legal Superfinanciera", actual: "Sin intereses de mora", deviation: "moderada", recommendation: "Incluir intereses de mora legales" },
     ],
     suggestions: [
-      { title: "Definir plazo de entrega con hitos", description: "Establecer cronograma de entregas parciales con cantidades y fechas específicas.", priority: "critica", category: "temporal" },
-      { title: "Incluir cláusula de ajuste IPC", description: "Las cuotas mensuales deben ajustarse anualmente conforme al IPC certificado por DANE.", priority: "alta", category: "financiero" },
-      { title: "Agregar acta de recibo y conformidad", description: "Protocolo formal de recepción con plazos para reportar inconformidades.", priority: "alta", category: "proceso" },
-      { title: "Reforzar cláusula de garantía", description: "Alinear con Art. 934 C.Co. para cubrir vicios ocultos durante 6 meses post-entrega.", priority: "alta", category: "garantia" },
+      { title: "Definir plazo de entrega con hitos", description: "Establecer cronograma de entregas parciales con cantidades y fechas específicas.", priority: "critica", category: "temporal", location: "Art. 3 — Plazo de Entrega (reemplazar texto actual)" },
+      { title: "Incluir cláusula de ajuste IPC", description: "Las cuotas mensuales deben ajustarse anualmente conforme al IPC certificado por DANE.", priority: "alta", category: "financiero", location: "Art. 2 — Precio y Pago (agregar párrafo de indexación)" },
+      { title: "Agregar acta de recibo y conformidad", description: "Protocolo formal de recepción con plazos para reportar inconformidades.", priority: "alta", category: "proceso", location: "Nuevo artículo — insertar después de Art. 3 (Plazo)" },
+      { title: "Reforzar cláusula de garantía", description: "Alinear con Art. 934 C.Co. para cubrir vicios ocultos durante 6 meses post-entrega.", priority: "alta", category: "garantia", location: "Art. 6 — Garantías (ampliar cobertura)" },
     ],
   },
 
@@ -364,9 +364,9 @@ const ANALYSIS = {
       { clause: "Plazo de Pago", standard: "Primeros 5 días del mes", actual: "Primeros 5 días", deviation: "ninguna", recommendation: "Conforme al estándar" },
     ],
     suggestions: [
-      { title: "Clasificar mejoras por tipo (necesarias/útiles/voluptuarias)", description: "Establecer régimen diferenciado de compensación conforme al Art. 1993-1994 del C.C.", priority: "critica", category: "proteccion" },
-      { title: "Limitar penalidad por restitución anticipada", description: "Negociar máximo de 3 cánones como indemnización en lugar de cánones pendientes.", priority: "alta", category: "financiero" },
-      { title: "Incluir protocolo de entrega/restitución", description: "Acta de inventario con registro fotográfico al inicio y fin del contrato.", priority: "media", category: "proceso" },
+      { title: "Clasificar mejoras por tipo (necesarias/útiles/voluptuarias)", description: "Establecer régimen diferenciado de compensación conforme al Art. 1993-1994 del C.C.", priority: "critica", category: "proteccion", location: "Art. 7 — Mejoras y Adiciones (reescribir completamente)" },
+      { title: "Limitar penalidad por restitución anticipada", description: "Negociar máximo de 3 cánones como indemnización en lugar de cánones pendientes.", priority: "alta", category: "financiero", location: "Art. 8 — Restitución Anticipada (modificar penalidad)" },
+      { title: "Incluir protocolo de entrega/restitución", description: "Acta de inventario con registro fotográfico al inicio y fin del contrato.", priority: "media", category: "proceso", location: "Nuevo artículo — insertar después de Art. 8" },
     ],
   },
 
@@ -422,10 +422,10 @@ const ANALYSIS = {
       { clause: "Vacaciones", standard: "15 días hábiles por año (Art. 186 CST)", actual: "15 días hábiles", deviation: "ninguna", recommendation: "Conforme a derecho" },
     ],
     suggestions: [
-      { title: "Corregir jornada laboral a 8 horas", description: "La jornada de 10h viola Art. 161 CST. Debe reducirse a 8h con pago de extras si se excede.", priority: "critica", category: "compliance" },
-      { title: "Reducir período de prueba a 2 meses", description: "Los 4 meses son nulos de pleno derecho. Máximo legal es 2 meses (Art. 78 CST).", priority: "critica", category: "compliance" },
-      { title: "Acotar cláusula de exclusividad", description: "Especificar sector, territorio y compensación. Restricción excesiva puede ser inaplicable.", priority: "alta", category: "proteccion" },
-      { title: "Incluir cláusula de teletrabajo", description: "Si aplica trabajo remoto, incluir condiciones conforme a Ley 1221/2008 y Decreto 649/2022.", priority: "media", category: "modernizacion" },
+      { title: "Corregir jornada laboral a 8 horas", description: "La jornada de 10h viola Art. 161 CST. Debe reducirse a 8h con pago de extras si se excede.", priority: "critica", category: "compliance", location: "Art. 3 — Jornada de Trabajo (corregir horario)" },
+      { title: "Reducir período de prueba a 2 meses", description: "Los 4 meses son nulos de pleno derecho. Máximo legal es 2 meses (Art. 78 CST).", priority: "critica", category: "compliance", location: "Art. 5 — Período de Prueba (reducir a 2 meses)" },
+      { title: "Acotar cláusula de exclusividad", description: "Especificar sector, territorio y compensación. Restricción excesiva puede ser inaplicable.", priority: "alta", category: "proteccion", location: "Art. 7 — Exclusividad (precisar alcance)" },
+      { title: "Incluir cláusula de teletrabajo", description: "Si aplica trabajo remoto, incluir condiciones conforme a Ley 1221/2008 y Decreto 649/2022.", priority: "media", category: "modernizacion", location: "Nuevo artículo — insertar después de Art. 3 (Jornada)" },
     ],
   },
 
@@ -473,9 +473,9 @@ const ANALYSIS = {
       { clause: "Plazo y Terminación", standard: "Causales claras de terminación anticipada bilateral", actual: "No incluye causales de terminación anticipada", deviation: "moderada", recommendation: "Incluir causales de terminación con preaviso de 30 días" },
     ],
     suggestions: [
-      { title: "Detallar cesión de propiedad intelectual", description: "Especificar: derechos patrimoniales (reproducción, transformación, distribución), territorio mundial, vigencia.", priority: "alta", category: "pi" },
-      { title: "Agregar cláusula penal por incumplimiento de confidencialidad", description: "Establecer sanción de 50 SMMLV por violación de reserva post-contractual.", priority: "alta", category: "proteccion" },
-      { title: "Incluir causales de terminación anticipada", description: "Definir causales bilaterales con preaviso de 30 días y liquidación de entregables parciales.", priority: "media", category: "terminacion" },
+      { title: "Detallar cesión de propiedad intelectual", description: "Especificar: derechos patrimoniales (reproducción, transformación, distribución), territorio mundial, vigencia.", priority: "alta", category: "pi", location: "Art. 6 — Propiedad Intelectual (ampliar detalle de cesión)" },
+      { title: "Agregar cláusula penal por incumplimiento de confidencialidad", description: "Establecer sanción de 50 SMMLV por violación de reserva post-contractual.", priority: "alta", category: "proteccion", location: "Art. 7 — Confidencialidad (agregar párrafo de penalidad)" },
+      { title: "Incluir causales de terminación anticipada", description: "Definir causales bilaterales con preaviso de 30 días y liquidación de entregables parciales.", priority: "media", category: "terminacion", location: "Nuevo artículo — insertar después de Art. 7" },
     ],
   },
 };
@@ -564,6 +564,35 @@ const computeTextDiff = (textA, textB) => {
     added: linesB.filter(l => !setA.has(l)),
     unchanged: linesA.filter(l => setB.has(l)),
   };
+};
+
+/* Word-level inline diff for two lines */
+const computeWordDiff = (lineA, lineB) => {
+  const wordsA = lineA.split(/(\s+)/);
+  const wordsB = lineB.split(/(\s+)/);
+  // Simple LCS-based word diff
+  const m = wordsA.length, n = wordsB.length;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = wordsA[i - 1] === wordsB[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
+  // Backtrack
+  const resultA = [], resultB = [];
+  let i = m, j = n;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && wordsA[i - 1] === wordsB[j - 1]) {
+      resultA.unshift({ text: wordsA[i - 1], type: "same" });
+      resultB.unshift({ text: wordsB[j - 1], type: "same" });
+      i--; j--;
+    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+      resultB.unshift({ text: wordsB[j - 1], type: "added" });
+      j--;
+    } else {
+      resultA.unshift({ text: wordsA[i - 1], type: "removed" });
+      i--;
+    }
+  }
+  return { left: resultA, right: resultB };
 };
 
 // ─── JURISPRUDENCIA DATA ──────────────────────────────────────────────────────
@@ -1415,6 +1444,10 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
   const [clauseSearch, setClauseSearch] = useState("");
   const [showViewer, setShowViewer] = useState(false);
   const [editableText, setEditableText] = useState("");
+  const [followUpPrompt, setFollowUpPrompt] = useState("");
+  const [followUpHistory, setFollowUpHistory] = useState([]);
+  const [docVersions, setDocVersions] = useState([]);
+  const [activeVersion, setActiveVersion] = useState(0);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -2121,13 +2154,17 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                     )}
                   </div>
 
-                  {/* Textarea */}
+                  {/* Quick text input for clause review */}
                   <div>
                     <div className="flex items-center justify-between" style={{ marginBottom: 8 }}>
-                      <p style={{ color: "#64748b", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600 }}>Texto del Documento</p>
+                      <p style={{ color: "#64748b", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600 }}>Texto para Revisión</p>
                       <span style={{ color: "#475569", fontSize: 10 }}>{text.length.toLocaleString()} chars</span>
                     </div>
-                    <textarea value={text} onChange={e => setText(e.target.value)} rows={9}
+                    <p style={{ color: "#475569", fontSize: 11, marginBottom: 8, lineHeight: 1.5 }}>
+                      Pega una cláusula o texto específico para análisis rápido. El documento completo puedes verlo en el Editor.
+                    </p>
+                    <textarea value={text} onChange={e => setText(e.target.value)} rows={6}
+                      placeholder="Pega aquí una cláusula, artículo o texto específico para revisar..."
                       className="w-full rounded-xl p-3.5 text-xs leading-relaxed outline-none resize-none"
                       style={{ backgroundColor: "rgba(15,23,42,0.6)", border: "1px solid rgba(30,41,59,0.8)", color: "#cbd5e1", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 11.5, lineHeight: 1.7 }} />
                   </div>
@@ -2311,11 +2348,35 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                     {tab === "matrix" && (
                       <div className="space-y-2">
                         {results.matrix.map((row, i) => (
-                          <div key={i} className="lf-slideIn lf-hover-lift flex items-start gap-4 p-4 rounded-xl"
+                          <div key={i} className="lf-slideIn lf-hover-lift rounded-xl overflow-hidden"
                             style={{ backgroundColor: "rgba(15,23,42,0.5)", border: "1px solid rgba(30,41,59,0.5)", animationDelay: `${i * 60}ms` }}>
-                            <p style={{ color: "#e2e8f0", fontSize: 13, fontWeight: 600, minWidth: 130 }}>{row.clause}</p>
-                            <RiskBadge level={row.risk} />
-                            <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.6, flex: 1 }}>{row.obs}</p>
+                            <div className="flex items-start gap-4 p-4">
+                              <p style={{ color: "#e2e8f0", fontSize: 13, fontWeight: 600, minWidth: 130 }}>{row.clause}</p>
+                              <RiskBadge level={row.risk} />
+                              <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.6, flex: 1 }}>{row.obs}</p>
+                            </div>
+                            {/* Harvey-like action buttons */}
+                            <div className="flex items-center gap-2 px-4 py-2" style={{ borderTop: "1px solid rgba(30,41,59,0.3)", backgroundColor: "rgba(15,23,42,0.3)" }}>
+                              <button onClick={() => {
+                                const proposal = `Para "${row.clause}": ${row.obs.includes("Recomendado") ? row.obs.split("Recomendado:")[1] || "Se recomienda ajustar conforme a la normativa colombiana vigente." : "Se recomienda revisar y ajustar esta cláusula conforme a las mejores prácticas y normativa colombiana vigente."}`;
+                                setFollowUpHistory(prev => [...prev, { question: `Dame una propuesta para ${row.clause}`, answer: proposal }]);
+                                showToast("Propuesta generada");
+                              }} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs lf-hover-lift" style={{ backgroundColor: `${currentPractice.color}10`, color: currentPractice.color, border: `1px solid ${currentPractice.color}20` }}>
+                                <PenTool size={10} /> Generar propuesta
+                              </button>
+                              <button onClick={() => {
+                                setFollowUpPrompt(`Explica en detalle el riesgo de "${row.clause}"`);
+                              }} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs lf-hover-lift" style={{ backgroundColor: "rgba(168,85,247,0.08)", color: "#a855f7", border: "1px solid rgba(168,85,247,0.15)" }}>
+                                <Sparkles size={10} /> Profundizar análisis
+                              </button>
+                              <button onClick={() => {
+                                const clauseText = `${row.clause}: ${row.obs}`;
+                                navigator.clipboard.writeText(clauseText);
+                                showToast("Copiado al portapapeles");
+                              }} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs lf-hover-lift" style={{ backgroundColor: "rgba(100,116,139,0.08)", color: "#94a3b8", border: "1px solid rgba(100,116,139,0.15)" }}>
+                                <Copy size={10} /> Copiar
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -2454,9 +2515,44 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                                 </div>
                               </div>
                               {pb.deviation !== "ninguna" && (
-                                <div className="px-4 py-2.5 flex items-center gap-2" style={{ backgroundColor: "rgba(15,23,42,0.6)", borderTop: "1px solid rgba(30,41,59,0.3)" }}>
-                                  <Lightbulb size={12} style={{ color: currentPractice.color }} />
-                                  <p style={{ color: currentPractice.color, fontSize: 11.5, fontWeight: 500 }}>{pb.recommendation}</p>
+                                <div className="px-4 py-2.5" style={{ backgroundColor: "rgba(15,23,42,0.6)", borderTop: "1px solid rgba(30,41,59,0.3)" }}>
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Lightbulb size={12} style={{ color: currentPractice.color }} />
+                                    <p style={{ color: currentPractice.color, fontSize: 11.5, fontWeight: 500 }}>{pb.recommendation}</p>
+                                  </div>
+                                  {/* Harvey-like action buttons */}
+                                  <div className="flex items-center gap-2">
+                                    <button onClick={() => {
+                                      const proposal = `Propuesta de redacción para "${pb.clause}":\n\n"${pb.standard}"\n\nEsta redacción se ajusta al estándar de la industria y cumple con la normativa colombiana vigente. Reemplaza el texto actual: "${pb.actual}"`;
+                                      setFollowUpHistory(prev => [...prev, { question: `Dame una propuesta para ${pb.clause}`, answer: proposal }]);
+                                      showToast("Propuesta de cláusula generada");
+                                    }} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs lf-hover-lift" style={{ backgroundColor: `${currentPractice.color}10`, color: currentPractice.color, border: `1px solid ${currentPractice.color}20` }}>
+                                      <PenTool size={10} /> Generar redacción
+                                    </button>
+                                    <button onClick={() => {
+                                      setFollowUpPrompt(`Analiza jurisprudencia colombiana relevante para "${pb.clause}"`);
+                                    }} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs lf-hover-lift" style={{ backgroundColor: "rgba(168,85,247,0.08)", color: "#a855f7", border: "1px solid rgba(168,85,247,0.15)" }}>
+                                      <BookOpen size={10} /> Jurisprudencia
+                                    </button>
+                                    <button onClick={() => {
+                                      if (showViewer && editableText) {
+                                        const newText = editableText.replace(pb.actual, pb.standard);
+                                        if (newText !== editableText) {
+                                          setEditableText(newText);
+                                          showToast("Texto estándar aplicado en el editor");
+                                        } else {
+                                          showToast("Texto no encontrado en el editor", "error");
+                                        }
+                                      } else {
+                                        setShowViewer(true);
+                                        setEditableText(text);
+                                        setFuncPanelOpen(false);
+                                        showToast("Abre el editor y vuelve a intentar");
+                                      }
+                                    }} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs lf-hover-lift" style={{ backgroundColor: "rgba(34,197,94,0.08)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.15)" }}>
+                                      <CheckCircle size={10} /> Aplicar estándar
+                                    </button>
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -2494,6 +2590,12 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                                 </div>
                               </div>
                               <p style={{ color: "#94a3b8", fontSize: 12.5, lineHeight: 1.7 }}>{sug.description}</p>
+                              {sug.location && (
+                                <div className="flex items-center gap-2 mt-2.5 px-2.5 py-1.5 rounded-lg" style={{ backgroundColor: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.12)" }}>
+                                  <MapPin size={11} style={{ color: "#818cf8", flexShrink: 0 }} />
+                                  <p style={{ color: "#a5b4fc", fontSize: 11, fontWeight: 500 }}>Ubicación: {sug.location}</p>
+                                </div>
+                              )}
                             </div>
                           );
                         })}
@@ -2509,13 +2611,30 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                             className="w-full rounded-xl p-3.5 text-xs outline-none resize-none"
                             style={{ backgroundColor: "rgba(15,23,42,0.5)", border: `1px solid ${currentPractice.color}15`, color: "#cbd5e1", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 11.5, lineHeight: 1.7 }} />
                         </div>
-                        {diff && (
+                        {diff && (() => {
+                          const linesA = text.split("\n").filter(Boolean);
+                          const linesB = compareText.split("\n").filter(Boolean);
+                          const maxLen = Math.max(linesA.length, linesB.length);
+                          const pairedRows = [];
+                          for (let li = 0; li < maxLen; li++) {
+                            const a = (linesA[li] || "").trim();
+                            const b = (linesB[li] || "").trim();
+                            if (a === b) { pairedRows.push({ type: "same", left: a, right: b }); }
+                            else if (!a && b) { pairedRows.push({ type: "added", left: "", right: b }); }
+                            else if (a && !b) { pairedRows.push({ type: "removed", left: a, right: "" }); }
+                            else { pairedRows.push({ type: "changed", left: a, right: b, wordDiff: computeWordDiff(a, b) }); }
+                          }
+                          const nChanged = pairedRows.filter(r => r.type === "changed").length;
+                          const nRemoved = pairedRows.filter(r => r.type === "removed").length + nChanged;
+                          const nAdded = pairedRows.filter(r => r.type === "added").length + nChanged;
+                          const nSame = pairedRows.filter(r => r.type === "same").length;
+                          return (
                           <div className="space-y-3 lf-fadeUp">
                             <div className="flex gap-3">
                               {[
-                                { n: diff.removed.length, label: "Eliminadas", color: "#f87171", bg: "rgba(239,68,68,0.06)" },
-                                { n: diff.added.length, label: "Agregadas", color: "#4ade80", bg: "rgba(34,197,94,0.06)" },
-                                { n: diff.unchanged.length, label: "Sin cambios", color: "#94a3b8", bg: "rgba(100,116,139,0.06)" },
+                                { n: nRemoved, label: "Modificadas / Eliminadas", color: "#f87171", bg: "rgba(239,68,68,0.06)" },
+                                { n: nAdded, label: "Modificadas / Agregadas", color: "#4ade80", bg: "rgba(34,197,94,0.06)" },
+                                { n: nSame, label: "Sin cambios", color: "#94a3b8", bg: "rgba(100,116,139,0.06)" },
                               ].map(s => (
                                 <div key={s.label} className="flex-1 p-4 rounded-xl text-center" style={{ backgroundColor: s.bg }}>
                                   <p style={{ fontSize: 24, fontWeight: 800, color: s.color }}>{s.n}</p>
@@ -2524,23 +2643,127 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                               ))}
                             </div>
                             <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(30,41,59,0.5)" }}>
-                              <div className="flex" style={{ minHeight: 0 }}>
-                                <div className="flex-1 p-4 border-r overflow-y-auto" style={{ borderColor: "rgba(30,41,59,0.4)", maxHeight: 350 }}>
-                                  {text.split("\n").filter(Boolean).map((line, i) => {
-                                    const isRemoved = diff.removed.includes(line.trim());
-                                    return <p key={i} className="py-0.5 px-2 rounded" style={{ backgroundColor: isRemoved ? "rgba(239,68,68,0.08)" : "transparent", color: isRemoved ? "#fca5a5" : "#64748b", textDecoration: isRemoved ? "line-through" : "none", fontFamily: "'JetBrains Mono', monospace", fontSize: 11, lineHeight: 1.7 }}>{line}</p>;
-                                  })}
+                              {/* Column headers */}
+                              <div className="flex" style={{ borderBottom: "1px solid rgba(30,41,59,0.4)" }}>
+                                <div className="flex-1 px-4 py-2" style={{ backgroundColor: "rgba(239,68,68,0.04)" }}>
+                                  <p style={{ fontSize: 10, fontWeight: 700, color: "#f87171", textTransform: "uppercase", letterSpacing: "0.05em" }}>Original</p>
                                 </div>
-                                <div className="flex-1 p-4 overflow-y-auto" style={{ maxHeight: 350 }}>
-                                  {compareText.split("\n").filter(Boolean).map((line, i) => {
-                                    const isAdded = diff.added.includes(line.trim());
-                                    return <p key={i} className="py-0.5 px-2 rounded" style={{ backgroundColor: isAdded ? "rgba(34,197,94,0.08)" : "transparent", color: isAdded ? "#86efac" : "#64748b", fontFamily: "'JetBrains Mono', monospace", fontSize: 11, lineHeight: 1.7 }}>{isAdded && <span style={{ color: "#22c55e", marginRight: 4, fontWeight: 700 }}>+</span>}{line}</p>;
-                                  })}
+                                <div className="flex-1 px-4 py-2" style={{ backgroundColor: "rgba(34,197,94,0.04)" }}>
+                                  <p style={{ fontSize: 10, fontWeight: 700, color: "#4ade80", textTransform: "uppercase", letterSpacing: "0.05em" }}>Nueva Versión</p>
+                                </div>
+                              </div>
+                              <div className="flex" style={{ minHeight: 0 }}>
+                                <div className="flex-1 p-3 border-r overflow-y-auto" style={{ borderColor: "rgba(30,41,59,0.4)", maxHeight: 400 }}>
+                                  {pairedRows.map((row, ri) => (
+                                    <div key={ri} className="py-1 px-2 rounded mb-0.5" style={{
+                                      backgroundColor: row.type === "removed" ? "rgba(239,68,68,0.1)" : row.type === "changed" ? "rgba(239,68,68,0.06)" : "transparent",
+                                      fontFamily: "'JetBrains Mono', monospace", fontSize: 11, lineHeight: 1.7
+                                    }}>
+                                      {row.type === "changed" && row.wordDiff ? (
+                                        <span>{row.wordDiff.left.map((w, wi) => (
+                                          <span key={wi} style={{
+                                            color: w.type === "removed" ? "#fca5a5" : "#64748b",
+                                            backgroundColor: w.type === "removed" ? "rgba(239,68,68,0.18)" : "transparent",
+                                            textDecoration: w.type === "removed" ? "line-through" : "none",
+                                            borderRadius: w.type === "removed" ? 2 : 0,
+                                            padding: w.type === "removed" ? "0 1px" : 0,
+                                          }}>{w.text}</span>
+                                        ))}</span>
+                                      ) : (
+                                        <span style={{
+                                          color: row.type === "removed" ? "#fca5a5" : "#64748b",
+                                          textDecoration: row.type === "removed" ? "line-through" : "none"
+                                        }}>{row.left || "\u00A0"}</span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="flex-1 p-3 overflow-y-auto" style={{ maxHeight: 400 }}>
+                                  {pairedRows.map((row, ri) => (
+                                    <div key={ri} className="py-1 px-2 rounded mb-0.5" style={{
+                                      backgroundColor: row.type === "added" ? "rgba(34,197,94,0.1)" : row.type === "changed" ? "rgba(34,197,94,0.06)" : "transparent",
+                                      fontFamily: "'JetBrains Mono', monospace", fontSize: 11, lineHeight: 1.7
+                                    }}>
+                                      {row.type === "changed" && row.wordDiff ? (
+                                        <span>{row.wordDiff.right.map((w, wi) => (
+                                          <span key={wi} style={{
+                                            color: w.type === "added" ? "#86efac" : "#64748b",
+                                            backgroundColor: w.type === "added" ? "rgba(34,197,94,0.18)" : "transparent",
+                                            fontWeight: w.type === "added" ? 600 : 400,
+                                            borderRadius: w.type === "added" ? 2 : 0,
+                                            padding: w.type === "added" ? "0 1px" : 0,
+                                          }}>{w.text}</span>
+                                        ))}</span>
+                                      ) : (
+                                        <span style={{ color: row.type === "added" ? "#86efac" : "#64748b" }}>
+                                          {row.type === "added" && <span style={{ color: "#22c55e", marginRight: 4, fontWeight: 700 }}>+</span>}
+                                          {row.right || "\u00A0"}
+                                        </span>
+                                      )}
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
                             </div>
                           </div>
-                        )}
+                          );
+                        })()}
+                      </div>
+                    )}
+                    {/* ── Follow-up Prompt (post-analysis) ── */}
+                    {results && (
+                      <div className="mt-4 lf-fadeUp">
+                        <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(30,41,59,0.5)", backgroundColor: "rgba(15,23,42,0.4)" }}>
+                          {/* Follow-up history */}
+                          {followUpHistory.length > 0 && (
+                            <div className="px-4 py-3 space-y-3" style={{ maxHeight: 200, overflowY: "auto", borderBottom: "1px solid rgba(30,41,59,0.3)" }}>
+                              {followUpHistory.map((entry, i) => (
+                                <div key={i} className="lf-slideIn" style={{ animationDelay: `${i * 50}ms` }}>
+                                  <div className="flex items-start gap-2 mb-1.5">
+                                    <User size={11} style={{ color: currentPractice.color, marginTop: 2 }} />
+                                    <p style={{ color: "#94a3b8", fontSize: 11.5, fontStyle: "italic" }}>{entry.question}</p>
+                                  </div>
+                                  <div className="flex items-start gap-2 ml-0.5">
+                                    <Sparkles size={11} style={{ color: "#a855f7", marginTop: 2 }} />
+                                    <p style={{ color: "#cbd5e1", fontSize: 12, lineHeight: 1.6 }}>{entry.answer}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {/* Input area */}
+                          <div className="flex items-center gap-2 px-3 py-2.5">
+                            <Sparkles size={14} style={{ color: "#a855f7", flexShrink: 0 }} />
+                            <input
+                              type="text" value={followUpPrompt} onChange={e => setFollowUpPrompt(e.target.value)}
+                              placeholder="Pide análisis adicional... Ej: Revisa si cumple con la Resolución XYZ"
+                              onKeyDown={e => {
+                                if (e.key === "Enter" && followUpPrompt.trim()) {
+                                  const mockAnswers = [
+                                    `Basado en el análisis del ${docType}, ${followUpPrompt.toLowerCase().includes("resolución") || followUpPrompt.toLowerCase().includes("resolucion") ? "no se encontró referencia expresa a dicha resolución en el documento. Se recomienda incluir una cláusula de cumplimiento regulatorio que cite expresamente la normativa aplicable." : followUpPrompt.toLowerCase().includes("propuesta") ? "se sugiere la siguiente redacción: \"Las partes acuerdan que [ajustar según el contexto específico de la solicitud], conforme a la legislación colombiana vigente y las mejores prácticas del sector.\"" : "se identificaron los siguientes puntos relevantes: (1) El documento actual no aborda expresamente este aspecto, (2) Se recomienda incluir una cláusula específica que regule esta materia conforme al marco normativo colombiano aplicable."}`,
+                                  ];
+                                  setFollowUpHistory(prev => [...prev, { question: followUpPrompt, answer: mockAnswers[0] }]);
+                                  setFollowUpPrompt("");
+                                }
+                              }}
+                              className="flex-1 bg-transparent outline-none text-sm"
+                              style={{ color: "#cbd5e1", fontSize: 12 }}
+                            />
+                            <button
+                              onClick={() => {
+                                if (followUpPrompt.trim()) {
+                                  const answer = `Basado en el análisis del ${docType}, ${followUpPrompt.toLowerCase().includes("resolución") || followUpPrompt.toLowerCase().includes("resolucion") ? "no se encontró referencia expresa a dicha resolución. Se recomienda incluir cláusula de cumplimiento regulatorio." : followUpPrompt.toLowerCase().includes("propuesta") ? "se sugiere la siguiente redacción ajustada conforme a la legislación colombiana vigente." : "se identificaron puntos relevantes que requieren cláusula específica conforme al marco normativo colombiano."}`;
+                                  setFollowUpHistory(prev => [...prev, { question: followUpPrompt, answer }]);
+                                  setFollowUpPrompt("");
+                                }
+                              }}
+                              disabled={!followUpPrompt.trim()}
+                              className="p-2 rounded-lg lf-hover-lift"
+                              style={{ backgroundColor: followUpPrompt.trim() ? `${currentPractice.color}20` : "transparent", cursor: followUpPrompt.trim() ? "pointer" : "default" }}>
+                              <Send size={13} style={{ color: followUpPrompt.trim() ? currentPractice.color : "#475569" }} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -2560,12 +2783,42 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                       {uploadedFile && <span style={{ color: "#64748b", fontSize: 11 }}>{uploadedFile.name}</span>}
                     </div>
                     <div className="flex items-center gap-2">
-                      <button onClick={() => { setEditableText(text); showToast("Texto sincronizado"); }} className="lf-hover-lift flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium" style={{ backgroundColor: "rgba(30,41,59,0.6)", color: "#94a3b8", border: "1px solid rgba(51,65,85,0.5)" }}>
-                        <RefreshCw size={11} /> Sync
+                      <button onClick={() => { setEditableText(text); showToast("Editor restaurado al texto original"); }} className="lf-hover-lift flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium" style={{ backgroundColor: "rgba(30,41,59,0.6)", color: "#94a3b8", border: "1px solid rgba(51,65,85,0.5)" }} title="Restaurar el texto original descartando cambios del editor">
+                        <RefreshCw size={11} /> Restaurar Original
                       </button>
-                      <button onClick={() => { setText(editableText); showToast("Cambios aplicados al análisis"); }} className="lf-hover-lift flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ backgroundColor: `${currentPractice.color}18`, color: currentPractice.color, border: `1px solid ${currentPractice.color}30` }}>
-                        <CheckCircle size={11} /> Aplicar
+                      <button onClick={() => {
+                        // Save version
+                        const versionLabel = `v${docVersions.length + 1} — ${new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}`;
+                        setDocVersions(prev => [...prev, { label: versionLabel, text: editableText, timestamp: Date.now() }]);
+                        setActiveVersion(docVersions.length);
+                        setText(editableText);
+                        showToast(`Versión guardada: ${versionLabel}`);
+                        // Offer download
+                        try {
+                          const blob = new Blob([editableText], { type: "text/plain;charset=utf-8" });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.download = `${docType.replace(/\s/g, "_")}_${versionLabel.replace(/\s/g, "_")}.txt`;
+                          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                          URL.revokeObjectURL(url);
+                        } catch (_) {}
+                      }} className="lf-hover-lift flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ backgroundColor: `${currentPractice.color}18`, color: currentPractice.color, border: `1px solid ${currentPractice.color}30` }}>
+                        <Download size={11} /> Aplicar y Guardar
                       </button>
+                      {docVersions.length > 0 && (
+                        <div className="flex items-center gap-1.5 ml-1">
+                          <span style={{ color: "#475569", fontSize: 10 }}>{docVersions.length} ver.</span>
+                          <select value={activeVersion} onChange={e => {
+                            const idx = Number(e.target.value);
+                            setActiveVersion(idx);
+                            setEditableText(docVersions[idx].text);
+                            showToast(`Cargada: ${docVersions[idx].label}`);
+                          }} className="rounded px-1.5 py-0.5 text-xs outline-none" style={{ backgroundColor: "rgba(30,41,59,0.6)", color: "#94a3b8", border: "1px solid rgba(51,65,85,0.5)", fontSize: 10 }}>
+                            {docVersions.map((v, vi) => <option key={vi} value={vi}>{v.label}</option>)}
+                          </select>
+                        </div>
+                      )}
                       <button onClick={() => setShowViewer(false)} className="p-1.5 rounded-lg lf-hover-lift" style={{ backgroundColor: "rgba(30,41,59,0.5)" }}>
                         <X size={13} style={{ color: "#64748b" }} />
                       </button>
