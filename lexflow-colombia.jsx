@@ -10,7 +10,7 @@ import {
   Clock, Copy, Filter, ChevronRight, User, Tag, GitMerge, FileSearch,
   ShieldCheck, Download, ListChecks, MapPin, Briefcase,
   Upload, Mail, Wifi, WifiOff, ArrowLeftRight, FileDown, Eye, Trash2, FilePlus2,
-  Users, Lightbulb, ChevronLeft
+  Users, Lightbulb, ChevronLeft, BarChart3
 } from "lucide-react";
 
 // ─── DASHBOARD DATA ───────────────────────────────────────────────────────────
