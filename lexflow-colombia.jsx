@@ -2562,7 +2562,7 @@ const ContratosModule = () => {
               </div>
               {/* Word-like Document Viewer — right panel */}
               {showViewer && results && (
-                <div className="flex flex-col border-l overflow-hidden" style={{ flex: 1, minWidth: 0, backgroundColor: "#0c1322", borderColor: "rgba(30,41,59,0.5)" }}>
+                <div className="flex flex-col border-l" style={{ width: 0, flexGrow: 1, overflow: "hidden", backgroundColor: "#0c1322", borderColor: "rgba(30,41,59,0.5)" }}>
                   {/* Viewer Toolbar — Word-like */}
                   <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: "rgba(30,41,59,0.4)", backgroundColor: "rgba(15,23,42,0.8)" }}>
                     <div className="flex items-center gap-3">
@@ -2599,9 +2599,9 @@ const ContratosModule = () => {
                     <button onClick={() => document.execCommand("insertUnorderedList")} className="p-1.5 rounded hover:bg-slate-700/50" title="Lista"><List size={12} style={{ color: "#94a3b8" }} /></button>
                   </div>
                   {/* Word-like document page */}
-                  <div className="flex-1 overflow-y-auto" style={{ backgroundColor: "#1e293b", padding: "20px 24px", overflowX: "hidden" }}>
+                  <div className="flex-1" style={{ backgroundColor: "#1e293b", padding: "20px 24px", overflowY: "auto", overflowX: "hidden", width: "100%", boxSizing: "border-box" }}>
                     <div style={{
-                      width: "100%", boxSizing: "border-box", backgroundColor: "#ffffff", borderRadius: 4,
+                      maxWidth: "100%", width: "100%", boxSizing: "border-box", backgroundColor: "#ffffff", borderRadius: 4,
                       boxShadow: "0 2px 20px rgba(0,0,0,0.4), 0 0 1px rgba(0,0,0,0.2)",
                       padding: "40px 36px", minHeight: "calc(100vh - 200px)", overflow: "hidden"
                     }}>
@@ -2621,7 +2621,8 @@ const ContratosModule = () => {
                           fontFamily: "'Georgia', 'Times New Roman', serif",
                           fontSize: 13.5, lineHeight: 1.9, color: "#334155",
                           outline: "none", minHeight: 400, whiteSpace: "pre-wrap",
-                          wordWrap: "break-word", overflowWrap: "break-word", wordBreak: "break-word"
+                          wordWrap: "break-word", overflowWrap: "break-word", wordBreak: "break-all",
+                          width: "100%", maxWidth: "100%", boxSizing: "border-box"
                         }}
                         dangerouslySetInnerHTML={{ __html: editableText.replace(/\n/g, "<br/>") }}
                       />
