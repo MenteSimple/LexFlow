@@ -10,7 +10,8 @@ import {
   Clock, Copy, Filter, ChevronRight, User, Tag, GitMerge, FileSearch,
   ShieldCheck, Download, ListChecks, MapPin, Briefcase,
   Upload, Mail, Wifi, WifiOff, ArrowLeftRight, FileDown, Eye, Trash2, FilePlus2,
-  Users, Lightbulb, ChevronLeft, BarChart3, Sparkles, ScrollText, ClipboardCheck, Target
+  Users, Lightbulb, ChevronLeft, BarChart3, Sparkles, ScrollText, ClipboardCheck, Target,
+  RefreshCw, AlignLeft, AlignCenter, AlignRight, List
 } from "lucide-react";
 
 // ─── DASHBOARD DATA ───────────────────────────────────────────────────────────
@@ -2166,41 +2167,6 @@ const ContratosModule = () => {
 
               {/* Results + Viewer container */}
               <div className="flex flex-1" style={{ minHeight: 0 }}>
-              {/* Document Viewer panel */}
-              {showViewer && results && (
-                <div className="flex flex-col border-r overflow-hidden" style={{ width: 380, backgroundColor: "#080e18", borderColor: "rgba(30,41,59,0.5)" }}>
-                  <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "rgba(30,41,59,0.5)" }}>
-                    <div className="flex items-center gap-2">
-                      <Eye size={14} style={{ color: currentPractice.color }} />
-                      <p className="text-white font-semibold" style={{ fontSize: 13 }}>Visor de Documento</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => { setEditableText(text); showToast("Texto actualizado"); }} className="px-2.5 py-1 rounded-lg text-xs font-medium" style={{ backgroundColor: `${currentPractice.color}15`, color: currentPractice.color, border: `1px solid ${currentPractice.color}25` }}>
-                        Sync
-                      </button>
-                      <button onClick={() => setShowViewer(false)} className="p-1.5 rounded-lg" style={{ backgroundColor: "rgba(30,41,59,0.5)" }}>
-                        <X size={12} style={{ color: "#64748b" }} />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="p-3 border-b flex items-center gap-2" style={{ borderColor: "rgba(30,41,59,0.4)" }}>
-                    <span className="px-2 py-0.5 rounded text-xs font-semibold" style={{ backgroundColor: `${currentPractice.color}15`, color: currentPractice.color }}>{docType}</span>
-                    {uploadedFile && <span style={{ color: "#475569", fontSize: 11 }}>{uploadedFile.name}</span>}
-                  </div>
-                  <textarea
-                    value={editableText}
-                    onChange={(e) => setEditableText(e.target.value)}
-                    className="flex-1 w-full p-4 outline-none resize-none"
-                    style={{ backgroundColor: "transparent", color: "#cbd5e1", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 11.5, lineHeight: 1.8, border: "none" }}
-                  />
-                  <div className="px-4 py-2.5 border-t flex items-center justify-between" style={{ borderColor: "rgba(30,41,59,0.4)" }}>
-                    <span style={{ color: "#475569", fontSize: 10 }}>{editableText.length.toLocaleString()} caracteres</span>
-                    <button onClick={() => { setText(editableText); showToast("Texto aplicado al análisis"); }} className="px-3 py-1.5 rounded-lg text-xs font-semibold lf-hover-lift" style={{ backgroundColor: `${currentPractice.color}15`, color: currentPractice.color, border: `1px solid ${currentPractice.color}25` }}>
-                      Aplicar Cambios
-                    </button>
-                  </div>
-                </div>
-              )}
               {/* Results sub-panel */}
               <div className="flex-1 overflow-y-auto" style={{ backgroundColor: "#0a1120" }}>
                 {analyzing && (
@@ -2594,6 +2560,84 @@ const ContratosModule = () => {
                   </div>
                 )}
               </div>
+              {/* Word-like Document Viewer — right panel */}
+              {showViewer && results && (
+                <div className="flex flex-col border-l overflow-hidden" style={{ width: "100%", maxWidth: "50%", minWidth: 420, backgroundColor: "#0c1322", borderColor: "rgba(30,41,59,0.5)" }}>
+                  {/* Viewer Toolbar — Word-like */}
+                  <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: "rgba(30,41,59,0.4)", backgroundColor: "rgba(15,23,42,0.8)" }}>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <FileText size={14} style={{ color: currentPractice.color }} />
+                        <p className="text-white font-semibold" style={{ fontSize: 13 }}>Editor de Documento</p>
+                      </div>
+                      <span className="px-2 py-0.5 rounded text-xs font-semibold" style={{ backgroundColor: `${currentPractice.color}15`, color: currentPractice.color }}>{docType}</span>
+                      {uploadedFile && <span style={{ color: "#64748b", fontSize: 11 }}>{uploadedFile.name}</span>}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => { setEditableText(text); showToast("Texto sincronizado"); }} className="lf-hover-lift flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium" style={{ backgroundColor: "rgba(30,41,59,0.6)", color: "#94a3b8", border: "1px solid rgba(51,65,85,0.5)" }}>
+                        <RefreshCw size={11} /> Sync
+                      </button>
+                      <button onClick={() => { setText(editableText); showToast("Cambios aplicados al análisis"); }} className="lf-hover-lift flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ backgroundColor: `${currentPractice.color}18`, color: currentPractice.color, border: `1px solid ${currentPractice.color}30` }}>
+                        <CheckCircle size={11} /> Aplicar
+                      </button>
+                      <button onClick={() => setShowViewer(false)} className="p-1.5 rounded-lg lf-hover-lift" style={{ backgroundColor: "rgba(30,41,59,0.5)" }}>
+                        <X size={13} style={{ color: "#64748b" }} />
+                      </button>
+                    </div>
+                  </div>
+                  {/* Format toolbar */}
+                  <div className="flex items-center gap-1 px-4 py-1.5 border-b" style={{ borderColor: "rgba(30,41,59,0.3)", backgroundColor: "rgba(15,23,42,0.5)" }}>
+                    <span style={{ color: "#475569", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginRight: 8 }}>Formato</span>
+                    <button onClick={() => document.execCommand("bold")} className="p-1.5 rounded hover:bg-slate-700/50" title="Negrita"><span style={{ color: "#94a3b8", fontSize: 12, fontWeight: 700 }}>B</span></button>
+                    <button onClick={() => document.execCommand("italic")} className="p-1.5 rounded hover:bg-slate-700/50" title="Cursiva"><span style={{ color: "#94a3b8", fontSize: 12, fontStyle: "italic" }}>I</span></button>
+                    <button onClick={() => document.execCommand("underline")} className="p-1.5 rounded hover:bg-slate-700/50" title="Subrayado"><span style={{ color: "#94a3b8", fontSize: 12, textDecoration: "underline" }}>U</span></button>
+                    <div style={{ width: 1, height: 16, backgroundColor: "rgba(51,65,85,0.5)", margin: "0 4px" }} />
+                    <button onClick={() => document.execCommand("justifyLeft")} className="p-1.5 rounded hover:bg-slate-700/50" title="Alinear izquierda"><AlignLeft size={12} style={{ color: "#94a3b8" }} /></button>
+                    <button onClick={() => document.execCommand("justifyCenter")} className="p-1.5 rounded hover:bg-slate-700/50" title="Centrar"><AlignCenter size={12} style={{ color: "#94a3b8" }} /></button>
+                    <button onClick={() => document.execCommand("justifyRight")} className="p-1.5 rounded hover:bg-slate-700/50" title="Alinear derecha"><AlignRight size={12} style={{ color: "#94a3b8" }} /></button>
+                    <div style={{ width: 1, height: 16, backgroundColor: "rgba(51,65,85,0.5)", margin: "0 4px" }} />
+                    <button onClick={() => document.execCommand("insertUnorderedList")} className="p-1.5 rounded hover:bg-slate-700/50" title="Lista"><List size={12} style={{ color: "#94a3b8" }} /></button>
+                  </div>
+                  {/* Word-like document page */}
+                  <div className="flex-1 overflow-y-auto" style={{ backgroundColor: "#1e293b", padding: "24px 32px" }}>
+                    <div style={{
+                      maxWidth: 680, margin: "0 auto", backgroundColor: "#ffffff", borderRadius: 4,
+                      boxShadow: "0 2px 20px rgba(0,0,0,0.4), 0 0 1px rgba(0,0,0,0.2)",
+                      padding: "60px 64px", minHeight: "calc(100vh - 200px)"
+                    }}>
+                      {/* Document header */}
+                      <div style={{ borderBottom: "2px solid #e2e8f0", paddingBottom: 16, marginBottom: 24 }}>
+                        <h1 style={{ fontSize: 18, fontWeight: 700, color: "#1e293b", fontFamily: "'Georgia', 'Times New Roman', serif", margin: 0, lineHeight: 1.3 }}>{docType}</h1>
+                        <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 6, fontFamily: "'Segoe UI', system-ui, sans-serif" }}>
+                          {uploadedFile ? uploadedFile.name : "Documento cargado"} · {editableText.length.toLocaleString()} caracteres
+                        </p>
+                      </div>
+                      {/* Editable content area */}
+                      <div
+                        contentEditable
+                        suppressContentEditableWarning
+                        onInput={(e) => setEditableText(e.currentTarget.innerText)}
+                        style={{
+                          fontFamily: "'Georgia', 'Times New Roman', serif",
+                          fontSize: 13.5, lineHeight: 1.9, color: "#334155",
+                          outline: "none", minHeight: 400, whiteSpace: "pre-wrap",
+                          wordWrap: "break-word"
+                        }}
+                        dangerouslySetInnerHTML={{ __html: editableText.replace(/\n/g, "<br/>") }}
+                      />
+                    </div>
+                  </div>
+                  {/* Status bar */}
+                  <div className="px-4 py-2 border-t flex items-center justify-between" style={{ borderColor: "rgba(30,41,59,0.4)", backgroundColor: "rgba(15,23,42,0.8)" }}>
+                    <div className="flex items-center gap-4">
+                      <span style={{ color: "#475569", fontSize: 10 }}>{editableText.length.toLocaleString()} caracteres</span>
+                      <span style={{ color: "#475569", fontSize: 10 }}>{editableText.split(/\s+/).filter(Boolean).length} palabras</span>
+                      <span style={{ color: "#475569", fontSize: 10 }}>Página 1 de 1</span>
+                    </div>
+                    <span style={{ color: "#475569", fontSize: 10 }}>Editando · {docType}</span>
+                  </div>
+                </div>
+              )}
               </div>{/* close Results + Viewer container */}
             </div>
           )}
