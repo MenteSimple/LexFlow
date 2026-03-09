@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis,
   Tooltip, ResponsiveContainer
@@ -39,12 +39,17 @@ const ACTIVITY = [
 ];
 
 const NAV = [
-  { id: "dashboard",      label: "Dashboard",       Icon: LayoutDashboard },
-  { id: "contratos",      label: "Contratos & NDA", Icon: FileText         },
-  { id: "jurisprudencia", label: "Jurisprudencia",  Icon: Scale            },
-  { id: "compliance",     label: "Compliance",      Icon: Shield           },
-  { id: "proveedores",    label: "Proveedores",     Icon: Building2        },
-  { id: "firmas",         label: "Firmas",          Icon: PenTool          },
+  { id: "dashboard",      label: "Dashboard",                   Icon: LayoutDashboard, color: null          },
+  { id: "laboral",        label: "Laboral",                     Icon: Users,           color: "#f59e0b"     },
+  { id: "comercial",      label: "Comercial",                   Icon: Briefcase,       color: "#3b82f6"     },
+  { id: "penal",          label: "Penal",                       Icon: Scale,           color: "#ef4444"     },
+  { id: "civil",          label: "Civil",                       Icon: FileText,        color: "#8b5cf6"     },
+  { id: "tributario",     label: "Tributario",                  Icon: BarChart3,       color: "#10b981"     },
+  { id: "pi",             label: "Propiedad Int.",              Icon: Lightbulb,       color: "#06b6d4"     },
+  { id: "compliance-reg", label: "Compliance",                  Icon: ShieldCheck,     color: "#f43f5e"     },
+  { id: "empresas",       label: "Empresas",                    Icon: Building2,       color: "#f97316"     },
+  { id: "jurisprudencia", label: "Jurisprudencia",              Icon: Scale,           color: "#a78bfa"     },
+  { id: "firmas",         label: "Firmas",                      Icon: PenTool,         color: "#0E1EAB"     },
 ];
 
 const JURISDICTIONS = [
@@ -1097,10 +1102,10 @@ const Dashboard = ({ onNav }) => {
 
       {/* KPIs */}
       <div className="grid grid-cols-4 gap-4">
-        <KPICard Icon={FileText}      label="Contratos Activos"  value="24"  sub="↑ 3 este mes"          color="#6446E5" onClick={() => onNav("contratos")}   />
-        <KPICard Icon={AlertTriangle} label="Riesgo Alto"        value="8"   sub="⚠ Requieren atención"  color="#ef4444" onClick={() => onNav("contratos")}   />
-        <KPICard Icon={PenTool}       label="Firmas Pendientes"  value="12"  sub="4 vencen hoy"          color="#FFB510" onClick={() => onNav("firmas")}       />
-        <KPICard Icon={Shield}        label="Compliance Score"   value="78%" sub="↑ 5% vs mes anterior"  color="#10B991" onClick={() => onNav("compliance")}  />
+        <KPICard Icon={FileText}      label="Contratos Activos"  value="24"  sub="↑ 3 este mes"          color="#6446E5" onClick={() => onNav("laboral")}       />
+        <KPICard Icon={AlertTriangle} label="Riesgo Alto"        value="8"   sub="⚠ Requieren atención"  color="#ef4444" onClick={() => onNav("comercial")}     />
+        <KPICard Icon={PenTool}       label="Firmas Pendientes"  value="12"  sub="4 vencen hoy"          color="#FFB510" onClick={() => onNav("firmas")}         />
+        <KPICard Icon={Shield}        label="Compliance Score"   value="78%" sub="↑ 5% vs mes anterior"  color="#10B991" onClick={() => onNav("compliance-reg")} />
       </div>
 
       {/* Charts row */}
@@ -1193,10 +1198,10 @@ const Dashboard = ({ onNav }) => {
           <h3 className="text-white font-semibold mb-4">Acciones Rápidas</h3>
           <div className="space-y-2">
             {[
-              { label: "Revisar Contrato",     Icon: FileText,  id: "contratos",      color: "#3b82f6" },
-              { label: "Consultar Ley",        Icon: Scale,     id: "jurisprudencia", color: "#8b5cf6" },
-              { label: "Verificar Compliance", Icon: Shield,    id: "compliance",     color: "#09C8D4" },
-              { label: "KYB Proveedor",        Icon: Building2, id: "proveedores",    color: "#f59e0b" },
+              { label: "Laboral",              Icon: Users,     id: "laboral",        color: "#f59e0b" },
+              { label: "Comercial",            Icon: Briefcase, id: "comercial",      color: "#3b82f6" },
+              { label: "Consultar Ley",        Icon: Scale,     id: "jurisprudencia", color: "#a78bfa" },
+              { label: "Compliance",           Icon: ShieldCheck, id: "compliance-reg", color: "#f43f5e" },
               { label: "Solicitar Firma",      Icon: PenTool,   id: "firmas",         color: "#22c55e" },
             ].map(({ label, Icon, id, color }) => (
               <button key={id} onClick={() => onNav(id)}
@@ -1372,10 +1377,23 @@ const SignModal = ({ onClose, docType }) => {
 
 // ─── CONTRATOS MODULE (PRACTICE AREAS) ──────────────────────────────────────
 
-const ContratosModule = () => {
+const ContratosModule = ({ initialPracticeArea = null }) => {
   /* ── State ── */
-  const [practiceArea, setPracticeArea] = useState(null);
+  const [practiceArea, setPracticeArea] = useState(initialPracticeArea);
   const [activeFunction, setActiveFunction] = useState(null);
+
+  /* Sync when top-level nav changes the practice area */
+  useEffect(() => {
+    if (initialPracticeArea !== practiceArea) {
+      setPracticeArea(initialPracticeArea);
+      setActiveFunction(null);
+      setResults(null);
+      setText(SAMPLE_TEXT["NDA"]);
+      setDocType("NDA");
+      setShowViewer(false);
+      setUploadedFile(null);
+    }
+  }, [initialPracticeArea]);
   const [docType, setDocType] = useState("NDA");
   const [text, setText] = useState(SAMPLE_TEXT["NDA"]);
   const [analyzing, setAnalyzing] = useState(false);
@@ -3800,7 +3818,7 @@ export default function LexFlowColombia() {
   const [showJur,   setShowJur]   = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [searchVal, setSearchVal] = useState("");
-  const [openConn,  setOpenConn]  = useState(null);
+  // connectors removed — planned for Settings area
 
   useEffect(() => {
     const link = document.createElement("link");
@@ -3861,40 +3879,38 @@ export default function LexFlowColombia() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 space-y-0.5 px-2 overflow-y-auto">
-          {NAV.map(({ id, label, Icon }) => (
-            <button key={id} onClick={() => setModule(id)} title={collapsed ? label : undefined}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${
-                module === id
-                  ? "text-white"
-                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
-              }`}
-              style={module === id ? { background: "linear-gradient(90deg, #6446E5 0%, #0E1EAB 100%)", boxShadow: "0 0 12px rgba(100,70,229,0.4)" } : {}}>
-              <Icon size={17} className="flex-shrink-0" />
-              {!collapsed && <span className="text-sm font-medium">{label}</span>}
-            </button>
+        <nav className="flex-1 py-3 px-2 overflow-y-auto">
+          {NAV.map(({ id, label, Icon, color }, idx) => (
+            <React.Fragment key={id}>
+              {/* Divider after Dashboard */}
+              {idx === 1 && (
+                <div className="px-3 pt-3 pb-1.5">
+                  {!collapsed && <p className="text-slate-600 text-[10px] uppercase tracking-widest font-semibold">Áreas de Práctica</p>}
+                  {collapsed && <div className="border-t border-slate-700/50 my-1" />}
+                </div>
+              )}
+              {/* Divider before utility modules */}
+              {id === "jurisprudencia" && (
+                <div className="px-3 pt-3 pb-1.5">
+                  {!collapsed && <p className="text-slate-600 text-[10px] uppercase tracking-widest font-semibold">Herramientas</p>}
+                  {collapsed && <div className="border-t border-slate-700/50 my-1" />}
+                </div>
+              )}
+              <button onClick={() => setModule(id)} title={collapsed ? label : undefined}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-left mb-0.5 ${
+                  module === id
+                    ? "text-white"
+                    : "text-slate-400 hover:bg-slate-800/60 hover:text-white"
+                }`}
+                style={module === id
+                  ? { background: color ? `linear-gradient(90deg, ${color}33 0%, ${color}15 100%)` : "linear-gradient(90deg, #6446E5 0%, #0E1EAB 100%)", boxShadow: color ? `0 0 12px ${color}25` : "0 0 12px rgba(100,70,229,0.4)", borderLeft: color ? `2px solid ${color}` : "2px solid #6446E5" }
+                  : { borderLeft: "2px solid transparent" }}>
+                <Icon size={16} className="flex-shrink-0" style={module === id && color ? { color } : {}} />
+                {!collapsed && <span className="text-[13px] font-medium">{label}</span>}
+              </button>
+            </React.Fragment>
           ))}
         </nav>
-
-        {/* Connectors */}
-        {!collapsed && (
-          <div className="px-4 py-4 border-t border-slate-800">
-            <p className="text-slate-500 text-xs uppercase tracking-wider mb-2.5">Conectores</p>
-            {CONNECTORS.map(c => (
-              <div key={c.name} className="flex items-center justify-between py-1.5">
-                <span className="text-slate-400 text-xs">{c.name}</span>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full"
-                    style={{ backgroundColor: c.online ? "#4ade80" : "#f87171" }} />
-                  <span className="text-xs"
-                    style={{ color: c.online ? "#4ade80" : "#f87171" }}>
-                    {c.online ? "Online" : "Offline"}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* Collapse toggle */}
         <button onClick={() => setCollapsed(!collapsed)}
@@ -3954,54 +3970,6 @@ export default function LexFlowColombia() {
 
           {/* Right cluster */}
           <div className="ml-auto flex items-center gap-4">
-            <div className="hidden xl:flex items-center gap-3">
-              {CONNECTORS.map(c => (
-                <div key={c.name} className="relative">
-                  <button
-                    onClick={() => setOpenConn(openConn === c.name ? null : c.name)}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-slate-800 transition-colors"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: c.online ? "#4ade80" : "#f87171" }} />
-                    <span className="text-slate-400 text-xs">{c.name}</span>
-                  </button>
-                  {openConn === c.name && (
-                    <>
-                      <div className="fixed inset-0 z-40" onClick={() => setOpenConn(null)} />
-                      <div className="absolute top-full mt-2 right-0 w-60 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-4">
-                        <div className="flex items-center gap-2 mb-2.5">
-                          {c.online
-                            ? <Wifi size={14} style={{ color: "#4ade80" }} />
-                            : <WifiOff size={14} style={{ color: "#f87171" }} />}
-                          <span className="text-sm font-semibold text-slate-100">{c.name}</span>
-                          <span className="ml-auto text-xs px-2 py-0.5 rounded-full font-medium"
-                            style={{
-                              backgroundColor: c.online ? "rgba(74,222,128,0.15)" : "rgba(248,113,113,0.15)",
-                              color: c.online ? "#4ade80" : "#f87171"
-                            }}>
-                            {c.online ? "Conectado" : "Desconectado"}
-                          </span>
-                        </div>
-                        <p className="text-slate-400 text-xs leading-relaxed mb-2.5">{c.desc}</p>
-                        {c.online && c.sync && (
-                          <div className="flex items-center gap-1.5 text-xs text-slate-500 border-t border-slate-700 pt-2.5">
-                            <Clock size={11} />
-                            <span>Sincronizado hace {c.sync}</span>
-                          </div>
-                        )}
-                        {!c.online && (
-                          <div className="flex items-center gap-1.5 text-xs pt-2.5 border-t border-slate-700"
-                            style={{ color: "#f87171" }}>
-                            <AlertTriangle size={11} />
-                            <span>Verificar configuración de red</span>
-                          </div>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
             <button className="relative p-2 hover:bg-slate-800 rounded-lg transition-colors">
               <Bell size={17} className="text-slate-400" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
@@ -4024,16 +3992,12 @@ export default function LexFlowColombia() {
         <main className="flex-1 overflow-hidden flex flex-col">
           {module === "dashboard"
             ? <div className="flex-1 overflow-y-auto"><Dashboard onNav={setModule} /></div>
-            : module === "contratos"
-            ? <ContratosModule />
             : module === "jurisprudencia"
             ? <JurisprudenciaModule />
-            : module === "proveedores"
-            ? <ProveedoresModule />
-            : module === "compliance"
-            ? <ComplianceModule />
             : module === "firmas"
             ? <FirmasModule />
+            : ["laboral","comercial","penal","civil","tributario","pi","compliance-reg","empresas"].includes(module)
+            ? <ContratosModule key={module} initialPracticeArea={module === "compliance-reg" ? "compliance" : module} />
             : <div className="flex-1 overflow-y-auto"><ModulePlaceholder id={module} /></div>
           }
         </main>
