@@ -9,7 +9,8 @@ import {
   CheckCircle, XCircle, AlertCircle, Send, X, BookOpen,
   Clock, Copy, Filter, ChevronRight, User, Tag, GitMerge, FileSearch,
   ShieldCheck, Download, ListChecks, MapPin, Briefcase,
-  Upload, Mail, Wifi, WifiOff, ArrowLeftRight, FileDown, Eye, Trash2, FilePlus2
+  Upload, Mail, Wifi, WifiOff, ArrowLeftRight, FileDown, Eye, Trash2, FilePlus2,
+  Users, Lightbulb, ChevronLeft
 } from "lucide-react";
 
 // ─── DASHBOARD DATA ───────────────────────────────────────────────────────────
@@ -1237,19 +1238,28 @@ const ContratosModule = () => {
   const [showSimple, setShowSimple] = useState(false);
   const [showModal,  setShowModal]  = useState(false);
 
-  // ── NEW: File upload state ──
   const [uploadedFile, setUploadedFile] = useState(null);
   const [dragOver,     setDragOver]     = useState(false);
-
-  // ── NEW: Redline view mode ──
   const [redlineView, setRedlineView] = useState("sideBySide");
-
-  // ── NEW: Compare mode ──
-  const [compareMode, setCompareMode] = useState(false);
   const [compareText, setCompareText] = useState("");
-
-  // ── NEW: Export state ──
   const [exporting, setExporting] = useState(false);
+  const [analyzeProgress, setAnalyzeProgress] = useState(0);
+  const [expandedRedline, setExpandedRedline] = useState(null);
+  const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 2800);
+  };
+
+  const docIcons = {
+    "NDA": Shield,
+    "Contrato Mercantil": Briefcase,
+    "Contrato de Arrendamiento": Building2,
+    "Contrato Laboral": Users,
+    "Contrato de Servicios": FileText,
+  };
 
   const handleDocTypeChange = (t) => {
     setDocType(t);
@@ -1257,11 +1267,9 @@ const ContratosModule = () => {
     setResults(null);
     setShowSimple(false);
     setUploadedFile(null);
-    setCompareMode(false);
     setCompareText("");
   };
 
-  // ── NEW: File upload handler ──
   const handleFile = (file) => {
     if (!file) return;
     setUploadedFile({ name: file.name, size: file.size, type: file.type });
@@ -1271,7 +1279,6 @@ const ContratosModule = () => {
       if (file.type === "text/plain" || file.name.endsWith(".txt")) {
         setText(raw);
       } else {
-        // For PDF/DOCX in demo mode, simulate extraction from the raw text
         const cleaned = raw.replace(/[^\x20-\x7E\xC0-\xFF\n\r]/g, " ").replace(/ {3,}/g, "\n").trim();
         setText(cleaned.length > 100
           ? cleaned.substring(0, 4000)
@@ -1279,6 +1286,7 @@ const ContratosModule = () => {
       }
     };
     reader.readAsText(file);
+    showToast(`${file.name} cargado exitosamente`);
   };
 
   const handleDrop = (e) => {
@@ -1295,18 +1303,20 @@ const ContratosModule = () => {
   const clearUpload = () => {
     setUploadedFile(null);
     setText(SAMPLE_TEXT[docType]);
+    showToast("Documento removido", "info");
   };
 
-  // ── Analyze ──
   const analyze = () => {
     if (analyzing || !text.trim()) return;
     setAnalyzing(true);
     setResults(null);
     setShowSimple(false);
+    setAnalyzeProgress(0);
     let i = 0;
     setLoadMsg(LOAD_MSGS[0]);
     const iv = setInterval(() => {
       i++;
+      setAnalyzeProgress(Math.min((i / LOAD_MSGS.length) * 100, 100));
       if (i < LOAD_MSGS.length) {
         setLoadMsg(LOAD_MSGS[i]);
       } else {
@@ -1314,11 +1324,12 @@ const ContratosModule = () => {
         setResults(ANALYSIS[docType] || ANALYSIS["Contrato de Servicios"]);
         setAnalyzing(false);
         setTab("matrix");
+        setAnalyzeProgress(100);
+        showToast("Análisis completado");
       }
     }, 520);
   };
 
-  // ── NEW: Export handler ──
   const handleExport = () => {
     if (!results) return;
     setExporting(true);
@@ -1334,222 +1345,379 @@ const ContratosModule = () => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       setExporting(false);
+      showToast("Informe exportado exitosamente");
     }, 600);
   };
 
   const scoreColor = (s) => s >= 71 ? "#22c55e" : s >= 41 ? "#f59e0b" : "#ef4444";
   const scoreLabel = (s) => s >= 71 ? "Riesgo Bajo" : s >= 41 ? "Riesgo Medio" : "Riesgo Alto";
+  const scoreEmoji = (s) => s >= 71 ? "✅" : s >= 41 ? "⚠️" : "🚨";
 
-  // ── Build tabs (with new compare tab) ──
   const tabs = results ? [
-    { id: "matrix",  label: "Matriz de Riesgos", count: results.matrix.length },
-    { id: "redline", label: "Redline",           count: results.redlines.length },
-    ...(results.ndaCheck ? [{ id: "nda", label: "Checklist NDA", count: results.ndaCheck.length }] : []),
-    { id: "compare", label: "Comparar Versiones", count: null },
+    { id: "matrix",  label: "Matriz de Riesgos", icon: BarChart3, count: results.matrix.length },
+    { id: "redline", label: "Redline",           icon: ArrowLeftRight, count: results.redlines.length },
+    ...(results.ndaCheck ? [{ id: "nda", label: "Checklist NDA", icon: CheckCircle, count: results.ndaCheck.length }] : []),
+    { id: "compare", label: "Comparar",          icon: Eye, count: null },
   ] : [];
 
-  // ── Compare diff computation ──
-  const diff = (compareMode && compareText.trim()) ? computeTextDiff(text, compareText) : null;
+  const diff = (tab === "compare" && compareText.trim()) ? computeTextDiff(text, compareText) : null;
+
+  /* ── Animated CSS keyframes injected once ── */
+  const styleId = "lexflow-contratos-styles";
+  if (typeof document !== "undefined" && !document.getElementById(styleId)) {
+    const styleEl = document.createElement("style");
+    styleEl.id = styleId;
+    styleEl.textContent = `
+      @keyframes lf-fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes lf-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+      @keyframes lf-slideIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+      @keyframes lf-scaleIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+      @keyframes lf-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+      @keyframes lf-toast { 0% { opacity:0; transform:translateY(16px) scale(.95); } 10% { opacity:1; transform:translateY(0) scale(1); } 90% { opacity:1; transform:translateY(0) scale(1); } 100% { opacity:0; transform:translateY(-8px) scale(.95); } }
+      .lf-fadeUp { animation: lf-fadeUp 0.4s ease-out both; }
+      .lf-slideIn { animation: lf-slideIn 0.3s ease-out both; }
+      .lf-scaleIn { animation: lf-scaleIn 0.35s ease-out both; }
+      .lf-hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+      .lf-hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+      .lf-hover-glow:hover { box-shadow: 0 0 20px rgba(59,130,246,0.15); }
+      .lf-shimmer { background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.06) 50%, transparent 100%); background-size: 200% 100%; animation: lf-shimmer 2s infinite; }
+      .lf-toast { animation: lf-toast 2.8s ease both; }
+    `;
+    document.head.appendChild(styleEl);
+  }
+
+  const DocIcon = docIcons[docType] || FileText;
 
   return (
-    <div className="flex flex-col flex-1" style={{ minHeight: 0 }}>
+    <div className="flex flex-col flex-1" style={{ minHeight: 0, position: "relative" }}>
 
-      {/* Module Header — with NEW export + compare buttons */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 flex-shrink-0"
-        style={{ backgroundColor: "#0c1422" }}>
+      {/* ── Toast notification ── */}
+      {toast && (
+        <div className="lf-toast" style={{
+          position: "absolute", bottom: 24, right: 24, zIndex: 50,
+          display: "flex", alignItems: "center", gap: 10,
+          padding: "12px 20px", borderRadius: 14,
+          backgroundColor: toast.type === "success" ? "rgba(34,197,94,0.15)" : "rgba(59,130,246,0.15)",
+          border: `1px solid ${toast.type === "success" ? "rgba(34,197,94,0.3)" : "rgba(59,130,246,0.3)"}`,
+          backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
+        }}>
+          <CheckCircle size={15} style={{ color: toast.type === "success" ? "#4ade80" : "#60a5fa" }} />
+          <span style={{ color: toast.type === "success" ? "#86efac" : "#93c5fd", fontSize: 13, fontWeight: 500 }}>{toast.msg}</span>
+        </div>
+      )}
+
+      {/* ── Module Header — glass effect with gradient accent ── */}
+      <div className="flex items-center justify-between px-6 py-4 flex-shrink-0"
+        style={{
+          background: "linear-gradient(135deg, rgba(12,20,34,0.97) 0%, rgba(15,23,42,0.97) 100%)",
+          borderBottom: "1px solid rgba(59,130,246,0.12)",
+          backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+        }}>
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg"
-            style={{ backgroundColor: "rgba(59,130,246,0.15)" }}>
-            <FileText size={16} style={{ color: "#60a5fa" }} />
+          <div className="p-2.5 rounded-xl"
+            style={{
+              background: "linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(99,102,241,0.2) 100%)",
+              border: "1px solid rgba(59,130,246,0.2)",
+            }}>
+            <DocIcon size={18} style={{ color: "#60a5fa" }} />
           </div>
           <div>
-            <h2 className="text-white font-semibold">Revisión de Contratos & NDA</h2>
-            <p className="text-slate-500 text-xs">Motor de análisis IA · Upload · Redline · Comparar · Exportar</p>
+            <h2 className="text-white font-semibold" style={{ fontSize: 15 }}>Revisión de Contratos & NDA</h2>
+            <p style={{ color: "#64748b", fontSize: 11.5, marginTop: 2 }}>
+              Motor de análisis IA · {docType}
+              {results && <span style={{ color: scoreColor(results.score), marginLeft: 8, fontWeight: 600 }}>
+                {scoreEmoji(results.score)} {results.score}/100
+              </span>}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Export button */}
           <button
             onClick={handleExport}
             disabled={!results || exporting}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all"
+            className="lf-hover-lift flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold"
             style={{
-              backgroundColor: results ? "rgba(16,185,129,0.14)" : "#1a2535",
+              background: results ? "linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(34,197,94,0.1) 100%)" : "#1a2535",
               color: results ? "#34d399" : "#475569",
-              border: results ? "1px solid rgba(16,185,129,0.32)" : "1px solid #263345",
+              border: results ? "1px solid rgba(16,185,129,0.25)" : "1px solid #263345",
               cursor: results ? "pointer" : "not-allowed",
             }}>
             {exporting
               ? <><div className="w-3.5 h-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" /> Exportando...</>
-              : <><FileDown size={13} /> Exportar Informe</>
+              : <><FileDown size={13} /> Exportar</>
             }
           </button>
-          {/* Solicitar Firma button */}
           <button
             onClick={() => setShowModal(true)}
             disabled={!results}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all"
+            className="lf-hover-lift flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold"
             style={{
-              backgroundColor: results ? "#3b82f6" : "#1a2535",
+              background: results ? "linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)" : "#1a2535",
               color: results ? "#fff" : "#475569",
               border: results ? "none" : "1px solid #263345",
               cursor: results ? "pointer" : "not-allowed",
+              boxShadow: results ? "0 4px 15px rgba(59,130,246,0.25)" : "none",
             }}>
             <Send size={13} /> Solicitar Firma
           </button>
         </div>
       </div>
 
-      {/* Two-panel body */}
+      {/* ── Two-panel body ── */}
       <div className="flex flex-1" style={{ minHeight: 0 }}>
 
-        {/* ── LEFT: Input panel ── */}
-        <div className="flex flex-col border-r border-slate-800 flex-shrink-0 overflow-y-auto"
-          style={{ width: 296, backgroundColor: "#090f1a" }}>
-          <div className="p-5 space-y-4">
+        {/* ── LEFT: Input panel with collapse toggle ── */}
+        <div className="flex flex-col border-r flex-shrink-0 overflow-y-auto"
+          style={{
+            width: leftPanelCollapsed ? 52 : 310,
+            backgroundColor: "#080e18",
+            borderColor: "rgba(30,41,59,0.6)",
+            transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          }}>
 
-            {/* Doc type */}
-            <div>
-              <p className="text-slate-500 text-xs uppercase tracking-wider font-medium mb-2.5">Tipo de Documento</p>
-              <div className="space-y-1">
-                {DOC_TYPES.map(t => (
-                  <button key={t} onClick={() => handleDocTypeChange(t)}
-                    className="w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all"
-                    style={{
-                      backgroundColor: docType === t ? "rgba(59,130,246,0.16)" : "transparent",
-                      color: docType === t ? "#93c5fd" : "#64748b",
-                      border: docType === t ? "1px solid rgba(59,130,246,0.32)" : "1px solid transparent",
-                    }}>
-                    {t}
-                  </button>
-                ))}
+          {/* Collapse toggle */}
+          <button onClick={() => setLeftPanelCollapsed(!leftPanelCollapsed)}
+            className="flex items-center justify-center py-3 border-b"
+            style={{ borderColor: "rgba(30,41,59,0.5)", color: "#475569", cursor: "pointer", backgroundColor: "transparent" }}>
+            {leftPanelCollapsed
+              ? <ChevronRight size={16} />
+              : <div className="flex items-center gap-2 px-4 w-full">
+                  <span style={{ fontSize: 10, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, flex: 1 }}>Configuración</span>
+                  <ChevronLeft size={14} style={{ color: "#475569" }} />
+                </div>
+            }
+          </button>
+
+          {!leftPanelCollapsed && (
+            <div className="p-5 space-y-5" style={{ animation: "lf-fadeUp 0.3s ease-out" }}>
+
+              {/* Doc type selector — card style */}
+              <div>
+                <p style={{ color: "#64748b", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600, marginBottom: 10 }}>Tipo de Documento</p>
+                <div className="space-y-1.5">
+                  {DOC_TYPES.map((t, idx) => {
+                    const Icon = docIcons[t] || FileText;
+                    const active = docType === t;
+                    return (
+                      <button key={t} onClick={() => handleDocTypeChange(t)}
+                        className="w-full text-left px-3.5 py-3 rounded-xl text-sm transition-all flex items-center gap-3 lf-hover-glow"
+                        style={{
+                          backgroundColor: active ? "rgba(59,130,246,0.12)" : "transparent",
+                          color: active ? "#93c5fd" : "#64748b",
+                          border: active ? "1px solid rgba(59,130,246,0.25)" : "1px solid transparent",
+                          animationDelay: `${idx * 50}ms`,
+                        }}>
+                        <Icon size={14} style={{ color: active ? "#60a5fa" : "#475569", flexShrink: 0 }} />
+                        <span style={{ fontWeight: active ? 600 : 400, fontSize: 13 }}>{t}</span>
+                        {active && <div style={{ marginLeft: "auto", width: 6, height: 6, borderRadius: "50%", backgroundColor: "#3b82f6" }} />}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
 
-            {/* ── NEW: File Upload Drop Zone ── */}
-            <div>
-              <p className="text-slate-500 text-xs uppercase tracking-wider font-medium mb-2">Cargar Documento</p>
-              {!uploadedFile ? (
-                <div
-                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={handleDrop}
-                  className="relative rounded-xl p-4 text-center transition-all cursor-pointer"
+              {/* File Upload — improved visual */}
+              <div>
+                <p style={{ color: "#64748b", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600, marginBottom: 10 }}>Cargar Documento</p>
+                {!uploadedFile ? (
+                  <div
+                    onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={handleDrop}
+                    className="relative rounded-xl p-5 text-center transition-all cursor-pointer lf-hover-lift"
+                    style={{
+                      border: `2px dashed ${dragOver ? "#3b82f6" : "rgba(30,41,59,0.8)"}`,
+                      backgroundColor: dragOver ? "rgba(59,130,246,0.06)" : "rgba(15,23,42,0.3)",
+                      borderRadius: 16,
+                    }}
+                    onClick={() => document.getElementById("lexflow-file-input").click()}>
+                    <input id="lexflow-file-input" type="file" className="hidden"
+                      accept=".pdf,.docx,.doc,.txt,.rtf"
+                      onChange={handleFileInput} />
+                    <div className="mx-auto mb-3 w-10 h-10 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: dragOver ? "rgba(59,130,246,0.15)" : "rgba(30,41,59,0.5)" }}>
+                      <Upload size={18} style={{ color: dragOver ? "#60a5fa" : "#475569" }} />
+                    </div>
+                    <p style={{ color: dragOver ? "#93c5fd" : "#94a3b8", fontSize: 12, fontWeight: 500 }}>
+                      Arrastra un archivo aquí
+                    </p>
+                    <p style={{ color: "#475569", fontSize: 11, marginTop: 4 }}>
+                      o <span style={{ color: "#60a5fa" }}>selecciona</span> · PDF, DOCX, TXT
+                    </p>
+                  </div>
+                ) : (
+                  <div className="rounded-xl p-3.5 flex items-center gap-3 lf-scaleIn"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(99,102,241,0.06) 100%)",
+                      border: "1px solid rgba(59,130,246,0.2)",
+                    }}>
+                    <div className="p-2 rounded-lg flex-shrink-0"
+                      style={{ backgroundColor: "rgba(59,130,246,0.15)" }}>
+                      <FileText size={14} style={{ color: "#60a5fa" }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p style={{ color: "#e2e8f0", fontSize: 12, fontWeight: 600 }} className="truncate">{uploadedFile.name}</p>
+                      <p style={{ color: "#64748b", fontSize: 11, marginTop: 1 }}>{(uploadedFile.size / 1024).toFixed(1)} KB</p>
+                    </div>
+                    <button onClick={clearUpload}
+                      className="p-1.5 rounded-lg transition-colors flex-shrink-0"
+                      style={{ backgroundColor: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)" }}>
+                      <Trash2 size={12} style={{ color: "#f87171" }} />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Textarea — improved */}
+              <div>
+                <div className="flex items-center justify-between" style={{ marginBottom: 8 }}>
+                  <p style={{ color: "#64748b", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600 }}>Texto del Contrato</p>
+                  <span style={{ color: "#475569", fontSize: 10 }}>{text.length.toLocaleString()} chars</span>
+                </div>
+                <textarea
+                  value={text}
+                  onChange={e => setText(e.target.value)}
+                  rows={10}
+                  className="w-full rounded-xl p-3.5 text-xs leading-relaxed outline-none resize-none transition-all"
                   style={{
-                    border: `2px dashed ${dragOver ? "#3b82f6" : "#1e293b"}`,
-                    backgroundColor: dragOver ? "rgba(59,130,246,0.06)" : "transparent",
+                    backgroundColor: "rgba(15,23,42,0.6)",
+                    border: "1px solid rgba(30,41,59,0.8)",
+                    color: "#cbd5e1",
+                    caretColor: "#3b82f6",
+                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                    fontSize: 11.5,
+                    lineHeight: 1.7,
                   }}
-                  onClick={() => document.getElementById("lexflow-file-input").click()}>
-                  <input id="lexflow-file-input" type="file" className="hidden"
-                    accept=".pdf,.docx,.doc,.txt,.rtf"
-                    onChange={handleFileInput} />
-                  <Upload size={22} style={{ color: dragOver ? "#60a5fa" : "#334155", margin: "0 auto 8px" }} />
-                  <p className="text-xs" style={{ color: dragOver ? "#93c5fd" : "#64748b" }}>
-                    Arrastra un archivo aquí
+                  onFocus={e => { e.target.style.borderColor = "rgba(59,130,246,0.4)"; e.target.style.boxShadow = "0 0 0 3px rgba(59,130,246,0.08)"; }}
+                  onBlur={e => { e.target.style.borderColor = "rgba(30,41,59,0.8)"; e.target.style.boxShadow = "none"; }}
+                />
+                {uploadedFile && (
+                  <p style={{ color: "#60a5fa", fontSize: 10.5, marginTop: 6, display: "flex", alignItems: "center", gap: 4 }}>
+                    <CheckCircle size={10} /> Extraído de archivo
                   </p>
-                  <p className="text-xs mt-1" style={{ color: "#475569" }}>
-                    o <span style={{ color: "#60a5fa", textDecoration: "underline" }}>selecciona</span> · PDF, DOCX, TXT
-                  </p>
-                </div>
-              ) : (
-                <div className="rounded-xl p-3 flex items-center gap-3"
-                  style={{ backgroundColor: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.25)" }}>
-                  <div className="p-2 rounded-lg flex-shrink-0"
-                    style={{ backgroundColor: "rgba(59,130,246,0.15)" }}>
-                    <FileText size={14} style={{ color: "#60a5fa" }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-slate-200 text-xs font-medium truncate">{uploadedFile.name}</p>
-                    <p className="text-slate-500 text-xs">{(uploadedFile.size / 1024).toFixed(1)} KB</p>
-                  </div>
-                  <button onClick={clearUpload}
-                    className="p-1 hover:bg-slate-700 rounded-lg transition-colors flex-shrink-0">
-                    <Trash2 size={12} style={{ color: "#f87171" }} />
-                  </button>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
 
-            {/* Textarea */}
-            <div>
-              <p className="text-slate-500 text-xs uppercase tracking-wider font-medium mb-2">Texto del Contrato</p>
-              <textarea
-                value={text}
-                onChange={e => setText(e.target.value)}
-                rows={12}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-slate-300 text-xs leading-relaxed outline-none resize-none transition-colors"
-                style={{ caretColor: "#3b82f6", fontFamily: "ui-monospace, monospace" }}
-                onFocus={e => e.target.style.borderColor = "#3b82f6"}
-                onBlur={e => e.target.style.borderColor = "#334155"}
-              />
-              <p className="text-slate-600 text-xs mt-1.5">
-                {text.length} caracteres
-                {uploadedFile
-                  ? <span style={{ color: "#60a5fa" }}> · extraído de archivo</span>
-                  : " · datos de ejemplo precargados"
-                }
-              </p>
+              {/* Analyze button — premium gradient */}
+              <button
+                onClick={analyze}
+                disabled={analyzing || !text.trim()}
+                className="w-full py-3.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2.5 lf-hover-lift"
+                style={{
+                  background: analyzing || !text.trim()
+                    ? "#1a2535"
+                    : "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #6366f1 100%)",
+                  color: analyzing || !text.trim() ? "#475569" : "#fff",
+                  cursor: analyzing || !text.trim() ? "not-allowed" : "pointer",
+                  boxShadow: analyzing || !text.trim() ? "none" : "0 6px 24px rgba(59,130,246,0.35), 0 2px 8px rgba(139,92,246,0.2)",
+                  letterSpacing: "0.02em",
+                  fontSize: 13,
+                  position: "relative",
+                  overflow: "hidden",
+                }}>
+                {analyzing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-blue-300 border-t-transparent rounded-full animate-spin" />
+                    <span>Analizando...</span>
+                    {/* Progress bar inside button */}
+                    <div style={{
+                      position: "absolute", bottom: 0, left: 0, height: 3,
+                      width: `${analyzeProgress}%`,
+                      background: "linear-gradient(90deg, #60a5fa, #a78bfa)",
+                      borderRadius: "0 2px 0 0",
+                      transition: "width 0.4s ease",
+                    }} />
+                  </>
+                ) : (
+                  <><Zap size={15} /> Analizar con IA</>
+                )}
+              </button>
             </div>
-
-            {/* Analyze button */}
-            <button
-              onClick={analyze}
-              disabled={analyzing || !text.trim()}
-              className="w-full py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
-              style={{
-                background: analyzing || !text.trim()
-                  ? "#1a2535"
-                  : "linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)",
-                color: analyzing || !text.trim() ? "#475569" : "#fff",
-                cursor: analyzing || !text.trim() ? "not-allowed" : "pointer",
-                boxShadow: analyzing || !text.trim() ? "none" : "0 4px 18px rgba(59,130,246,0.38)",
-              }}>
-              {analyzing
-                ? <><div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" /> Analizando...</>
-                : <><Zap size={14} /> Analizar con IA</>
-              }
-            </button>
-          </div>
+          )}
         </div>
 
         {/* ── RIGHT: Results panel ── */}
         <div className="flex-1 overflow-y-auto" style={{ backgroundColor: "#0a1120" }}>
 
-          {/* Loading */}
+          {/* Loading — improved with steps visualization */}
           {analyzing && (
-            <div className="flex flex-col items-center justify-center h-full gap-6">
-              <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"
-                style={{ borderTopColor: "transparent" }} />
-              <div className="text-center">
-                <p className="text-white font-semibold text-base">{loadMsg}</p>
-                <p className="text-slate-500 text-sm mt-1">Motor de análisis legal IA · Colombia 🇨🇴</p>
+            <div className="flex flex-col items-center justify-center h-full gap-6 lf-fadeUp" style={{ padding: "0 48px" }}>
+              <div style={{ position: "relative", width: 80, height: 80 }}>
+                <div className="w-20 h-20 border-4 rounded-full animate-spin"
+                  style={{ borderColor: "rgba(59,130,246,0.15)", borderTopColor: "#3b82f6" }} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span style={{ color: "#60a5fa", fontSize: 14, fontWeight: 700 }}>{Math.round(analyzeProgress)}%</span>
+                </div>
               </div>
-              <div className="flex gap-2">
-                {LOAD_MSGS.map((m, i) => (
-                  <div key={i} className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: m === loadMsg ? "#3b82f6" : "#1e293b" }} />
-                ))}
+              <div className="text-center">
+                <p className="text-white font-semibold" style={{ fontSize: 16, letterSpacing: "-0.01em" }}>{loadMsg}</p>
+                <p style={{ color: "#475569", fontSize: 12.5, marginTop: 6 }}>Motor de análisis legal IA · Colombia</p>
+              </div>
+              {/* Step dots with progress bar */}
+              <div style={{ width: "100%", maxWidth: 320 }}>
+                <div style={{
+                  height: 4, borderRadius: 4,
+                  backgroundColor: "rgba(30,41,59,0.6)",
+                  overflow: "hidden",
+                }}>
+                  <div style={{
+                    height: "100%",
+                    width: `${analyzeProgress}%`,
+                    background: "linear-gradient(90deg, #3b82f6, #8b5cf6)",
+                    borderRadius: 4,
+                    transition: "width 0.5s ease",
+                  }} />
+                </div>
+                <div className="flex justify-between" style={{ marginTop: 8 }}>
+                  {LOAD_MSGS.map((m, i) => (
+                    <div key={i} className="w-2 h-2 rounded-full transition-all"
+                      style={{
+                        backgroundColor: m === loadMsg ? "#3b82f6" : (LOAD_MSGS.indexOf(loadMsg) > i ? "#6366f1" : "#1e293b"),
+                        transform: m === loadMsg ? "scale(1.4)" : "scale(1)",
+                        boxShadow: m === loadMsg ? "0 0 8px rgba(59,130,246,0.5)" : "none",
+                      }} />
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
-          {/* Empty state */}
+          {/* Empty state — polished */}
           {!analyzing && !results && (
-            <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-12">
-              <div className="w-20 h-20 rounded-2xl flex items-center justify-center"
-                style={{ backgroundColor: "rgba(59,130,246,0.08)", border: "1.5px dashed rgba(59,130,246,0.28)" }}>
-                <BookOpen size={36} style={{ color: "#3b82f6" }} />
+            <div className="flex flex-col items-center justify-center h-full gap-5 text-center px-16 lf-fadeUp">
+              <div style={{
+                width: 88, height: 88, borderRadius: 24,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                background: "linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(139,92,246,0.06) 100%)",
+                border: "1.5px dashed rgba(59,130,246,0.2)",
+              }}>
+                <DocIcon size={38} style={{ color: "#3b82f6" }} />
               </div>
-              <h3 className="text-white font-semibold text-lg">Listo para analizar</h3>
-              <p className="text-slate-500 text-sm max-w-sm leading-relaxed">
-                Carga un documento o selecciona un tipo de ejemplo, luego presiona{" "}
-                <span style={{ color: "#60a5fa", fontWeight: 600 }}>Analizar con IA</span>.
-              </p>
-              <div className="flex flex-wrap gap-2 justify-center mt-1">
-                {["Cargar PDF/DOCX", "Matriz de Riesgos", "Redline Side-by-Side", "Comparar Versiones", "Exportar Informe"].map(f => (
-                  <span key={f} className="text-xs px-3 py-1 rounded-full"
-                    style={{ backgroundColor: "rgba(59,130,246,0.1)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.2)" }}>
-                    {f}
+              <div>
+                <h3 className="text-white font-bold" style={{ fontSize: 20, letterSpacing: "-0.02em" }}>
+                  Listo para analizar
+                </h3>
+                <p style={{ color: "#64748b", fontSize: 13, marginTop: 8, maxWidth: 360, lineHeight: 1.6 }}>
+                  Carga un documento o selecciona un tipo de ejemplo, luego presiona{" "}
+                  <span style={{ color: "#60a5fa", fontWeight: 600 }}>Analizar con IA</span> para obtener el análisis completo.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 justify-center" style={{ marginTop: 4 }}>
+                {[
+                  { label: "Upload PDF/DOCX", icon: Upload },
+                  { label: "Matriz de Riesgos", icon: BarChart3 },
+                  { label: "Redline", icon: ArrowLeftRight },
+                  { label: "Comparar", icon: Eye },
+                  { label: "Exportar", icon: FileDown },
+                ].map(f => (
+                  <span key={f.label} className="flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-full"
+                    style={{
+                      backgroundColor: "rgba(59,130,246,0.07)",
+                      color: "#60a5fa",
+                      border: "1px solid rgba(59,130,246,0.15)",
+                      fontWeight: 500,
+                    }}>
+                    <f.icon size={11} /> {f.label}
                   </span>
                 ))}
               </div>
@@ -1560,203 +1728,239 @@ const ContratosModule = () => {
           {!analyzing && results && (
             <div className="p-6 space-y-5">
 
-              {/* Score card */}
-              <div className="flex items-center gap-5 p-5 rounded-2xl"
-                style={{ backgroundColor: "#0f172a", border: "1px solid #1e293b" }}>
-                <div className="relative flex-shrink-0 flex items-center justify-center" style={{ width: 80, height: 80 }}>
-                  <svg width="80" height="80" style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)" }}>
-                    <circle cx="40" cy="40" r="33" fill="none" stroke="#1e293b" strokeWidth="7" />
-                    <circle cx="40" cy="40" r="33" fill="none"
-                      stroke={scoreColor(results.score)} strokeWidth="7"
-                      strokeDasharray={`${(results.score / 100) * 207.3} 207.3`}
-                      strokeLinecap="round" />
-                  </svg>
-                  <span className="text-2xl font-bold text-white" style={{ position: "relative", zIndex: 1 }}>{results.score}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xl font-bold" style={{ color: scoreColor(results.score) }}>
-                    {scoreLabel(results.score)}
-                  </p>
-                  <p className="text-slate-500 text-xs mt-0.5">Puntaje de salud jurídica · escala 0–100</p>
-                  <div className="flex items-center gap-2 mt-3 flex-wrap">
-                    {(() => {
-                      const counts = results.matrix.reduce((a, r) => { a[r.risk] = (a[r.risk] || 0) + 1; return a; }, {});
-                      return Object.entries(counts).map(([r, n]) => {
-                        const s = riskCfg(r);
-                        return (
-                          <span key={r} className="text-xs px-2.5 py-0.5 rounded-full capitalize"
-                            style={{ backgroundColor: s.bg, color: s.color, border: `1px solid ${s.border}` }}>
-                            {n} {r}
-                          </span>
-                        );
-                      });
-                    })()}
+              {/* Score card — enhanced with gradient and glow */}
+              <div className="lf-fadeUp lf-hover-lift rounded-2xl p-6"
+                style={{
+                  background: "linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.7) 100%)",
+                  border: `1px solid ${scoreColor(results.score)}22`,
+                  boxShadow: `0 0 40px ${scoreColor(results.score)}08`,
+                }}>
+                <div className="flex items-center gap-6">
+                  <div className="relative flex-shrink-0 flex items-center justify-center" style={{ width: 90, height: 90 }}>
+                    <svg width="90" height="90" style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)" }}>
+                      <circle cx="45" cy="45" r="37" fill="none" stroke="rgba(30,41,59,0.5)" strokeWidth="6" />
+                      <circle cx="45" cy="45" r="37" fill="none"
+                        stroke={scoreColor(results.score)} strokeWidth="6"
+                        strokeDasharray={`${(results.score / 100) * 232.5} 232.5`}
+                        strokeLinecap="round"
+                        style={{ filter: `drop-shadow(0 0 6px ${scoreColor(results.score)}66)` }} />
+                    </svg>
+                    <div className="text-center" style={{ position: "relative", zIndex: 1 }}>
+                      <span className="font-bold text-white" style={{ fontSize: 26, lineHeight: 1 }}>{results.score}</span>
+                      <p style={{ color: "#64748b", fontSize: 9, marginTop: 2 }}>/ 100</p>
+                    </div>
                   </div>
-                </div>
-                <button
-                  onClick={() => setShowSimple(!showSimple)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex-shrink-0"
-                  style={{
-                    backgroundColor: showSimple ? "rgba(245,158,11,0.15)" : "#1e293b",
-                    color: showSimple ? "#fbbf24" : "#64748b",
-                    border: `1px solid ${showSimple ? "rgba(245,158,11,0.38)" : "#334155"}`,
-                  }}>
-                  <BookOpen size={14} /> Explicación Simple
-                </button>
-              </div>
-
-              {/* Explicación Simple card */}
-              {showSimple && (
-                <div className="p-4 rounded-xl text-sm leading-relaxed"
-                  style={{ backgroundColor: "rgba(245,158,11,0.07)", border: "1px solid rgba(245,158,11,0.22)", color: "#fde68a" }}>
-                  <p className="font-semibold mb-2" style={{ color: "#fbbf24" }}>💡 Explicación en lenguaje simple</p>
-                  {results.simple}
-                </div>
-              )}
-
-              {/* Tab bar */}
-              <div className="flex gap-1 p-1 rounded-xl"
-                style={{ backgroundColor: "#0f172a", border: "1px solid #1e293b" }}>
-                {tabs.map(t => (
-                  <button key={t.id} onClick={() => setTab(t.id)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 justify-center"
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold" style={{ color: scoreColor(results.score), fontSize: 18 }}>
+                        {scoreLabel(results.score)}
+                      </p>
+                    </div>
+                    <p style={{ color: "#64748b", fontSize: 11.5, marginTop: 3 }}>Puntaje de salud jurídica · {docType}</p>
+                    <div className="flex items-center gap-2 mt-3 flex-wrap">
+                      {(() => {
+                        const counts = results.matrix.reduce((a, r) => { a[r.risk] = (a[r.risk] || 0) + 1; return a; }, {});
+                        return Object.entries(counts).map(([r, n]) => {
+                          const s = riskCfg(r);
+                          return (
+                            <span key={r} className="text-xs px-3 py-1 rounded-full capitalize font-medium"
+                              style={{ backgroundColor: s.bg, color: s.color, border: `1px solid ${s.border}` }}>
+                              {n} {r}
+                            </span>
+                          );
+                        });
+                      })()}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowSimple(!showSimple)}
+                    className="lf-hover-lift flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all flex-shrink-0"
                     style={{
-                      backgroundColor: tab === t.id ? "#1e293b" : "transparent",
-                      color: tab === t.id ? "#e2e8f0" : "#64748b",
-                      border: tab === t.id ? "1px solid #334155" : "1px solid transparent",
+                      backgroundColor: showSimple ? "rgba(245,158,11,0.12)" : "rgba(30,41,59,0.6)",
+                      color: showSimple ? "#fbbf24" : "#94a3b8",
+                      border: `1px solid ${showSimple ? "rgba(245,158,11,0.3)" : "rgba(51,65,85,0.6)"}`,
                     }}>
-                    {t.id === "compare" && <ArrowLeftRight size={13} />}
-                    {t.label}
-                    {t.count !== null && (
-                      <span className="text-xs px-1.5 py-0.5 rounded-full"
-                        style={{
-                          backgroundColor: tab === t.id ? "rgba(59,130,246,0.2)" : "rgba(100,116,139,0.15)",
-                          color: tab === t.id ? "#60a5fa" : "#64748b",
-                        }}>
-                        {t.count}
-                      </span>
-                    )}
+                    <BookOpen size={14} /> {showSimple ? "Ocultar" : "Explicación Simple"}
                   </button>
-                ))}
+                </div>
               </div>
 
-              {/* ── Tab: Matriz de Riesgos ── */}
-              {tab === "matrix" && (
-                <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #1e293b" }}>
-                  <table className="w-full">
-                    <thead>
-                      <tr style={{ backgroundColor: "#0f172a" }}>
-                        <th className="text-left px-4 py-3 text-slate-500 text-xs uppercase tracking-wider font-medium" style={{ width: "38%" }}>Cláusula</th>
-                        <th className="text-left px-4 py-3 text-slate-500 text-xs uppercase tracking-wider font-medium" style={{ width: "14%" }}>Riesgo</th>
-                        <th className="text-left px-4 py-3 text-slate-500 text-xs uppercase tracking-wider font-medium">Observación</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {results.matrix.map((row, i) => (
-                        <tr key={i} className="border-t"
-                          style={{
-                            borderColor: "#1e293b",
-                            backgroundColor: i % 2 === 0 ? "rgba(15,23,42,0.4)" : "rgba(30,41,59,0.25)",
-                          }}>
-                          <td className="px-4 py-3 text-slate-200 text-sm font-medium">{row.clause}</td>
-                          <td className="px-4 py-3"><RiskBadge level={row.risk} /></td>
-                          <td className="px-4 py-3 text-slate-400 text-xs leading-relaxed">{row.obs}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              {/* Explicación Simple — improved */}
+              {showSimple && (
+                <div className="lf-scaleIn p-5 rounded-xl text-sm leading-relaxed"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(245,158,11,0.06) 0%, rgba(251,191,36,0.04) 100%)",
+                    border: "1px solid rgba(245,158,11,0.18)",
+                    color: "#fde68a",
+                  }}>
+                  <p className="font-semibold mb-2.5 flex items-center gap-2" style={{ color: "#fbbf24", fontSize: 13 }}>
+                    <Lightbulb size={15} /> Explicación en lenguaje simple
+                  </p>
+                  <p style={{ lineHeight: 1.7, fontSize: 13.5 }}>{results.simple}</p>
                 </div>
               )}
 
-              {/* ── Tab: Redline (UPGRADED — side-by-side + toggle) ── */}
+              {/* Tab bar — glass pill style */}
+              <div className="flex gap-1 p-1.5 rounded-2xl"
+                style={{
+                  backgroundColor: "rgba(15,23,42,0.7)",
+                  border: "1px solid rgba(30,41,59,0.6)",
+                  backdropFilter: "blur(8px)",
+                }}>
+                {tabs.map(t => {
+                  const TabIcon = t.icon;
+                  return (
+                    <button key={t.id} onClick={() => setTab(t.id)}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all flex-1 justify-center"
+                      style={{
+                        backgroundColor: tab === t.id ? "rgba(59,130,246,0.12)" : "transparent",
+                        color: tab === t.id ? "#93c5fd" : "#64748b",
+                        border: tab === t.id ? "1px solid rgba(59,130,246,0.2)" : "1px solid transparent",
+                        boxShadow: tab === t.id ? "0 2px 8px rgba(59,130,246,0.1)" : "none",
+                      }}>
+                      <TabIcon size={13} style={{ opacity: tab === t.id ? 1 : 0.5 }} />
+                      {t.label}
+                      {t.count !== null && (
+                        <span className="px-2 py-0.5 rounded-full" style={{
+                          backgroundColor: tab === t.id ? "rgba(59,130,246,0.2)" : "rgba(100,116,139,0.12)",
+                          color: tab === t.id ? "#60a5fa" : "#64748b",
+                          fontSize: 10.5, fontWeight: 700,
+                        }}>
+                          {t.count}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* ── Tab: Matriz de Riesgos — card rows with hover ── */}
+              {tab === "matrix" && (
+                <div className="space-y-2">
+                  {results.matrix.map((row, i) => (
+                    <div key={i} className="lf-slideIn lf-hover-lift flex items-start gap-4 p-4 rounded-xl"
+                      style={{
+                        backgroundColor: "rgba(15,23,42,0.5)",
+                        border: "1px solid rgba(30,41,59,0.5)",
+                        animationDelay: `${i * 60}ms`,
+                      }}>
+                      <div style={{ minWidth: 140 }}>
+                        <p style={{ color: "#e2e8f0", fontSize: 13, fontWeight: 600 }}>{row.clause}</p>
+                      </div>
+                      <div style={{ flexShrink: 0 }}>
+                        <RiskBadge level={row.risk} />
+                      </div>
+                      <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.6, flex: 1 }}>{row.obs}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* ── Tab: Redline — improved with expand/collapse per item ── */}
               {tab === "redline" && (
                 <div className="space-y-4">
-                  {/* View toggle */}
                   <div className="flex items-center gap-2">
-                    <p className="text-slate-500 text-xs uppercase tracking-wider font-medium flex-1">
+                    <p style={{ color: "#64748b", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, flex: 1 }}>
                       {results.redlines.length} sugerencias Redline
                     </p>
-                    <div className="flex gap-1 p-0.5 rounded-lg" style={{ backgroundColor: "#0f172a", border: "1px solid #1e293b" }}>
+                    <div className="flex gap-1 p-0.5 rounded-xl" style={{ backgroundColor: "rgba(15,23,42,0.7)", border: "1px solid rgba(30,41,59,0.6)" }}>
                       <button onClick={() => setRedlineView("sideBySide")}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
                         style={{
-                          backgroundColor: redlineView === "sideBySide" ? "#1e293b" : "transparent",
-                          color: redlineView === "sideBySide" ? "#e2e8f0" : "#64748b",
+                          backgroundColor: redlineView === "sideBySide" ? "rgba(59,130,246,0.12)" : "transparent",
+                          color: redlineView === "sideBySide" ? "#93c5fd" : "#64748b",
                         }}>
                         <ArrowLeftRight size={11} /> Side-by-Side
                       </button>
                       <button onClick={() => setRedlineView("stacked")}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
                         style={{
-                          backgroundColor: redlineView === "stacked" ? "#1e293b" : "transparent",
-                          color: redlineView === "stacked" ? "#e2e8f0" : "#64748b",
+                          backgroundColor: redlineView === "stacked" ? "rgba(59,130,246,0.12)" : "transparent",
+                          color: redlineView === "stacked" ? "#93c5fd" : "#64748b",
                         }}>
                         <ListChecks size={11} /> Apilado
                       </button>
                     </div>
                   </div>
 
-                  {results.redlines.map((r, i) => (
-                    <div key={i} className="rounded-xl overflow-hidden" style={{ border: "1px solid #1e293b" }}>
-                      {/* Row header */}
-                      <div className="flex items-center justify-between px-4 py-3 border-b"
-                        style={{ backgroundColor: "#0f172a", borderColor: "#1e293b" }}>
-                        <span className="text-slate-200 text-sm font-medium">{r.clause}</span>
-                        <RiskBadge level={r.risk} />
-                      </div>
-
-                      {redlineView === "sideBySide" ? (
-                        /* ── SIDE-BY-SIDE VIEW (NEW) ── */
-                        <div className="flex" style={{ minHeight: 0 }}>
-                          <div className="flex-1 px-4 py-3 border-r"
-                            style={{ borderColor: "#1e293b", backgroundColor: "rgba(239,68,68,0.04)" }}>
-                            <p className="text-xs font-semibold mb-2" style={{ color: "#f87171" }}>◀ TEXTO ACTUAL</p>
-                            <p className="text-sm leading-relaxed line-through"
-                              style={{ color: "#fca5a5", textDecorationColor: "#f87171" }}>{r.original}</p>
+                  {results.redlines.map((r, i) => {
+                    const isExpanded = expandedRedline === i || expandedRedline === null;
+                    return (
+                      <div key={i} className="lf-slideIn rounded-xl overflow-hidden lf-hover-glow"
+                        style={{ border: "1px solid rgba(30,41,59,0.5)", animationDelay: `${i * 80}ms` }}>
+                        <div className="flex items-center justify-between px-4 py-3 cursor-pointer border-b"
+                          onClick={() => setExpandedRedline(expandedRedline === i ? null : i)}
+                          style={{ backgroundColor: "rgba(15,23,42,0.6)", borderColor: "rgba(30,41,59,0.5)" }}>
+                          <div className="flex items-center gap-3">
+                            <span style={{ color: "#94a3b8", fontSize: 10, fontWeight: 700, opacity: 0.5 }}>#{i + 1}</span>
+                            <span style={{ color: "#e2e8f0", fontSize: 13, fontWeight: 600 }}>{r.clause}</span>
                           </div>
-                          <div className="flex-1 px-4 py-3"
-                            style={{ backgroundColor: "rgba(34,197,94,0.04)" }}>
-                            <p className="text-xs font-semibold mb-2" style={{ color: "#4ade80" }}>▶ TEXTO SUGERIDO</p>
-                            <p className="text-sm leading-relaxed" style={{ color: "#86efac" }}>{r.suggested}</p>
+                          <div className="flex items-center gap-2">
+                            <RiskBadge level={r.risk} />
+                            <ChevronRight size={14} style={{
+                              color: "#475569",
+                              transform: isExpanded ? "rotate(90deg)" : "rotate(0)",
+                              transition: "transform 0.2s ease",
+                            }} />
                           </div>
                         </div>
-                      ) : (
-                        /* ── STACKED VIEW (original) ── */
-                        <>
-                          <div className="px-4 py-3 border-b"
-                            style={{ borderColor: "#1e293b", backgroundColor: "rgba(239,68,68,0.04)" }}>
-                            <p className="text-xs font-semibold mb-1.5" style={{ color: "#f87171" }}>▼ TEXTO ACTUAL</p>
-                            <p className="text-sm leading-relaxed line-through"
-                              style={{ color: "#fca5a5", textDecorationColor: "#f87171" }}>{r.original}</p>
+
+                        {isExpanded && (
+                          <div style={{ animation: "lf-fadeUp 0.25s ease-out" }}>
+                            {redlineView === "sideBySide" ? (
+                              <div className="flex" style={{ minHeight: 0 }}>
+                                <div className="flex-1 px-4 py-4 border-r"
+                                  style={{ borderColor: "rgba(30,41,59,0.4)", backgroundColor: "rgba(239,68,68,0.03)" }}>
+                                  <p style={{ fontSize: 10, fontWeight: 700, color: "#f87171", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>Texto Actual</p>
+                                  <p className="line-through" style={{ color: "#fca5a5", fontSize: 13, lineHeight: 1.7, textDecorationColor: "rgba(248,113,113,0.4)" }}>{r.original}</p>
+                                </div>
+                                <div className="flex-1 px-4 py-4"
+                                  style={{ backgroundColor: "rgba(34,197,94,0.03)" }}>
+                                  <p style={{ fontSize: 10, fontWeight: 700, color: "#4ade80", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>Texto Sugerido</p>
+                                  <p style={{ color: "#86efac", fontSize: 13, lineHeight: 1.7 }}>{r.suggested}</p>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="px-4 py-4 border-b" style={{ borderColor: "rgba(30,41,59,0.4)", backgroundColor: "rgba(239,68,68,0.03)" }}>
+                                  <p style={{ fontSize: 10, fontWeight: 700, color: "#f87171", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Texto Actual</p>
+                                  <p className="line-through" style={{ color: "#fca5a5", fontSize: 13, lineHeight: 1.7, textDecorationColor: "rgba(248,113,113,0.4)" }}>{r.original}</p>
+                                </div>
+                                <div className="px-4 py-4" style={{ backgroundColor: "rgba(34,197,94,0.03)" }}>
+                                  <p style={{ fontSize: 10, fontWeight: 700, color: "#4ade80", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Texto Sugerido</p>
+                                  <p style={{ color: "#86efac", fontSize: 13, lineHeight: 1.7 }}>{r.suggested}</p>
+                                </div>
+                              </>
+                            )}
                           </div>
-                          <div className="px-4 py-3"
-                            style={{ backgroundColor: "rgba(34,197,94,0.04)" }}>
-                            <p className="text-xs font-semibold mb-1.5" style={{ color: "#4ade80" }}>▲ TEXTO SUGERIDO</p>
-                            <p className="text-sm leading-relaxed" style={{ color: "#86efac" }}>{r.suggested}</p>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  ))}
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
 
-              {/* ── Tab: Checklist NDA ── */}
+              {/* ── Tab: Checklist NDA — enhanced cards ── */}
               {tab === "nda" && results.ndaCheck && (
-                <div className="space-y-2">
-                  {results.ndaCheck.map(item => {
+                <div className="space-y-2.5">
+                  {results.ndaCheck.map((item, idx) => {
                     const cfg = {
-                      pass: { Icon: CheckCircle, color: "#4ade80", bg: "rgba(34,197,94,0.08)",   border: "rgba(34,197,94,0.22)"  },
-                      fail: { Icon: XCircle,     color: "#f87171", bg: "rgba(239,68,68,0.08)",   border: "rgba(239,68,68,0.22)"  },
-                      warn: { Icon: AlertCircle, color: "#fbbf24", bg: "rgba(245,158,11,0.08)",  border: "rgba(245,158,11,0.22)" },
+                      pass: { Icon: CheckCircle, color: "#4ade80", bg: "rgba(34,197,94,0.06)",   border: "rgba(34,197,94,0.18)", label: "Cumple" },
+                      fail: { Icon: XCircle,     color: "#f87171", bg: "rgba(239,68,68,0.06)",   border: "rgba(239,68,68,0.18)", label: "No cumple" },
+                      warn: { Icon: AlertCircle, color: "#fbbf24", bg: "rgba(245,158,11,0.06)",  border: "rgba(245,158,11,0.18)", label: "Revisar" },
                     }[item.status];
                     return (
-                      <div key={item.id} className="flex items-start gap-3 p-4 rounded-xl"
-                        style={{ backgroundColor: cfg.bg, border: `1px solid ${cfg.border}` }}>
-                        <cfg.Icon size={18} style={{ color: cfg.color, flexShrink: 0, marginTop: 1 }} />
+                      <div key={item.id} className="lf-slideIn lf-hover-lift flex items-start gap-3.5 p-4 rounded-xl"
+                        style={{ backgroundColor: cfg.bg, border: `1px solid ${cfg.border}`, animationDelay: `${idx * 60}ms` }}>
+                        <div className="p-1.5 rounded-lg flex-shrink-0" style={{ backgroundColor: `${cfg.color}15` }}>
+                          <cfg.Icon size={16} style={{ color: cfg.color }} />
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-slate-200 text-sm font-medium">{item.label}</p>
-                          <p className="text-slate-400 text-xs mt-0.5 leading-relaxed">{item.obs}</p>
+                          <div className="flex items-center gap-2">
+                            <p style={{ color: "#e2e8f0", fontSize: 13, fontWeight: 600 }}>{item.label}</p>
+                            <span style={{ color: cfg.color, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{cfg.label}</span>
+                          </div>
+                          <p style={{ color: "#94a3b8", fontSize: 12, marginTop: 3, lineHeight: 1.6 }}>{item.obs}</p>
                         </div>
                       </div>
                     );
@@ -1764,97 +1968,104 @@ const ContratosModule = () => {
                 </div>
               )}
 
-              {/* ── Tab: Comparar Versiones (NEW) ── */}
+              {/* ── Tab: Comparar Versiones — refined ── */}
               {tab === "compare" && (
                 <div className="space-y-4">
-                  <div className="p-4 rounded-xl"
-                    style={{ backgroundColor: "#0f172a", border: "1px solid #1e293b" }}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <ArrowLeftRight size={16} style={{ color: "#a78bfa" }} />
+                  <div className="lf-fadeUp p-5 rounded-xl"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(15,23,42,0.8) 0%, rgba(15,23,42,0.6) 100%)",
+                      border: "1px solid rgba(139,92,246,0.15)",
+                    }}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 rounded-lg" style={{ backgroundColor: "rgba(139,92,246,0.12)" }}>
+                        <ArrowLeftRight size={15} style={{ color: "#a78bfa" }} />
+                      </div>
                       <div>
-                        <p className="text-white text-sm font-semibold">Comparar Versiones del Contrato</p>
-                        <p className="text-slate-500 text-xs">Pega la segunda versión para ver las diferencias entre ambas.</p>
+                        <p className="font-semibold" style={{ color: "#e2e8f0", fontSize: 14 }}>Comparar Versiones</p>
+                        <p style={{ color: "#64748b", fontSize: 11.5, marginTop: 1 }}>Pega la segunda versión para ver diferencias línea por línea.</p>
                       </div>
                     </div>
                     <textarea
                       value={compareText}
                       onChange={e => setCompareText(e.target.value)}
-                      placeholder="Pega aquí la segunda versión del contrato para comparar…"
-                      rows={8}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-slate-300 text-xs leading-relaxed outline-none resize-none transition-colors"
-                      style={{ caretColor: "#a78bfa", fontFamily: "ui-monospace, monospace" }}
-                      onFocus={e => e.target.style.borderColor = "#8b5cf6"}
-                      onBlur={e => e.target.style.borderColor = "#334155"}
+                      placeholder="Pega aquí la segunda versión del contrato..."
+                      rows={7}
+                      className="w-full rounded-xl p-3.5 text-xs leading-relaxed outline-none resize-none transition-all"
+                      style={{
+                        backgroundColor: "rgba(15,23,42,0.5)",
+                        border: "1px solid rgba(139,92,246,0.15)",
+                        color: "#cbd5e1",
+                        caretColor: "#a78bfa",
+                        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                        fontSize: 11.5,
+                      }}
+                      onFocus={e => { e.target.style.borderColor = "rgba(139,92,246,0.35)"; e.target.style.boxShadow = "0 0 0 3px rgba(139,92,246,0.06)"; }}
+                      onBlur={e => { e.target.style.borderColor = "rgba(139,92,246,0.15)"; e.target.style.boxShadow = "none"; }}
                     />
                     {compareText.trim() && (
-                      <p className="text-slate-500 text-xs mt-1.5">{compareText.length} caracteres en versión B</p>
+                      <p style={{ color: "#a78bfa", fontSize: 10.5, marginTop: 6 }}>{compareText.length.toLocaleString()} caracteres en versión B</p>
                     )}
                   </div>
 
-                  {/* Diff results */}
                   {diff && (
-                    <div className="space-y-3">
-                      {/* Summary stats */}
+                    <div className="space-y-3 lf-fadeUp" style={{ animationDelay: "100ms" }}>
                       <div className="flex gap-3">
-                        <div className="flex-1 p-3 rounded-xl text-center"
-                          style={{ backgroundColor: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                          <p className="text-2xl font-bold" style={{ color: "#f87171" }}>{diff.removed.length}</p>
-                          <p className="text-xs" style={{ color: "#fca5a5" }}>Líneas eliminadas</p>
-                        </div>
-                        <div className="flex-1 p-3 rounded-xl text-center"
-                          style={{ backgroundColor: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.2)" }}>
-                          <p className="text-2xl font-bold" style={{ color: "#4ade80" }}>{diff.added.length}</p>
-                          <p className="text-xs" style={{ color: "#86efac" }}>Líneas agregadas</p>
-                        </div>
-                        <div className="flex-1 p-3 rounded-xl text-center"
-                          style={{ backgroundColor: "rgba(100,116,139,0.06)", border: "1px solid rgba(100,116,139,0.2)" }}>
-                          <p className="text-2xl font-bold text-slate-300">{diff.unchanged.length}</p>
-                          <p className="text-xs text-slate-500">Sin cambios</p>
-                        </div>
+                        {[
+                          { n: diff.removed.length, label: "Eliminadas", color: "#f87171", bg: "rgba(239,68,68,0.06)", border: "rgba(239,68,68,0.15)" },
+                          { n: diff.added.length,   label: "Agregadas",  color: "#4ade80", bg: "rgba(34,197,94,0.06)", border: "rgba(34,197,94,0.15)" },
+                          { n: diff.unchanged.length, label: "Sin cambios", color: "#94a3b8", bg: "rgba(100,116,139,0.06)", border: "rgba(100,116,139,0.15)" },
+                        ].map(s => (
+                          <div key={s.label} className="flex-1 p-4 rounded-xl text-center lf-hover-lift"
+                            style={{ backgroundColor: s.bg, border: `1px solid ${s.border}` }}>
+                            <p style={{ fontSize: 26, fontWeight: 800, color: s.color, lineHeight: 1 }}>{s.n}</p>
+                            <p style={{ fontSize: 10.5, color: s.color, marginTop: 4, fontWeight: 500, opacity: 0.8 }}>{s.label}</p>
+                          </div>
+                        ))}
                       </div>
 
-                      {/* Side-by-side diff display */}
-                      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #1e293b" }}>
-                        <div className="flex border-b" style={{ borderColor: "#1e293b", backgroundColor: "#0f172a" }}>
-                          <div className="flex-1 px-4 py-2.5 border-r" style={{ borderColor: "#1e293b" }}>
-                            <p className="text-xs font-semibold text-slate-400">VERSIÓN A (Original)</p>
+                      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(30,41,59,0.5)" }}>
+                        <div className="flex border-b" style={{ borderColor: "rgba(30,41,59,0.5)", backgroundColor: "rgba(15,23,42,0.6)" }}>
+                          <div className="flex-1 px-4 py-2.5 border-r flex items-center gap-2" style={{ borderColor: "rgba(30,41,59,0.5)" }}>
+                            <div style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: "#f87171" }} />
+                            <p style={{ fontSize: 10.5, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em" }}>Versión A (Original)</p>
                           </div>
-                          <div className="flex-1 px-4 py-2.5">
-                            <p className="text-xs font-semibold text-slate-400">VERSIÓN B (Nueva)</p>
+                          <div className="flex-1 px-4 py-2.5 flex items-center gap-2">
+                            <div style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: "#4ade80" }} />
+                            <p style={{ fontSize: 10.5, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em" }}>Versión B (Nueva)</p>
                           </div>
                         </div>
                         <div className="flex" style={{ minHeight: 0 }}>
-                          {/* Left: Version A with removed highlighted */}
                           <div className="flex-1 p-4 border-r overflow-y-auto"
-                            style={{ borderColor: "#1e293b", maxHeight: 400 }}>
+                            style={{ borderColor: "rgba(30,41,59,0.4)", maxHeight: 400 }}>
                             {text.split("\n").filter(Boolean).map((line, i) => {
                               const isRemoved = diff.removed.includes(line.trim());
                               return (
-                                <p key={i} className="text-xs leading-relaxed py-0.5 px-2 rounded"
+                                <p key={i} className="py-0.5 px-2 rounded"
                                   style={{
-                                    backgroundColor: isRemoved ? "rgba(239,68,68,0.1)" : "transparent",
-                                    color: isRemoved ? "#fca5a5" : "#94a3b8",
+                                    backgroundColor: isRemoved ? "rgba(239,68,68,0.08)" : "transparent",
+                                    color: isRemoved ? "#fca5a5" : "#64748b",
                                     textDecoration: isRemoved ? "line-through" : "none",
-                                    textDecorationColor: "#ef4444",
-                                    fontFamily: "ui-monospace, monospace",
+                                    textDecorationColor: "rgba(239,68,68,0.5)",
+                                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                                    fontSize: 11.5, lineHeight: 1.7,
                                   }}>
                                   {line}
                                 </p>
                               );
                             })}
                           </div>
-                          {/* Right: Version B with added highlighted */}
                           <div className="flex-1 p-4 overflow-y-auto" style={{ maxHeight: 400 }}>
                             {compareText.split("\n").filter(Boolean).map((line, i) => {
                               const isAdded = diff.added.includes(line.trim());
                               return (
-                                <p key={i} className="text-xs leading-relaxed py-0.5 px-2 rounded"
+                                <p key={i} className="py-0.5 px-2 rounded"
                                   style={{
-                                    backgroundColor: isAdded ? "rgba(34,197,94,0.1)" : "transparent",
-                                    color: isAdded ? "#86efac" : "#94a3b8",
-                                    fontFamily: "ui-monospace, monospace",
+                                    backgroundColor: isAdded ? "rgba(34,197,94,0.08)" : "transparent",
+                                    color: isAdded ? "#86efac" : "#64748b",
+                                    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                                    fontSize: 11.5, lineHeight: 1.7,
                                   }}>
-                                  {isAdded && <span style={{ color: "#22c55e", marginRight: 4 }}>+</span>}
+                                  {isAdded && <span style={{ color: "#22c55e", marginRight: 4, fontWeight: 700 }}>+</span>}
                                   {line}
                                 </p>
                               );
@@ -1865,15 +2076,18 @@ const ContratosModule = () => {
                     </div>
                   )}
 
-                  {/* Empty compare state */}
                   {!compareText.trim() && (
-                    <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
-                      <div className="w-14 h-14 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: "rgba(139,92,246,0.08)", border: "1.5px dashed rgba(139,92,246,0.28)" }}>
-                        <FilePlus2 size={26} style={{ color: "#a78bfa" }} />
+                    <div className="flex flex-col items-center justify-center py-14 gap-4 text-center lf-fadeUp">
+                      <div style={{
+                        width: 64, height: 64, borderRadius: 18,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        background: "linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(99,102,241,0.06) 100%)",
+                        border: "1.5px dashed rgba(139,92,246,0.2)",
+                      }}>
+                        <FilePlus2 size={28} style={{ color: "#a78bfa" }} />
                       </div>
-                      <p className="text-slate-400 text-sm">Pega la segunda versión del contrato arriba</p>
-                      <p className="text-slate-600 text-xs max-w-xs">
+                      <p style={{ color: "#94a3b8", fontSize: 13, fontWeight: 500 }}>Pega la segunda versión arriba</p>
+                      <p style={{ color: "#475569", fontSize: 12, maxWidth: 300, lineHeight: 1.6 }}>
                         LexFlow comparará ambas versiones línea por línea y destacará los cambios.
                       </p>
                     </div>
@@ -1886,7 +2100,6 @@ const ContratosModule = () => {
         </div>
       </div>
 
-      {/* Sign Modal */}
       {showModal && <SignModal onClose={() => setShowModal(false)} docType={docType} />}
     </div>
   );
