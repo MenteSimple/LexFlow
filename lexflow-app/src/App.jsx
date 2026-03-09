@@ -2621,7 +2621,7 @@ const ContratosModule = () => {
                           fontFamily: "'Georgia', 'Times New Roman', serif",
                           fontSize: 13.5, lineHeight: 1.9, color: "#334155",
                           outline: "none", minHeight: 400, whiteSpace: "pre-wrap",
-                          wordWrap: "break-word", overflowWrap: "break-word", wordBreak: "break-all",
+                          wordWrap: "break-word", overflowWrap: "anywhere", wordBreak: "normal",
                           width: "100%", maxWidth: "100%", boxSizing: "border-box"
                         }}
                         dangerouslySetInnerHTML={{ __html: editableText.replace(/\n/g, "<br/>") }}
