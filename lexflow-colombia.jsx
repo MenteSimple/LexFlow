@@ -2599,11 +2599,11 @@ const ContratosModule = () => {
                     <button onClick={() => document.execCommand("insertUnorderedList")} className="p-1.5 rounded hover:bg-slate-700/50" title="Lista"><List size={12} style={{ color: "#94a3b8" }} /></button>
                   </div>
                   {/* Word-like document page */}
-                  <div className="flex-1 overflow-y-auto" style={{ backgroundColor: "#1e293b", padding: "20px 24px" }}>
+                  <div className="flex-1 overflow-y-auto" style={{ backgroundColor: "#1e293b", padding: "20px 24px", overflowX: "hidden" }}>
                     <div style={{
                       width: "100%", boxSizing: "border-box", backgroundColor: "#ffffff", borderRadius: 4,
                       boxShadow: "0 2px 20px rgba(0,0,0,0.4), 0 0 1px rgba(0,0,0,0.2)",
-                      padding: "40px 36px", minHeight: "calc(100vh - 200px)"
+                      padding: "40px 36px", minHeight: "calc(100vh - 200px)", overflow: "hidden"
                     }}>
                       {/* Document header */}
                       <div style={{ borderBottom: "2px solid #e2e8f0", paddingBottom: 16, marginBottom: 24 }}>
@@ -2621,7 +2621,7 @@ const ContratosModule = () => {
                           fontFamily: "'Georgia', 'Times New Roman', serif",
                           fontSize: 13.5, lineHeight: 1.9, color: "#334155",
                           outline: "none", minHeight: 400, whiteSpace: "pre-wrap",
-                          wordWrap: "break-word"
+                          wordWrap: "break-word", overflowWrap: "break-word", wordBreak: "break-word"
                         }}
                         dangerouslySetInnerHTML={{ __html: editableText.replace(/\n/g, "<br/>") }}
                       />
