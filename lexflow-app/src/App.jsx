@@ -1410,7 +1410,7 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
   const [analyzeProgress, setAnalyzeProgress] = useState(0);
   const [expandedRedline, setExpandedRedline] = useState(null);
   const [toast, setToast] = useState(null);
-  const [practiceMenuOpen, setPracticeMenuOpen] = useState(true);
+  const [funcPanelOpen, setFuncPanelOpen] = useState(true);
   const [generatingDoc, setGeneratingDoc] = useState(false);
   const [clauseSearch, setClauseSearch] = useState("");
   const [showViewer, setShowViewer] = useState(false);
@@ -1664,6 +1664,12 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
     ],
   };
 
+  /* Auto-collapse functions panel when viewer opens, restore when closed */
+  useEffect(() => {
+    if (showViewer) setFuncPanelOpen(false);
+    else setFuncPanelOpen(true);
+  }, [showViewer]);
+
   /* ── Handlers ── */
   const currentPractice = PRACTICE_AREAS.find(p => p.id === practiceArea);
 
@@ -1876,153 +1882,115 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
       {/* ── Main Body: Left Nav + Right Content ── */}
       <div className="flex flex-1" style={{ minHeight: 0 }}>
 
-        {/* ══════════════ LEFT SIDEBAR — Practice Areas Menu ══════════════ */}
-        <div className="flex flex-col flex-shrink-0 overflow-y-auto border-r"
-          style={{
-            width: (practiceMenuOpen && !showViewer) ? 260 : 52,
-            backgroundColor: "#060b14",
-            borderColor: "rgba(30,41,59,0.5)",
-            transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-          }}>
+        {/* ══════════════ LEFT PANEL — Functions (collapsible) ══════════════ */}
+        {currentPractice && activeFunction && (
+          <div className="flex flex-col flex-shrink-0 overflow-y-auto border-r"
+            style={{
+              width: funcPanelOpen ? 220 : 44,
+              backgroundColor: "#060b14",
+              borderColor: "rgba(30,41,59,0.5)",
+              transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}>
 
-          {/* Toggle */}
-          <button onClick={() => setPracticeMenuOpen(!practiceMenuOpen)}
-            className="flex items-center justify-center py-3 border-b"
-            style={{ borderColor: "rgba(30,41,59,0.4)", color: "#475569", cursor: "pointer", backgroundColor: "transparent" }}>
-            {practiceMenuOpen ? (
-              <div className="flex items-center gap-2 px-4 w-full">
-                <span style={{ fontSize: 10, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, flex: 1 }}>Áreas de Práctica</span>
-                <ChevronLeft size={14} style={{ color: "#475569" }} />
-              </div>
-            ) : <ChevronRight size={16} />}
-          </button>
+            {/* Toggle */}
+            <button onClick={() => setFuncPanelOpen(!funcPanelOpen)}
+              className="flex items-center justify-center py-3 border-b"
+              style={{ borderColor: "rgba(30,41,59,0.4)", color: "#475569", cursor: "pointer", backgroundColor: "transparent" }}>
+              {funcPanelOpen ? (
+                <div className="flex items-center gap-2 px-3 w-full">
+                  <span style={{ fontSize: 10, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, flex: 1 }}>Funciones</span>
+                  <ChevronLeft size={14} style={{ color: "#475569" }} />
+                </div>
+              ) : <ChevronRight size={16} />}
+            </button>
 
-          {practiceMenuOpen && (
-            <div className="p-3 space-y-1" style={{ animation: "lf-fadeUp 0.25s ease-out" }}>
-              {PRACTICE_AREAS.map((area, idx) => {
-                const AreaIcon = area.icon;
-                const active = practiceArea === area.id;
-                return (
-                  <button key={area.id} onClick={() => handleSelectPractice(area.id)}
-                    className="w-full text-left px-3 py-2.5 rounded-xl flex items-center gap-3 transition-all lf-hover-glow"
-                    style={{
-                      backgroundColor: active ? `${area.color}15` : "transparent",
-                      border: active ? `1px solid ${area.color}30` : "1px solid transparent",
-                      animationDelay: `${idx * 30}ms`,
-                    }}>
-                    <div className="p-1.5 rounded-lg flex-shrink-0" style={{
-                      backgroundColor: active ? `${area.color}20` : "rgba(30,41,59,0.4)",
-                    }}>
-                      <AreaIcon size={14} style={{ color: active ? area.color : "#64748b" }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p style={{ color: active ? "#e2e8f0" : "#94a3b8", fontSize: 12.5, fontWeight: active ? 600 : 400 }} className="truncate">{area.name}</p>
-                    </div>
-                    {active && <div style={{ width: 5, height: 5, borderRadius: "50%", backgroundColor: area.color, flexShrink: 0 }} />}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Functions menu - show when practice selected */}
-          {practiceMenuOpen && currentPractice && (
-            <div className="px-3 pb-3 mt-1">
-              {/* Divider */}
-              <div style={{ height: 1, backgroundColor: "rgba(30,41,59,0.5)", margin: "4px 0 12px 0" }} />
-              <p style={{ color: "#64748b", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600, marginBottom: 8, paddingLeft: 4 }}>Funciones Comunes</p>
-              <div className="space-y-1">
+            {/* Common functions */}
+            {funcPanelOpen ? (
+              <div className="px-3 py-3 space-y-0.5" style={{ animation: "lf-fadeUp 0.2s ease-out" }}>
+                <p style={{ color: "#64748b", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600, marginBottom: 6, paddingLeft: 4 }}>Comunes</p>
                 {COMMON_FUNCTIONS.map((fn) => {
                   const FnIcon = fn.icon;
-                  const active = activeFunction === fn.id;
+                  const isActive = activeFunction === fn.id;
                   return (
                     <button key={fn.id} onClick={() => { setActiveFunction(fn.id); setResults(null); }}
                       className="w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 transition-all"
                       style={{
-                        backgroundColor: active ? "rgba(59,130,246,0.1)" : "transparent",
-                        color: active ? "#93c5fd" : "#64748b",
-                        border: active ? "1px solid rgba(59,130,246,0.2)" : "1px solid transparent",
+                        backgroundColor: isActive ? "rgba(59,130,246,0.1)" : "transparent",
+                        color: isActive ? "#93c5fd" : "#64748b",
+                        border: isActive ? "1px solid rgba(59,130,246,0.2)" : "1px solid transparent",
                         fontSize: 11.5,
                       }}>
-                      <FnIcon size={12} style={{ opacity: active ? 1 : 0.6, flexShrink: 0 }} />
-                      <span style={{ fontWeight: active ? 600 : 400 }}>{fn.name}</span>
+                      <FnIcon size={12} style={{ opacity: isActive ? 1 : 0.6, flexShrink: 0 }} />
+                      <span style={{ fontWeight: isActive ? 600 : 400 }}>{fn.name}</span>
                     </button>
                   );
                 })}
-              </div>
 
-              {/* Practice-specific functions */}
-              <p style={{ color: currentPractice.color, fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600, marginBottom: 8, marginTop: 14, paddingLeft: 4 }}>
-                Específicas — {currentPractice.name}
-              </p>
-              <div className="space-y-1">
+                {/* Practice-specific functions */}
+                <p style={{ color: currentPractice.color, fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600, marginBottom: 6, marginTop: 12, paddingLeft: 4 }}>
+                  {currentPractice.name}
+                </p>
                 {currentPractice.specificFunctions.map((fn) => {
                   const FnIcon = fn.icon;
-                  const active = activeFunction === fn.id;
+                  const isActive = activeFunction === fn.id;
                   return (
                     <button key={fn.id} onClick={() => { setActiveFunction(fn.id); setResults(null); }}
                       className="w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 transition-all"
                       style={{
-                        backgroundColor: active ? `${currentPractice.color}15` : "transparent",
-                        color: active ? currentPractice.color : "#64748b",
-                        border: active ? `1px solid ${currentPractice.color}25` : "1px solid transparent",
+                        backgroundColor: isActive ? `${currentPractice.color}15` : "transparent",
+                        color: isActive ? currentPractice.color : "#64748b",
+                        border: isActive ? `1px solid ${currentPractice.color}25` : "1px solid transparent",
                         fontSize: 11.5,
                       }}>
-                      <FnIcon size={12} style={{ opacity: active ? 1 : 0.6, flexShrink: 0 }} />
-                      <span style={{ fontWeight: active ? 600 : 400 }}>{fn.name}</span>
+                      <FnIcon size={12} style={{ opacity: isActive ? 1 : 0.6, flexShrink: 0 }} />
+                      <span style={{ fontWeight: isActive ? 600 : 400 }}>{fn.name}</span>
                     </button>
                   );
                 })}
               </div>
-            </div>
-          )}
-        </div>
+            ) : (
+              /* Collapsed: icon-only buttons */
+              <div className="py-2 space-y-0.5 flex flex-col items-center">
+                {COMMON_FUNCTIONS.map((fn) => {
+                  const FnIcon = fn.icon;
+                  const isActive = activeFunction === fn.id;
+                  return (
+                    <button key={fn.id} onClick={() => { setActiveFunction(fn.id); setResults(null); }}
+                      title={fn.name}
+                      className="p-2 rounded-lg transition-all"
+                      style={{
+                        backgroundColor: isActive ? "rgba(59,130,246,0.1)" : "transparent",
+                        color: isActive ? "#93c5fd" : "#64748b",
+                      }}>
+                      <FnIcon size={14} />
+                    </button>
+                  );
+                })}
+                <div style={{ height: 1, width: 20, backgroundColor: "rgba(30,41,59,0.5)", margin: "4px 0" }} />
+                {currentPractice.specificFunctions.map((fn) => {
+                  const FnIcon = fn.icon;
+                  const isActive = activeFunction === fn.id;
+                  return (
+                    <button key={fn.id} onClick={() => { setActiveFunction(fn.id); setResults(null); }}
+                      title={fn.name}
+                      className="p-2 rounded-lg transition-all"
+                      style={{
+                        backgroundColor: isActive ? `${currentPractice.color}15` : "transparent",
+                        color: isActive ? currentPractice.color : "#64748b",
+                      }}>
+                      <FnIcon size={14} />
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ══════════════ RIGHT CONTENT AREA ══════════════ */}
         <div className="flex-1 overflow-y-auto" style={{ backgroundColor: "#0a1120" }}>
 
-          {/* ── State 0: No practice selected — landing page ── */}
-          {!practiceArea && (
-            <div className="p-8 lf-fadeUp">
-              <div className="text-center mb-8">
-                <h3 className="text-white font-bold" style={{ fontSize: 22, letterSpacing: "-0.02em" }}>
-                  Selecciona un Área de Práctica
-                </h3>
-                <p style={{ color: "#64748b", fontSize: 13.5, marginTop: 8, maxWidth: 480, margin: "8px auto 0" }}>
-                  Cada área tiene funcionalidades comunes y específicas para optimizar tu flujo de trabajo legal.
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-3" style={{ maxWidth: 720, margin: "0 auto" }}>
-                {PRACTICE_AREAS.map((area, idx) => {
-                  const AreaIcon = area.icon;
-                  return (
-                    <button key={area.id} onClick={() => handleSelectPractice(area.id)}
-                      className="lf-slideIn lf-hover-lift text-left p-5 rounded-2xl transition-all"
-                      style={{
-                        backgroundColor: "rgba(15,23,42,0.5)",
-                        border: `1px solid ${area.color}20`,
-                        animationDelay: `${idx * 60}ms`,
-                      }}>
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="p-2.5 rounded-xl" style={{ backgroundColor: `${area.color}15` }}>
-                          <AreaIcon size={18} style={{ color: area.color }} />
-                        </div>
-                        <h4 className="font-semibold text-white" style={{ fontSize: 14 }}>{area.name}</h4>
-                      </div>
-                      <p style={{ color: "#64748b", fontSize: 12, lineHeight: 1.5 }}>{area.description}</p>
-                      <div className="flex items-center gap-1.5 mt-3">
-                        <span style={{ color: area.color, fontSize: 10.5, fontWeight: 500 }}>{area.docTypes.length} tipos de documento</span>
-                        <span style={{ color: "#334155" }}>·</span>
-                        <span style={{ color: "#475569", fontSize: 10.5 }}>{area.specificFunctions.length + COMMON_FUNCTIONS.length} funciones</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* ── State 1: Practice selected but no function ── */}
+          {/* ── State 1: Practice selected — function picker ── */}
           {currentPractice && !activeFunction && (
             <div className="p-6 lf-fadeUp">
               <div className="mb-6">
