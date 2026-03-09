@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis,
   Tooltip, ResponsiveContainer
@@ -11,7 +11,7 @@ import {
   ShieldCheck, Download, ListChecks, MapPin, Briefcase,
   Upload, Mail, Wifi, WifiOff, ArrowLeftRight, FileDown, Eye, Trash2, FilePlus2,
   Users, Lightbulb, ChevronLeft, BarChart3, Sparkles, ScrollText, ClipboardCheck, Target,
-  RefreshCw, AlignLeft, AlignCenter, AlignRight, List
+  RefreshCw, AlignLeft, AlignCenter, AlignRight, List, Save
 } from "lucide-react";
 
 // ─── DASHBOARD DATA ───────────────────────────────────────────────────────────
@@ -1448,6 +1448,11 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
   const [followUpHistory, setFollowUpHistory] = useState([]);
   const [docVersions, setDocVersions] = useState([]);
   const [activeVersion, setActiveVersion] = useState(0);
+  const [showTextInput, setShowTextInput] = useState(false);
+  const [customDocType, setCustomDocType] = useState("");
+  const [inputPanelOpen, setInputPanelOpen] = useState(true);
+  const editorRef = useRef(null);
+  const editorTextRef = useRef("");
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -1697,11 +1702,19 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
     ],
   };
 
-  /* Auto-collapse functions panel when viewer opens, restore when closed */
+  /* Auto-collapse panels when viewer opens, restore when closed */
   useEffect(() => {
-    if (showViewer) setFuncPanelOpen(false);
-    else setFuncPanelOpen(true);
+    if (showViewer) { setFuncPanelOpen(false); setInputPanelOpen(false); }
+    else { setFuncPanelOpen(true); setInputPanelOpen(true); }
   }, [showViewer]);
+
+  /* Sync editorRef innerHTML only when editableText changes externally (not from user typing) */
+  useEffect(() => {
+    if (editorRef.current && editorTextRef.current !== editableText) {
+      editorRef.current.innerHTML = editableText.replace(/\n/g, "<br/>");
+      editorTextRef.current = editableText;
+    }
+  }, [editableText]);
 
   /* ── Handlers ── */
   const currentPractice = PRACTICE_AREAS.find(p => p.id === practiceArea);
@@ -2098,10 +2111,16 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
           {/* ── State 2: Active function — REVIEW (full analysis engine) ── */}
           {currentPractice && activeFunction === "review" && (
             <div className="flex flex-1" style={{ minHeight: 0 }}>
-              {/* Input sub-panel */}
-              <div className="flex flex-col flex-shrink-0 overflow-y-auto border-r"
-                style={{ width: 300, backgroundColor: "#080e18", borderColor: "rgba(30,41,59,0.5)" }}>
-                <div className="p-5 space-y-5">
+              {/* Input sub-panel — collapsible */}
+              <div className="flex flex-col flex-shrink-0 overflow-y-auto border-r transition-all"
+                style={{ width: inputPanelOpen ? 300 : 44, backgroundColor: "#080e18", borderColor: "rgba(30,41,59,0.5)" }}>
+                <button onClick={() => setInputPanelOpen(!inputPanelOpen)}
+                  className="flex items-center gap-2 px-3 py-2.5 border-b lf-hover-lift"
+                  style={{ borderColor: "rgba(30,41,59,0.4)", backgroundColor: "rgba(15,23,42,0.5)" }}>
+                  {inputPanelOpen ? <ChevronLeft size={13} style={{ color: "#64748b" }} /> : <ChevronRight size={13} style={{ color: "#64748b" }} />}
+                  {inputPanelOpen && <span style={{ color: "#94a3b8", fontSize: 11, fontWeight: 500 }}>Configuración</span>}
+                </button>
+                {inputPanelOpen && <div className="p-5 space-y-5">
                   {/* Doc type selector */}
                   <div>
                     <p style={{ color: "#64748b", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600, marginBottom: 10 }}>Tipo de Documento</p>
@@ -2123,6 +2142,32 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                           </button>
                         );
                       })}
+                      {/* "Otro" option */}
+                      {(() => {
+                        const isOtro = !currentPractice.docTypes.includes(docType);
+                        return (
+                          <div>
+                            <button onClick={() => { setDocType(customDocType || "Otro"); setText(SAMPLE_TEXT["NDA"] || ""); }}
+                              className="w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all flex items-center gap-3 lf-hover-glow"
+                              style={{
+                                backgroundColor: isOtro ? `${currentPractice.color}15` : "transparent",
+                                color: isOtro ? "#e2e8f0" : "#64748b",
+                                border: isOtro ? `1px solid ${currentPractice.color}30` : "1px solid transparent",
+                                fontSize: 12.5,
+                              }}>
+                              <FileText size={13} style={{ color: isOtro ? currentPractice.color : "#475569", flexShrink: 0 }} />
+                              <span style={{ fontWeight: isOtro ? 600 : 400 }}>Otro</span>
+                              {isOtro && <div style={{ marginLeft: "auto", width: 5, height: 5, borderRadius: "50%", backgroundColor: currentPractice.color }} />}
+                            </button>
+                            {isOtro && (
+                              <input type="text" value={customDocType} onChange={e => { setCustomDocType(e.target.value); setDocType(e.target.value || "Otro"); }}
+                                placeholder="Nombre del documento..."
+                                className="w-full mt-1.5 px-3 py-2 rounded-lg text-xs outline-none"
+                                style={{ backgroundColor: "rgba(15,23,42,0.6)", border: `1px solid ${currentPractice.color}25`, color: "#cbd5e1", fontSize: 11.5 }} />
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
 
@@ -2154,19 +2199,27 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                     )}
                   </div>
 
-                  {/* Quick text input for clause review */}
+                  {/* Quick text input for clause review — collapsible */}
                   <div>
-                    <div className="flex items-center justify-between" style={{ marginBottom: 8 }}>
-                      <p style={{ color: "#64748b", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600 }}>Texto para Revisión</p>
-                      <span style={{ color: "#475569", fontSize: 10 }}>{text.length.toLocaleString()} chars</span>
-                    </div>
-                    <p style={{ color: "#475569", fontSize: 11, marginBottom: 8, lineHeight: 1.5 }}>
-                      Pega una cláusula o texto específico para análisis rápido. El documento completo puedes verlo en el Editor.
-                    </p>
-                    <textarea value={text} onChange={e => setText(e.target.value)} rows={6}
-                      placeholder="Pega aquí una cláusula, artículo o texto específico para revisar..."
-                      className="w-full rounded-xl p-3.5 text-xs leading-relaxed outline-none resize-none"
-                      style={{ backgroundColor: "rgba(15,23,42,0.6)", border: "1px solid rgba(30,41,59,0.8)", color: "#cbd5e1", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 11.5, lineHeight: 1.7 }} />
+                    <button onClick={() => setShowTextInput(!showTextInput)} className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl lf-hover-lift"
+                      style={{ backgroundColor: showTextInput ? `${currentPractice.color}08` : "rgba(15,23,42,0.4)", border: `1px solid ${showTextInput ? `${currentPractice.color}20` : "rgba(30,41,59,0.6)"}` }}>
+                      <div className="flex items-center gap-2">
+                        <PenTool size={12} style={{ color: showTextInput ? currentPractice.color : "#475569" }} />
+                        <span style={{ color: showTextInput ? "#e2e8f0" : "#94a3b8", fontSize: 11.5, fontWeight: 500 }}>Pegar texto para revisión</span>
+                      </div>
+                      <ChevronDown size={13} style={{ color: "#475569", transform: showTextInput ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }} />
+                    </button>
+                    {showTextInput && (
+                      <div className="mt-2 lf-fadeUp">
+                        <p style={{ color: "#475569", fontSize: 11, marginBottom: 8, lineHeight: 1.5 }}>
+                          Pega una cláusula o texto específico para análisis rápido.
+                        </p>
+                        <textarea value={text} onChange={e => setText(e.target.value)} rows={5}
+                          placeholder="Pega aquí una cláusula, artículo o texto específico para revisar..."
+                          className="w-full rounded-xl p-3.5 text-xs leading-relaxed outline-none resize-none"
+                          style={{ backgroundColor: "rgba(15,23,42,0.6)", border: "1px solid rgba(30,41,59,0.8)", color: "#cbd5e1", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 11.5, lineHeight: 1.7 }} />
+                      </div>
+                    )}
                   </div>
 
                   {/* Analyze button */}
@@ -2185,7 +2238,7 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                       </>
                     ) : <><Zap size={15} /> Analizar con IA</>}
                   </button>
-                </div>
+                </div>}
               </div>
 
               {/* Results + Viewer container */}
@@ -2221,6 +2274,56 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
 
                 {!analyzing && results && (
                   <div className="p-6 space-y-5">
+                    {/* ── Follow-up Prompt (transversal — above score) ── */}
+                    <div className="lf-fadeUp">
+                      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(30,41,59,0.5)", backgroundColor: "rgba(15,23,42,0.4)" }}>
+                        {followUpHistory.length > 0 && (
+                          <div className="px-4 py-3 space-y-3" style={{ maxHeight: 200, overflowY: "auto", borderBottom: "1px solid rgba(30,41,59,0.3)" }}>
+                            {followUpHistory.map((entry, i) => (
+                              <div key={i} className="lf-slideIn" style={{ animationDelay: `${i * 50}ms` }}>
+                                <div className="flex items-start gap-2 mb-1.5">
+                                  <User size={11} style={{ color: currentPractice.color, marginTop: 2 }} />
+                                  <p style={{ color: "#94a3b8", fontSize: 11.5, fontStyle: "italic" }}>{entry.question}</p>
+                                </div>
+                                <div className="flex items-start gap-2 ml-0.5">
+                                  <Sparkles size={11} style={{ color: "#a855f7", marginTop: 2 }} />
+                                  <p style={{ color: "#cbd5e1", fontSize: 12, lineHeight: 1.6 }}>{entry.answer}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 px-3 py-2.5">
+                          <Sparkles size={14} style={{ color: "#a855f7", flexShrink: 0 }} />
+                          <input
+                            type="text" value={followUpPrompt} onChange={e => setFollowUpPrompt(e.target.value)}
+                            placeholder="Pide análisis adicional... Ej: Revisa si cumple con la Resolución XYZ"
+                            onKeyDown={e => {
+                              if (e.key === "Enter" && followUpPrompt.trim()) {
+                                const answer = `Basado en el análisis del ${docType}, ${followUpPrompt.toLowerCase().includes("resolución") || followUpPrompt.toLowerCase().includes("resolucion") ? "no se encontró referencia expresa a dicha resolución en el documento. Se recomienda incluir una cláusula de cumplimiento regulatorio que cite expresamente la normativa aplicable." : followUpPrompt.toLowerCase().includes("propuesta") ? "se sugiere la siguiente redacción: \"Las partes acuerdan que [ajustar según el contexto específico de la solicitud], conforme a la legislación colombiana vigente y las mejores prácticas del sector.\"" : "se identificaron los siguientes puntos relevantes: (1) El documento actual no aborda expresamente este aspecto, (2) Se recomienda incluir una cláusula específica que regule esta materia conforme al marco normativo colombiano aplicable."}`;
+                                setFollowUpHistory(prev => [...prev, { question: followUpPrompt, answer }]);
+                                setFollowUpPrompt("");
+                              }
+                            }}
+                            className="flex-1 bg-transparent outline-none text-sm"
+                            style={{ color: "#cbd5e1", fontSize: 12 }}
+                          />
+                          <button
+                            onClick={() => {
+                              if (followUpPrompt.trim()) {
+                                const answer = `Basado en el análisis del ${docType}, ${followUpPrompt.toLowerCase().includes("resolución") || followUpPrompt.toLowerCase().includes("resolucion") ? "no se encontró referencia expresa a dicha resolución. Se recomienda incluir cláusula de cumplimiento regulatorio." : followUpPrompt.toLowerCase().includes("propuesta") ? "se sugiere la siguiente redacción ajustada conforme a la legislación colombiana vigente." : "se identificaron puntos relevantes que requieren cláusula específica conforme al marco normativo colombiano."}`;
+                                setFollowUpHistory(prev => [...prev, { question: followUpPrompt, answer }]);
+                                setFollowUpPrompt("");
+                              }
+                            }}
+                            disabled={!followUpPrompt.trim()}
+                            className="p-2 rounded-lg lf-hover-lift"
+                            style={{ backgroundColor: followUpPrompt.trim() ? `${currentPractice.color}20` : "transparent", cursor: followUpPrompt.trim() ? "pointer" : "default" }}>
+                            <Send size={13} style={{ color: followUpPrompt.trim() ? currentPractice.color : "#475569" }} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                     {/* Score card */}
                     <div className="lf-fadeUp lf-hover-lift rounded-2xl p-6" style={{ background: "linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.7) 100%)", border: `1px solid ${scoreColor(results.score)}22` }}>
                       <div className="flex items-center gap-6">
@@ -2710,62 +2813,7 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                         })()}
                       </div>
                     )}
-                    {/* ── Follow-up Prompt (post-analysis) ── */}
-                    {results && (
-                      <div className="mt-4 lf-fadeUp">
-                        <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(30,41,59,0.5)", backgroundColor: "rgba(15,23,42,0.4)" }}>
-                          {/* Follow-up history */}
-                          {followUpHistory.length > 0 && (
-                            <div className="px-4 py-3 space-y-3" style={{ maxHeight: 200, overflowY: "auto", borderBottom: "1px solid rgba(30,41,59,0.3)" }}>
-                              {followUpHistory.map((entry, i) => (
-                                <div key={i} className="lf-slideIn" style={{ animationDelay: `${i * 50}ms` }}>
-                                  <div className="flex items-start gap-2 mb-1.5">
-                                    <User size={11} style={{ color: currentPractice.color, marginTop: 2 }} />
-                                    <p style={{ color: "#94a3b8", fontSize: 11.5, fontStyle: "italic" }}>{entry.question}</p>
-                                  </div>
-                                  <div className="flex items-start gap-2 ml-0.5">
-                                    <Sparkles size={11} style={{ color: "#a855f7", marginTop: 2 }} />
-                                    <p style={{ color: "#cbd5e1", fontSize: 12, lineHeight: 1.6 }}>{entry.answer}</p>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          {/* Input area */}
-                          <div className="flex items-center gap-2 px-3 py-2.5">
-                            <Sparkles size={14} style={{ color: "#a855f7", flexShrink: 0 }} />
-                            <input
-                              type="text" value={followUpPrompt} onChange={e => setFollowUpPrompt(e.target.value)}
-                              placeholder="Pide análisis adicional... Ej: Revisa si cumple con la Resolución XYZ"
-                              onKeyDown={e => {
-                                if (e.key === "Enter" && followUpPrompt.trim()) {
-                                  const mockAnswers = [
-                                    `Basado en el análisis del ${docType}, ${followUpPrompt.toLowerCase().includes("resolución") || followUpPrompt.toLowerCase().includes("resolucion") ? "no se encontró referencia expresa a dicha resolución en el documento. Se recomienda incluir una cláusula de cumplimiento regulatorio que cite expresamente la normativa aplicable." : followUpPrompt.toLowerCase().includes("propuesta") ? "se sugiere la siguiente redacción: \"Las partes acuerdan que [ajustar según el contexto específico de la solicitud], conforme a la legislación colombiana vigente y las mejores prácticas del sector.\"" : "se identificaron los siguientes puntos relevantes: (1) El documento actual no aborda expresamente este aspecto, (2) Se recomienda incluir una cláusula específica que regule esta materia conforme al marco normativo colombiano aplicable."}`,
-                                  ];
-                                  setFollowUpHistory(prev => [...prev, { question: followUpPrompt, answer: mockAnswers[0] }]);
-                                  setFollowUpPrompt("");
-                                }
-                              }}
-                              className="flex-1 bg-transparent outline-none text-sm"
-                              style={{ color: "#cbd5e1", fontSize: 12 }}
-                            />
-                            <button
-                              onClick={() => {
-                                if (followUpPrompt.trim()) {
-                                  const answer = `Basado en el análisis del ${docType}, ${followUpPrompt.toLowerCase().includes("resolución") || followUpPrompt.toLowerCase().includes("resolucion") ? "no se encontró referencia expresa a dicha resolución. Se recomienda incluir cláusula de cumplimiento regulatorio." : followUpPrompt.toLowerCase().includes("propuesta") ? "se sugiere la siguiente redacción ajustada conforme a la legislación colombiana vigente." : "se identificaron puntos relevantes que requieren cláusula específica conforme al marco normativo colombiano."}`;
-                                  setFollowUpHistory(prev => [...prev, { question: followUpPrompt, answer }]);
-                                  setFollowUpPrompt("");
-                                }
-                              }}
-                              disabled={!followUpPrompt.trim()}
-                              className="p-2 rounded-lg lf-hover-lift"
-                              style={{ backgroundColor: followUpPrompt.trim() ? `${currentPractice.color}20` : "transparent", cursor: followUpPrompt.trim() ? "pointer" : "default" }}>
-                              <Send size={13} style={{ color: followUpPrompt.trim() ? currentPractice.color : "#475569" }} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                    {/* Follow-up prompt moved above score card */}
                   </div>
                 )}
               </div>
@@ -2793,18 +2841,22 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                         setActiveVersion(docVersions.length);
                         setText(editableText);
                         showToast(`Versión guardada: ${versionLabel}`);
-                        // Offer download
+                      }} className="lf-hover-lift flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ backgroundColor: `${currentPractice.color}18`, color: currentPractice.color, border: `1px solid ${currentPractice.color}30` }}>
+                        <Save size={11} /> Guardar Versión
+                      </button>
+                      <button onClick={() => {
                         try {
-                          const blob = new Blob([editableText], { type: "text/plain;charset=utf-8" });
+                          const blob = new Blob([editableText], { type: "application/msword;charset=utf-8" });
                           const url = URL.createObjectURL(blob);
                           const a = document.createElement("a");
                           a.href = url;
-                          a.download = `${docType.replace(/\s/g, "_")}_${versionLabel.replace(/\s/g, "_")}.txt`;
+                          a.download = `${docType.replace(/\s/g, "_")}_${new Date().toISOString().slice(0,10)}.doc`;
                           document.body.appendChild(a); a.click(); document.body.removeChild(a);
                           URL.revokeObjectURL(url);
-                        } catch (_) {}
-                      }} className="lf-hover-lift flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ backgroundColor: `${currentPractice.color}18`, color: currentPractice.color, border: `1px solid ${currentPractice.color}30` }}>
-                        <Download size={11} /> Aplicar y Guardar
+                          showToast("Documento descargado (.doc)");
+                        } catch (_) { showToast("Error al descargar"); }
+                      }} className="lf-hover-lift flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ backgroundColor: "rgba(30,41,59,0.6)", color: "#94a3b8", border: "1px solid rgba(51,65,85,0.5)" }}>
+                        <Download size={11} /> Descargar .doc
                       </button>
                       {docVersions.length > 0 && (
                         <div className="flex items-center gap-1.5 ml-1">
@@ -2851,11 +2903,16 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                           {uploadedFile ? uploadedFile.name : "Documento cargado"} · {editableText.length.toLocaleString()} caracteres
                         </p>
                       </div>
-                      {/* Editable content area */}
+                      {/* Editable content area (ref-based to avoid cursor jumping) */}
                       <div
+                        ref={editorRef}
                         contentEditable
                         suppressContentEditableWarning
-                        onInput={(e) => setEditableText(e.currentTarget.innerText)}
+                        onInput={(e) => {
+                          const txt = e.currentTarget.innerText;
+                          editorTextRef.current = txt;
+                          setEditableText(txt);
+                        }}
                         style={{
                           fontFamily: "'Georgia', 'Times New Roman', serif",
                           fontSize: 13.5, lineHeight: 1.9, color: "#334155",
@@ -2863,7 +2920,6 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                           wordWrap: "break-word", overflowWrap: "anywhere", wordBreak: "normal",
                           width: "100%", maxWidth: "100%", boxSizing: "border-box"
                         }}
-                        dangerouslySetInnerHTML={{ __html: editableText.replace(/\n/g, "<br/>") }}
                       />
                     </div>
                   </div>
