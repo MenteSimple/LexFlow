@@ -10,7 +10,7 @@ import {
   Clock, Copy, Filter, ChevronRight, User, Tag, GitMerge, FileSearch,
   ShieldCheck, Download, ListChecks, MapPin, Briefcase,
   Upload, Mail, Wifi, WifiOff, ArrowLeftRight, FileDown, Eye, Trash2, FilePlus2,
-  Users, Lightbulb, ChevronLeft, BarChart3
+  Users, Lightbulb, ChevronLeft, BarChart3, Sparkles, ScrollText, ClipboardCheck, Target
 } from "lucide-react";
 
 // ─── DASHBOARD DATA ───────────────────────────────────────────────────────────
@@ -222,6 +222,37 @@ const ANALYSIS = {
       { id: 7, label: "Mecanismo de solución de controversias",            status: "pass", obs: "Arbitramento CCB correctamente pactado (Ley 1563/2012)." },
     ],
     simple: "Este es un acuerdo de 'boca cerrada' entre dos empresas. El principal problema es que NO dice cuánto tiempo dura ese secreto — sin un plazo claro, es muy difícil hacerlo valer ante un juez. Además, si alguien lo viola, la multa pactada ($5 millones) es tan pequeña que no representa un desincentivo real. Por último, no menciona las reglas de protección de datos personales que la ley colombiana exige (Ley 1581 de 2012).",
+    executiveSummary: {
+      parties: [{ name: "TechCorp S.A.S.", role: "Parte Reveladora", nit: "900.123.456-7" }, { name: "InnoSoft Ltda.", role: "Parte Receptora", nit: "901.789.012-3" }],
+      contractType: "Acuerdo de Confidencialidad (NDA) — Unilateral",
+      signDate: "15 de febrero de 2025",
+      effectiveDate: "15 de febrero de 2025",
+      expirationDate: "Sin definir (riesgo alto)",
+      value: "Cláusula penal: $5.000.000 COP",
+      jurisdiction: "Colombia — Arbitramento CCB",
+      keyTerms: ["Información confidencial amplia pero incompleta", "Vigencia indefinida", "Penalidad baja", "Sin referencia a datos personales"],
+    },
+    obligations: [
+      { party: "Parte Receptora", obligation: "Mantener reserva sobre toda información confidencial recibida", deadline: "Durante la vigencia (indefinida)", priority: "alto", article: "Art. 1" },
+      { party: "Parte Receptora", obligation: "No divulgar a terceros sin autorización escrita previa", deadline: "Durante la vigencia", priority: "alto", article: "Art. 2" },
+      { party: "Parte Receptora", obligation: "Devolver o destruir información al terminar la relación", deadline: "30 días post-terminación", priority: "medio", article: "Art. 4" },
+      { party: "Ambas Partes", obligation: "Someterse a arbitramento CCB en caso de controversia", deadline: "Permanente", priority: "bajo", article: "Art. 10" },
+      { party: "Parte Reveladora", obligation: "Marcar como confidencial la información que entregue", deadline: "Al momento de entrega", priority: "medio", article: "Art. 2" },
+    ],
+    playbook: [
+      { clause: "Vigencia de la Reserva", standard: "2-5 años post-terminación con extensión pactada", actual: "Sin plazo definido", deviation: "critica", recommendation: "Definir plazo de 3 años mínimo" },
+      { clause: "Cláusula Penal", standard: "50-100 SMMLV como piso mínimo", actual: "$5.000.000 fijo", deviation: "mayor", recommendation: "Subir a mínimo 50 SMMLV" },
+      { clause: "Protección de Datos", standard: "Referencia expresa a Ley 1581/2012 y Decreto 1074/2015", actual: "Sin mención", deviation: "mayor", recommendation: "Incluir cláusula de tratamiento de datos personales" },
+      { clause: "Excepciones", standard: "Mínimo 4 supuestos: dominio público, conocimiento previo, orden judicial, desarrollo independiente", actual: "Solo dominio público", deviation: "moderada", recommendation: "Ampliar excepciones conforme al estándar" },
+      { clause: "Jurisdicción", standard: "Ley colombiana + mecanismo de resolución", actual: "Arbitramento CCB", deviation: "ninguna", recommendation: "Conforme al estándar" },
+    ],
+    suggestions: [
+      { title: "Agregar cláusula de datos personales", description: "Incluir autorización y tratamiento conforme a Ley 1581/2012. Obligatorio si se comparten datos de personas naturales.", priority: "critica", category: "compliance" },
+      { title: "Definir término de vigencia", description: "Establecer plazo de 3-5 años para la obligación de confidencialidad post-terminación.", priority: "critica", category: "temporal" },
+      { title: "Incluir cláusula de propiedad de información derivada", description: "Especificar que información derivada, compilaciones y análisis también están protegidos.", priority: "alta", category: "alcance" },
+      { title: "Ampliar excepciones de confidencialidad", description: "Agregar: conocimiento previo documentado, orden judicial con notificación previa, desarrollo independiente.", priority: "alta", category: "excepciones" },
+      { title: "Agregar cláusula de no-solicitación", description: "Proteger contra la contratación de empleados clave de la otra parte durante y después del NDA.", priority: "media", category: "proteccion" },
+    ],
   },
 
   "Contrato Mercantil": {
@@ -252,6 +283,34 @@ const ANALYSIS = {
     ],
     ndaCheck: null,
     simple: "Contrato para comprar 10.000 productos por $200 millones en cuotas mensuales. Los dos problemas más serios: 1) no dice cuándo se entregan los productos (¡sin fecha de entrega!), y 2) los $200 millones no se ajustan con la inflación, lo que significa que el vendedor pierde poder adquisitivo durante el año de pago.",
+    executiveSummary: {
+      parties: [{ name: "Distribuidora Nacional S.A.", role: "Comprador", nit: "800.456.789-1" }, { name: "Manufacturas del Valle S.A.S.", role: "Vendedor", nit: "900.321.654-8" }],
+      contractType: "Compraventa Mercantil — Código de Comercio",
+      signDate: "1 de marzo de 2025",
+      effectiveDate: "1 de marzo de 2025",
+      expirationDate: "28 de febrero de 2026 (12 meses)",
+      value: "$200.000.000 COP en 12 cuotas mensuales",
+      jurisdiction: "Colombia — Juez Civil del Circuito de Bogotá",
+      keyTerms: ["10.000 unidades sin plazo de entrega", "Sin ajuste IPC", "Garantía limitada sobre vicios", "Cláusula penal del 5%"],
+    },
+    obligations: [
+      { party: "Vendedor", obligation: "Entregar 10.000 unidades conforme a especificaciones", deadline: "Sin definir (riesgo)", priority: "alto", article: "Art. 1" },
+      { party: "Comprador", obligation: "Pagar cuotas mensuales de $16.666.667", deadline: "Día 5 de cada mes", priority: "alto", article: "Art. 2" },
+      { party: "Vendedor", obligation: "Garantía sobre calidad y conformidad de productos", deadline: "6 meses post-entrega", priority: "medio", article: "Art. 4" },
+      { party: "Ambas Partes", obligation: "Cumplir con cláusula penal en caso de incumplimiento", deadline: "Al incumplimiento", priority: "medio", article: "Art. 5" },
+    ],
+    playbook: [
+      { clause: "Plazo de Entrega", standard: "Fecha o período específico con hitos", actual: "No determinado", deviation: "critica", recommendation: "Establecer 30 días calendario desde la firma" },
+      { clause: "Ajuste de Precio", standard: "Indexación IPC para contratos >6 meses", actual: "Precio fijo sin ajuste", deviation: "mayor", recommendation: "Incluir ajuste IPC anual certificado DANE" },
+      { clause: "Vicios Ocultos", standard: "Responsabilidad conforme Art. 934 C.Co.", actual: "Exclusión de vicios post-entrega", deviation: "mayor", recommendation: "Restablecer responsabilidad por 6 meses" },
+      { clause: "Intereses de Mora", standard: "Tasa máxima legal Superfinanciera", actual: "Sin intereses de mora", deviation: "moderada", recommendation: "Incluir intereses de mora legales" },
+    ],
+    suggestions: [
+      { title: "Definir plazo de entrega con hitos", description: "Establecer cronograma de entregas parciales con cantidades y fechas específicas.", priority: "critica", category: "temporal" },
+      { title: "Incluir cláusula de ajuste IPC", description: "Las cuotas mensuales deben ajustarse anualmente conforme al IPC certificado por DANE.", priority: "alta", category: "financiero" },
+      { title: "Agregar acta de recibo y conformidad", description: "Protocolo formal de recepción con plazos para reportar inconformidades.", priority: "alta", category: "proceso" },
+      { title: "Reforzar cláusula de garantía", description: "Alinear con Art. 934 C.Co. para cubrir vicios ocultos durante 6 meses post-entrega.", priority: "alta", category: "garantia" },
+    ],
   },
 
   "Contrato de Arrendamiento": {
@@ -276,6 +335,33 @@ const ANALYSIS = {
     ],
     ndaCheck: null,
     simple: "Es un contrato para arrendar una oficina por 24 meses a $8.5 millones al mes. El mayor riesgo: si la empresa hace reformas en la oficina (pinturas, instalaciones, divisiones), pierde todo ese dinero invertido cuando se vaya, porque el arrendador se queda con todo sin pagar nada. En lo demás es un contrato bastante equilibrado.",
+    executiveSummary: {
+      parties: [{ name: "Inmobiliaria Andina S.A.", role: "Arrendador", nit: "800.111.222-3" }, { name: "StartUp Digital S.A.S.", role: "Arrendatario", nit: "901.555.666-7" }],
+      contractType: "Arrendamiento de Local Comercial — Ley 820/2003",
+      signDate: "10 de enero de 2025",
+      effectiveDate: "1 de febrero de 2025",
+      expirationDate: "31 de enero de 2027 (24 meses)",
+      value: "$8.500.000 COP mensuales + IPC+2%",
+      jurisdiction: "Colombia — Juez Civil Municipal de Bogotá",
+      keyTerms: ["24 meses de plazo", "Canon con incremento IPC+2%", "Mejoras sin compensación", "Penalidad por restitución anticipada"],
+    },
+    obligations: [
+      { party: "Arrendatario", obligation: "Pagar canon mensual de $8.500.000 en primeros 5 días", deadline: "Día 5 de cada mes", priority: "alto", article: "Art. 3" },
+      { party: "Arrendador", obligation: "Garantizar goce pacífico del inmueble", deadline: "Durante toda la vigencia", priority: "alto", article: "Art. 1" },
+      { party: "Arrendatario", obligation: "Restituir inmueble en condiciones originales", deadline: "Al vencimiento", priority: "medio", article: "Art. 8" },
+      { party: "Arrendatario", obligation: "No realizar modificaciones sin autorización escrita", deadline: "Permanente", priority: "medio", article: "Art. 7" },
+    ],
+    playbook: [
+      { clause: "Mejoras y Adiciones", standard: "Distinguir necesarias/útiles/voluptuarias (Art. 1994 C.C.)", actual: "Todo queda para arrendador sin compensación", deviation: "critica", recommendation: "Clasificar mejoras y establecer reembolso para necesarias" },
+      { clause: "Restitución Anticipada", standard: "Penalidad de 3 cánones máximo", actual: "Cánones pendientes hasta fin del plazo", deviation: "mayor", recommendation: "Limitar penalidad a 3 cánones" },
+      { clause: "Incremento del Canon", standard: "IPC o IPC+1% para comercial", actual: "IPC+2%", deviation: "moderada", recommendation: "Aceptable para comercial, ideal negociar IPC+1%" },
+      { clause: "Plazo de Pago", standard: "Primeros 5 días del mes", actual: "Primeros 5 días", deviation: "ninguna", recommendation: "Conforme al estándar" },
+    ],
+    suggestions: [
+      { title: "Clasificar mejoras por tipo (necesarias/útiles/voluptuarias)", description: "Establecer régimen diferenciado de compensación conforme al Art. 1993-1994 del C.C.", priority: "critica", category: "proteccion" },
+      { title: "Limitar penalidad por restitución anticipada", description: "Negociar máximo de 3 cánones como indemnización en lugar de cánones pendientes.", priority: "alta", category: "financiero" },
+      { title: "Incluir protocolo de entrega/restitución", description: "Acta de inventario con registro fotográfico al inicio y fin del contrato.", priority: "media", category: "proceso" },
+    ],
   },
 
   "Contrato Laboral": {
@@ -306,6 +392,35 @@ const ANALYSIS = {
     ],
     ndaCheck: null,
     simple: "Este contrato tiene dos problemas legales graves: 1) La jornada de 10 horas al día viola el límite de 8 horas que fija el Código del Trabajo — las 2 horas extra deben pagarse con recargo, y 2) el período de prueba de 4 meses está prohibido; la ley solo permite máximo 2 meses. Estas cláusulas son nulas y el trabajador podría reclamar diferencias ante el Ministerio de Trabajo.",
+    executiveSummary: {
+      parties: [{ name: "Soluciones Digitales S.A.S.", role: "Empleador", nit: "900.777.888-9" }, { name: "María Fernanda López", role: "Trabajador", nit: "C.C. 1.020.456.789" }],
+      contractType: "Contrato de Trabajo a Término Indefinido — CST",
+      signDate: "15 de enero de 2025",
+      effectiveDate: "1 de febrero de 2025",
+      expirationDate: "Indefinido",
+      value: "Salario: $6.500.000 COP mensuales + prestaciones de ley",
+      jurisdiction: "Colombia — Juez Laboral del Circuito de Bogotá",
+      keyTerms: ["Término indefinido", "Jornada de 10h (ilegal)", "Período de prueba 4 meses (nulo)", "Cláusula de exclusividad amplia"],
+    },
+    obligations: [
+      { party: "Empleador", obligation: "Pagar salario y prestaciones conforme al CST", deadline: "Quincenal o mensual", priority: "alto", article: "Art. 2" },
+      { party: "Trabajador", obligation: "Cumplir jornada laboral ordinaria", deadline: "L-V según horario", priority: "alto", article: "Art. 3" },
+      { party: "Empleador", obligation: "Afiliar a seguridad social (salud, pensión, ARL)", deadline: "Antes del inicio", priority: "alto", article: "Ley 100/1993" },
+      { party: "Trabajador", obligation: "Guardar confidencialidad sobre información del empleador", deadline: "Durante y 1-2 años post", priority: "medio", article: "Art. 6" },
+      { party: "Trabajador", obligation: "No prestar servicios a competidores directos", deadline: "Durante la vigencia", priority: "medio", article: "Art. 7" },
+    ],
+    playbook: [
+      { clause: "Jornada de Trabajo", standard: "8 horas diarias, 48 semanales (Art. 161 CST)", actual: "10 horas diarias", deviation: "critica", recommendation: "Corregir a 8 horas. Horas extra con recargo legal" },
+      { clause: "Período de Prueba", standard: "Máximo 2 meses para indefinido (Art. 78 CST)", actual: "4 meses", deviation: "critica", recommendation: "Reducir a 2 meses. Cláusula actual es nula" },
+      { clause: "Exclusividad", standard: "Limitada al sector/mercado específico del empleador", actual: "Prohibición amplia a todos los competidores", deviation: "moderada", recommendation: "Precisar sector, mercado geográfico y segmento" },
+      { clause: "Vacaciones", standard: "15 días hábiles por año (Art. 186 CST)", actual: "15 días hábiles", deviation: "ninguna", recommendation: "Conforme a derecho" },
+    ],
+    suggestions: [
+      { title: "Corregir jornada laboral a 8 horas", description: "La jornada de 10h viola Art. 161 CST. Debe reducirse a 8h con pago de extras si se excede.", priority: "critica", category: "compliance" },
+      { title: "Reducir período de prueba a 2 meses", description: "Los 4 meses son nulos de pleno derecho. Máximo legal es 2 meses (Art. 78 CST).", priority: "critica", category: "compliance" },
+      { title: "Acotar cláusula de exclusividad", description: "Especificar sector, territorio y compensación. Restricción excesiva puede ser inaplicable.", priority: "alta", category: "proteccion" },
+      { title: "Incluir cláusula de teletrabajo", description: "Si aplica trabajo remoto, incluir condiciones conforme a Ley 1221/2008 y Decreto 649/2022.", priority: "media", category: "modernizacion" },
+    ],
   },
 
   "Contrato de Servicios": {
@@ -329,6 +444,33 @@ const ANALYSIS = {
     ],
     ndaCheck: null,
     simple: "Contrato de consultoría de 6 meses a $12 millones mensuales. En general está bien redactado y equilibrado. El único punto a mejorar es la cláusula de propiedad intelectual: dice que todo pertenece al contratante, pero no especifica qué tipo de derechos ni en qué territorio. La ley colombiana exige ser específico cuando se ceden derechos de autor sobre obras creadas por encargo.",
+    executiveSummary: {
+      parties: [{ name: "Corporación Andina de Fomento", role: "Contratante", nit: "800.999.111-5" }, { name: "Consultoría Estratégica S.A.S.", role: "Contratista", nit: "901.222.333-4" }],
+      contractType: "Prestación de Servicios Profesionales — C.Co.",
+      signDate: "1 de marzo de 2025",
+      effectiveDate: "1 de marzo de 2025",
+      expirationDate: "31 de agosto de 2025 (6 meses)",
+      value: "$12.000.000 COP mensuales ($72.000.000 total)",
+      jurisdiction: "Colombia — Tribunal de Arbitraje CIAC",
+      keyTerms: ["6 meses de plazo", "Autonomía del contratista", "Cesión amplia de PI", "Confidencialidad 2 años post"],
+    },
+    obligations: [
+      { party: "Contratista", obligation: "Entregar informes mensuales de avance", deadline: "Último día hábil de cada mes", priority: "alto", article: "Art. 2" },
+      { party: "Contratante", obligation: "Pagar honorarios mensuales de $12.000.000", deadline: "Dentro de 10 días hábiles post-factura", priority: "alto", article: "Art. 3" },
+      { party: "Contratista", obligation: "Ceder derechos patrimoniales sobre entregables", deadline: "Al momento de entrega", priority: "medio", article: "Art. 6" },
+      { party: "Contratista", obligation: "Guardar confidencialidad durante y 2 años post-contrato", deadline: "Hasta agosto 2027", priority: "medio", article: "Art. 7" },
+    ],
+    playbook: [
+      { clause: "Propiedad Intelectual", standard: "Cesión detallada: tipo de derechos, territorio, vigencia (Ley 23/1982)", actual: "Cesión genérica sin especificación", deviation: "moderada", recommendation: "Detallar derechos patrimoniales cedidos, territorio y vigencia" },
+      { clause: "Confidencialidad Post-Contractual", standard: "1-3 años con cláusula penal", actual: "2 años sin sanción específica", deviation: "moderada", recommendation: "Agregar cláusula penal de 50 SMMLV" },
+      { clause: "Autonomía del Contratista", standard: "Independencia clara para evitar subordinación (Art. 23 CST)", actual: "Bien redactada", deviation: "ninguna", recommendation: "Conforme al estándar" },
+      { clause: "Plazo y Terminación", standard: "Causales claras de terminación anticipada bilateral", actual: "No incluye causales de terminación anticipada", deviation: "moderada", recommendation: "Incluir causales de terminación con preaviso de 30 días" },
+    ],
+    suggestions: [
+      { title: "Detallar cesión de propiedad intelectual", description: "Especificar: derechos patrimoniales (reproducción, transformación, distribución), territorio mundial, vigencia.", priority: "alta", category: "pi" },
+      { title: "Agregar cláusula penal por incumplimiento de confidencialidad", description: "Establecer sanción de 50 SMMLV por violación de reserva post-contractual.", priority: "alta", category: "proteccion" },
+      { title: "Incluir causales de terminación anticipada", description: "Definir causales bilaterales con preaviso de 30 días y liquidación de entregables parciales.", priority: "media", category: "terminacion" },
+    ],
   },
 };
 
@@ -1252,6 +1394,8 @@ const ContratosModule = () => {
   const [practiceMenuOpen, setPracticeMenuOpen] = useState(true);
   const [generatingDoc, setGeneratingDoc] = useState(false);
   const [clauseSearch, setClauseSearch] = useState("");
+  const [showViewer, setShowViewer] = useState(false);
+  const [editableText, setEditableText] = useState("");
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -1376,7 +1520,7 @@ const ContratosModule = () => {
 
   /* ── Common functions (all practice areas) ── */
   const COMMON_FUNCTIONS = [
-    { id: "review", name: "Revisar Documento", icon: Eye, desc: "Análisis IA: riesgos, cláusulas faltantes, compliance", primary: true },
+    { id: "review", name: "Revisar Contrato / Documento", icon: Eye, desc: "Análisis IA: riesgos, obligaciones, playbook, sugerencias", primary: true },
     { id: "draft", name: "Elaborar Documento", icon: PenTool, desc: "Generación asistida con plantillas por tipo y jurisdicción" },
     { id: "compare", name: "Comparar Versiones", icon: ArrowLeftRight, desc: "Diff lado a lado con marcas de cambio (redline)" },
     { id: "clauses", name: "Biblioteca de Cláusulas", icon: BookOpen, desc: "Banco de cláusulas recomendadas por tipo de documento" },
@@ -1567,8 +1711,9 @@ const ContratosModule = () => {
         clearInterval(iv);
         setResults(ANALYSIS[docType] || ANALYSIS["Contrato de Servicios"]);
         setAnalyzing(false);
-        setTab("matrix");
+        setTab("summary");
         setAnalyzeProgress(100);
+        setEditableText(text);
         showToast("Análisis completado");
       }
     }, 520);
@@ -1598,8 +1743,12 @@ const ContratosModule = () => {
   const scoreEmoji = (s) => s >= 71 ? "✅" : s >= 41 ? "⚠️" : "🚨";
 
   const tabs = results ? [
+    { id: "summary", label: "Resumen", icon: FileSearch, count: null },
     { id: "matrix", label: "Matriz de Riesgos", icon: BarChart3, count: results.matrix.length },
+    { id: "obligations", label: "Obligaciones", icon: ScrollText, count: results.obligations ? results.obligations.length : 0 },
     { id: "redline", label: "Redline", icon: ArrowLeftRight, count: results.redlines.length },
+    { id: "playbook", label: "Playbook", icon: Target, count: results.playbook ? results.playbook.filter(p => p.deviation !== "ninguna").length : 0 },
+    { id: "suggestions", label: "Sugerencias IA", icon: Sparkles, count: results.suggestions ? results.suggestions.length : 0 },
     ...(results.ndaCheck ? [{ id: "nda", label: "Checklist NDA", icon: CheckCircle, count: results.ndaCheck.length }] : []),
     { id: "compare", label: "Comparar", icon: Eye, count: null },
   ] : [];
@@ -2015,6 +2164,43 @@ const ContratosModule = () => {
                 </div>
               </div>
 
+              {/* Results + Viewer container */}
+              <div className="flex flex-1" style={{ minHeight: 0 }}>
+              {/* Document Viewer panel */}
+              {showViewer && results && (
+                <div className="flex flex-col border-r overflow-hidden" style={{ width: 380, backgroundColor: "#080e18", borderColor: "rgba(30,41,59,0.5)" }}>
+                  <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "rgba(30,41,59,0.5)" }}>
+                    <div className="flex items-center gap-2">
+                      <Eye size={14} style={{ color: currentPractice.color }} />
+                      <p className="text-white font-semibold" style={{ fontSize: 13 }}>Visor de Documento</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => { setEditableText(text); showToast("Texto actualizado"); }} className="px-2.5 py-1 rounded-lg text-xs font-medium" style={{ backgroundColor: `${currentPractice.color}15`, color: currentPractice.color, border: `1px solid ${currentPractice.color}25` }}>
+                        Sync
+                      </button>
+                      <button onClick={() => setShowViewer(false)} className="p-1.5 rounded-lg" style={{ backgroundColor: "rgba(30,41,59,0.5)" }}>
+                        <X size={12} style={{ color: "#64748b" }} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="p-3 border-b flex items-center gap-2" style={{ borderColor: "rgba(30,41,59,0.4)" }}>
+                    <span className="px-2 py-0.5 rounded text-xs font-semibold" style={{ backgroundColor: `${currentPractice.color}15`, color: currentPractice.color }}>{docType}</span>
+                    {uploadedFile && <span style={{ color: "#475569", fontSize: 11 }}>{uploadedFile.name}</span>}
+                  </div>
+                  <textarea
+                    value={editableText}
+                    onChange={(e) => setEditableText(e.target.value)}
+                    className="flex-1 w-full p-4 outline-none resize-none"
+                    style={{ backgroundColor: "transparent", color: "#cbd5e1", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 11.5, lineHeight: 1.8, border: "none" }}
+                  />
+                  <div className="px-4 py-2.5 border-t flex items-center justify-between" style={{ borderColor: "rgba(30,41,59,0.4)" }}>
+                    <span style={{ color: "#475569", fontSize: 10 }}>{editableText.length.toLocaleString()} caracteres</span>
+                    <button onClick={() => { setText(editableText); showToast("Texto aplicado al análisis"); }} className="px-3 py-1.5 rounded-lg text-xs font-semibold lf-hover-lift" style={{ backgroundColor: `${currentPractice.color}15`, color: currentPractice.color, border: `1px solid ${currentPractice.color}25` }}>
+                      Aplicar Cambios
+                    </button>
+                  </div>
+                </div>
+              )}
               {/* Results sub-panel */}
               <div className="flex-1 overflow-y-auto" style={{ backgroundColor: "#0a1120" }}>
                 {analyzing && (
@@ -2071,10 +2257,16 @@ const ContratosModule = () => {
                             })()}
                           </div>
                         </div>
-                        <button onClick={() => setShowSimple(!showSimple)} className="lf-hover-lift flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold"
-                          style={{ backgroundColor: showSimple ? "rgba(245,158,11,0.12)" : "rgba(30,41,59,0.6)", color: showSimple ? "#fbbf24" : "#94a3b8", border: `1px solid ${showSimple ? "rgba(245,158,11,0.3)" : "rgba(51,65,85,0.6)"}` }}>
-                          <BookOpen size={13} /> {showSimple ? "Ocultar" : "Simple"}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => { setShowViewer(!showViewer); if (!showViewer && !editableText) setEditableText(text); }} className="lf-hover-lift flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold"
+                            style={{ backgroundColor: showViewer ? `${currentPractice.color}15` : "rgba(30,41,59,0.6)", color: showViewer ? currentPractice.color : "#94a3b8", border: `1px solid ${showViewer ? `${currentPractice.color}30` : "rgba(51,65,85,0.6)"}` }}>
+                            <Eye size={13} /> {showViewer ? "Cerrar Visor" : "Visor"}
+                          </button>
+                          <button onClick={() => setShowSimple(!showSimple)} className="lf-hover-lift flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold"
+                            style={{ backgroundColor: showSimple ? "rgba(245,158,11,0.12)" : "rgba(30,41,59,0.6)", color: showSimple ? "#fbbf24" : "#94a3b8", border: `1px solid ${showSimple ? "rgba(245,158,11,0.3)" : "rgba(51,65,85,0.6)"}` }}>
+                            <BookOpen size={13} /> {showSimple ? "Ocultar" : "Simple"}
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -2104,6 +2296,65 @@ const ContratosModule = () => {
                       })}
                     </div>
 
+                    {/* Executive Summary tab */}
+                    {tab === "summary" && results.executiveSummary && (
+                      <div className="space-y-4 lf-fadeUp">
+                        {/* Contract header card */}
+                        <div className="rounded-2xl p-5" style={{ background: `linear-gradient(135deg, ${currentPractice.color}0A 0%, ${currentPractice.color}05 100%)`, border: `1px solid ${currentPractice.color}20` }}>
+                          <div className="flex items-center gap-3 mb-4">
+                            <FileSearch size={18} style={{ color: currentPractice.color }} />
+                            <h4 className="text-white font-bold" style={{ fontSize: 15 }}>Resumen Ejecutivo</h4>
+                            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: `${currentPractice.color}15`, color: currentPractice.color, border: `1px solid ${currentPractice.color}25` }}>{results.executiveSummary.contractType}</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            {results.executiveSummary.parties.map((p, i) => (
+                              <div key={i} className="p-3.5 rounded-xl" style={{ backgroundColor: "rgba(15,23,42,0.5)", border: "1px solid rgba(30,41,59,0.5)" }}>
+                                <p style={{ color: "#64748b", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>{p.role}</p>
+                                <p className="text-white font-semibold mt-1" style={{ fontSize: 13 }}>{p.name}</p>
+                                <p style={{ color: "#475569", fontSize: 11, marginTop: 2 }}>{p.nit}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        {/* Key info grid */}
+                        <div className="grid grid-cols-3 gap-3">
+                          {[
+                            { label: "Fecha de Firma", value: results.executiveSummary.signDate, icon: Clock },
+                            { label: "Vigencia", value: results.executiveSummary.expirationDate, icon: Clock },
+                            { label: "Valor", value: results.executiveSummary.value, icon: Tag },
+                          ].map((item, i) => {
+                            const ItemIcon = item.icon;
+                            return (
+                              <div key={i} className="p-3.5 rounded-xl lf-slideIn" style={{ backgroundColor: "rgba(15,23,42,0.5)", border: "1px solid rgba(30,41,59,0.4)", animationDelay: `${i * 80}ms` }}>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <ItemIcon size={12} style={{ color: "#64748b" }} />
+                                  <p style={{ color: "#64748b", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>{item.label}</p>
+                                </div>
+                                <p className="text-white font-semibold" style={{ fontSize: 12.5 }}>{item.value}</p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {/* Jurisdiction */}
+                        <div className="p-3.5 rounded-xl flex items-center gap-3" style={{ backgroundColor: "rgba(15,23,42,0.4)", border: "1px solid rgba(30,41,59,0.4)" }}>
+                          <Scale size={14} style={{ color: "#64748b" }} />
+                          <div>
+                            <p style={{ color: "#64748b", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>Jurisdicción</p>
+                            <p className="text-white" style={{ fontSize: 12.5, marginTop: 2 }}>{results.executiveSummary.jurisdiction}</p>
+                          </div>
+                        </div>
+                        {/* Key terms */}
+                        <div className="p-4 rounded-xl" style={{ backgroundColor: "rgba(15,23,42,0.4)", border: "1px solid rgba(30,41,59,0.4)" }}>
+                          <p style={{ color: "#64748b", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 10 }}>Términos Clave Identificados</p>
+                          <div className="flex flex-wrap gap-2">
+                            {results.executiveSummary.keyTerms.map((term, i) => (
+                              <span key={i} className="px-3 py-1.5 rounded-lg text-xs" style={{ backgroundColor: `${currentPractice.color}0A`, color: "#94a3b8", border: `1px solid ${currentPractice.color}15` }}>{term}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Matrix tab */}
                     {tab === "matrix" && (
                       <div className="space-y-2">
@@ -2115,6 +2366,40 @@ const ContratosModule = () => {
                             <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.6, flex: 1 }}>{row.obs}</p>
                           </div>
                         ))}
+                      </div>
+                    )}
+
+                    {/* Obligations tab */}
+                    {tab === "obligations" && results.obligations && (
+                      <div className="space-y-3 lf-fadeUp">
+                        <div className="p-4 rounded-xl" style={{ background: `linear-gradient(135deg, ${currentPractice.color}08 0%, transparent 100%)`, border: `1px solid ${currentPractice.color}15` }}>
+                          <div className="flex items-center gap-2 mb-1">
+                            <ScrollText size={15} style={{ color: currentPractice.color }} />
+                            <p className="text-white font-bold" style={{ fontSize: 14 }}>Mapa de Obligaciones</p>
+                          </div>
+                          <p style={{ color: "#64748b", fontSize: 12 }}>Obligaciones contractuales por parte con plazos y prioridad</p>
+                        </div>
+                        {results.obligations.map((ob, i) => {
+                          const prioColor = ob.priority === "alto" ? "#f87171" : ob.priority === "medio" ? "#fbbf24" : "#4ade80";
+                          const prioBg = ob.priority === "alto" ? "rgba(239,68,68,0.06)" : ob.priority === "medio" ? "rgba(245,158,11,0.06)" : "rgba(34,197,94,0.06)";
+                          return (
+                            <div key={i} className="lf-slideIn lf-hover-lift p-4 rounded-xl" style={{ backgroundColor: "rgba(15,23,42,0.5)", border: "1px solid rgba(30,41,59,0.5)", animationDelay: `${i * 60}ms` }}>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <User size={12} style={{ color: currentPractice.color }} />
+                                  <span className="font-semibold text-white" style={{ fontSize: 12 }}>{ob.party}</span>
+                                  <span className="px-2 py-0.5 rounded-full text-xs" style={{ backgroundColor: prioBg, color: prioColor, fontWeight: 600, fontSize: 10 }}>{ob.priority}</span>
+                                </div>
+                                <span style={{ color: "#475569", fontSize: 10, fontWeight: 600 }}>{ob.article}</span>
+                              </div>
+                              <p style={{ color: "#e2e8f0", fontSize: 12.5, lineHeight: 1.6 }}>{ob.obligation}</p>
+                              <div className="flex items-center gap-2 mt-2">
+                                <Clock size={11} style={{ color: "#64748b" }} />
+                                <span style={{ color: "#64748b", fontSize: 11 }}>{ob.deadline}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
 
@@ -2180,6 +2465,89 @@ const ContratosModule = () => {
                       </div>
                     )}
 
+                    {/* Playbook tab */}
+                    {tab === "playbook" && results.playbook && (
+                      <div className="space-y-3 lf-fadeUp">
+                        <div className="p-4 rounded-xl" style={{ background: `linear-gradient(135deg, ${currentPractice.color}08 0%, transparent 100%)`, border: `1px solid ${currentPractice.color}15` }}>
+                          <div className="flex items-center gap-2 mb-1">
+                            <Target size={15} style={{ color: currentPractice.color }} />
+                            <p className="text-white font-bold" style={{ fontSize: 14 }}>Análisis de Playbook</p>
+                          </div>
+                          <p style={{ color: "#64748b", fontSize: 12 }}>Comparación contra posiciones estándar para {currentPractice.name}</p>
+                        </div>
+                        {results.playbook.map((pb, i) => {
+                          const devCfg = {
+                            critica: { color: "#f87171", bg: "rgba(239,68,68,0.06)", border: "rgba(239,68,68,0.18)", label: "Desviación Crítica", icon: "🚨" },
+                            mayor: { color: "#fb923c", bg: "rgba(251,146,60,0.06)", border: "rgba(251,146,60,0.18)", label: "Desviación Mayor", icon: "⚠️" },
+                            moderada: { color: "#fbbf24", bg: "rgba(245,158,11,0.06)", border: "rgba(245,158,11,0.18)", label: "Desviación Moderada", icon: "📋" },
+                            ninguna: { color: "#4ade80", bg: "rgba(34,197,94,0.06)", border: "rgba(34,197,94,0.18)", label: "Conforme", icon: "✅" },
+                          }[pb.deviation] || { color: "#94a3b8", bg: "rgba(100,116,139,0.06)", border: "rgba(100,116,139,0.18)", label: pb.deviation, icon: "📋" };
+                          return (
+                            <div key={i} className="lf-slideIn lf-hover-lift rounded-xl overflow-hidden" style={{ border: `1px solid ${devCfg.border}`, animationDelay: `${i * 70}ms` }}>
+                              <div className="px-4 py-3 flex items-center justify-between" style={{ backgroundColor: devCfg.bg }}>
+                                <div className="flex items-center gap-2">
+                                  <span style={{ fontSize: 13 }}>{devCfg.icon}</span>
+                                  <span className="font-semibold text-white" style={{ fontSize: 13 }}>{pb.clause}</span>
+                                </div>
+                                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold" style={{ color: devCfg.color, backgroundColor: `${devCfg.color}15`, border: `1px solid ${devCfg.color}25` }}>{devCfg.label}</span>
+                              </div>
+                              <div className="px-4 py-3 grid grid-cols-2 gap-4" style={{ backgroundColor: "rgba(15,23,42,0.4)" }}>
+                                <div>
+                                  <p style={{ color: "#4ade80", fontSize: 10, fontWeight: 700, textTransform: "uppercase", marginBottom: 4 }}>Posición Estándar</p>
+                                  <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.6 }}>{pb.standard}</p>
+                                </div>
+                                <div>
+                                  <p style={{ color: "#f87171", fontSize: 10, fontWeight: 700, textTransform: "uppercase", marginBottom: 4 }}>Texto Actual</p>
+                                  <p style={{ color: "#94a3b8", fontSize: 12, lineHeight: 1.6 }}>{pb.actual}</p>
+                                </div>
+                              </div>
+                              {pb.deviation !== "ninguna" && (
+                                <div className="px-4 py-2.5 flex items-center gap-2" style={{ backgroundColor: "rgba(15,23,42,0.6)", borderTop: "1px solid rgba(30,41,59,0.3)" }}>
+                                  <Lightbulb size={12} style={{ color: currentPractice.color }} />
+                                  <p style={{ color: currentPractice.color, fontSize: 11.5, fontWeight: 500 }}>{pb.recommendation}</p>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Suggestions tab */}
+                    {tab === "suggestions" && results.suggestions && (
+                      <div className="space-y-3 lf-fadeUp">
+                        <div className="p-4 rounded-xl" style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(139,92,246,0.04) 100%)", border: "1px solid rgba(168,85,247,0.18)" }}>
+                          <div className="flex items-center gap-2 mb-1">
+                            <Sparkles size={15} style={{ color: "#a855f7" }} />
+                            <p className="text-white font-bold" style={{ fontSize: 14 }}>Sugerencias de IA</p>
+                          </div>
+                          <p style={{ color: "#64748b", fontSize: 12 }}>Cláusulas recomendadas y mejoras basadas en mejores prácticas</p>
+                        </div>
+                        {results.suggestions.map((sug, i) => {
+                          const prioCfg = {
+                            critica: { color: "#f87171", bg: "rgba(239,68,68,0.08)", badge: "Crítica" },
+                            alta: { color: "#fb923c", bg: "rgba(251,146,60,0.08)", badge: "Alta" },
+                            media: { color: "#fbbf24", bg: "rgba(245,158,11,0.08)", badge: "Media" },
+                          }[sug.priority] || { color: "#94a3b8", bg: "rgba(100,116,139,0.08)", badge: sug.priority };
+                          return (
+                            <div key={i} className="lf-slideIn lf-hover-lift p-4 rounded-xl" style={{ backgroundColor: "rgba(15,23,42,0.5)", border: "1px solid rgba(30,41,59,0.5)", animationDelay: `${i * 70}ms` }}>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <Sparkles size={13} style={{ color: "#a855f7" }} />
+                                  <span className="font-semibold text-white" style={{ fontSize: 13 }}>{sug.title}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ color: prioCfg.color, backgroundColor: prioCfg.bg }}>{prioCfg.badge}</span>
+                                  <span className="px-2 py-0.5 rounded-full text-xs" style={{ color: "#64748b", backgroundColor: "rgba(30,41,59,0.5)", textTransform: "capitalize" }}>{sug.category}</span>
+                                </div>
+                              </div>
+                              <p style={{ color: "#94a3b8", fontSize: 12.5, lineHeight: 1.7 }}>{sug.description}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
                     {/* Compare tab */}
                     {tab === "compare" && (
                       <div className="space-y-4">
@@ -2226,6 +2594,7 @@ const ContratosModule = () => {
                   </div>
                 )}
               </div>
+              </div>{/* close Results + Viewer container */}
             </div>
           )}
 
@@ -2275,7 +2644,7 @@ const ContratosModule = () => {
                 </div>
               </div>
               <button onClick={() => setActiveFunction("review")} className="lf-hover-lift px-5 py-3 rounded-xl text-sm font-semibold" style={{ backgroundColor: `${currentPractice.color}15`, color: currentPractice.color, border: `1px solid ${currentPractice.color}30` }}>
-                <Eye size={14} style={{ display: "inline", marginRight: 8 }} /> Ir a Revisar Documento
+                <Eye size={14} style={{ display: "inline", marginRight: 8 }} /> Ir a Revisar Contrato
               </button>
             </div>
           )}
@@ -2362,7 +2731,7 @@ const ContratosModule = () => {
                 </div>
               </div>
               <button onClick={() => setActiveFunction("review")} className="lf-hover-lift px-5 py-3 rounded-xl text-sm font-semibold" style={{ backgroundColor: `${currentPractice.color}15`, color: currentPractice.color, border: `1px solid ${currentPractice.color}30` }}>
-                <Eye size={14} style={{ display: "inline", marginRight: 8 }} /> Ir a Revisar Documento
+                <Eye size={14} style={{ display: "inline", marginRight: 8 }} /> Ir a Revisar Contrato
               </button>
             </div>
           )}
@@ -2389,7 +2758,7 @@ const ContratosModule = () => {
                       <FnIcon size={40} style={{ color: `${currentPractice.color}55`, margin: "0 auto 16px" }} />
                       <h4 className="text-white font-semibold mb-2" style={{ fontSize: 16 }}>Próximamente</h4>
                       <p style={{ color: "#64748b", fontSize: 13, maxWidth: 400, margin: "0 auto", lineHeight: 1.6 }}>
-                        Esta funcionalidad específica de <span style={{ color: currentPractice.color }}>{currentPractice.name}</span> está en desarrollo. Mientras tanto, puedes usar la función de <span style={{ color: "#60a5fa", cursor: "pointer" }} onClick={() => setActiveFunction("review")}>Revisar Documento</span> para analizar contratos de esta práctica.
+                        Esta funcionalidad específica de <span style={{ color: currentPractice.color }}>{currentPractice.name}</span> está en desarrollo. Mientras tanto, puedes usar la función de <span style={{ color: "#60a5fa", cursor: "pointer" }} onClick={() => setActiveFunction("review")}>Revisar Contrato / Documento</span> para analizar contratos de esta práctica.
                       </p>
                     </div>
                   </div>
