@@ -9,7 +9,7 @@ import {
   CheckCircle, XCircle, AlertCircle, Send, X, BookOpen,
   Clock, Copy, Filter, ChevronRight, User, Tag, GitMerge, FileSearch,
   ShieldCheck, Download, ListChecks, MapPin, Briefcase,
-  Upload, Mail, Wifi, WifiOff
+  Upload, Mail, Wifi, WifiOff, ArrowLeftRight, FileDown, Eye, Trash2, FilePlus2
 } from "lucide-react";
 
 // ─── DASHBOARD DATA ───────────────────────────────────────────────────────────
@@ -329,6 +329,92 @@ const ANALYSIS = {
     ndaCheck: null,
     simple: "Contrato de consultoría de 6 meses a $12 millones mensuales. En general está bien redactado y equilibrado. El único punto a mejorar es la cláusula de propiedad intelectual: dice que todo pertenece al contratante, pero no especifica qué tipo de derechos ni en qué territorio. La ley colombiana exige ser específico cuando se ceden derechos de autor sobre obras creadas por encargo.",
   },
+};
+
+// ─── EXPORT REPORT GENERATOR ─────────────────────────────────────────────────
+
+const generateExportReport = (docType, results, contractText) => {
+  const date = new Date().toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric" });
+  const riskLabel = results.score >= 71 ? "Riesgo Bajo" : results.score >= 41 ? "Riesgo Medio" : "Riesgo Alto";
+  const riskColor = results.score >= 71 ? "#22c55e" : results.score >= 41 ? "#f59e0b" : "#ef4444";
+
+  const matrixRows = results.matrix.map(r => {
+    const c = r.risk === "alto" ? "#ef4444" : r.risk === "medio" ? "#f59e0b" : "#22c55e";
+    return `<tr><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;font-weight:500">${r.clause}</td><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:center"><span style="background:${c}18;color:${c};padding:3px 10px;border-radius:20px;font-size:12px;text-transform:capitalize">${r.risk}</span></td><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:13px">${r.obs}</td></tr>`;
+  }).join("");
+
+  const redlineItems = results.redlines.map(r => `
+    <div style="margin-bottom:16px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">
+      <div style="background:#f8fafc;padding:10px 14px;border-bottom:1px solid #e2e8f0;font-weight:600;font-size:14px">${r.clause}</div>
+      <div style="display:flex">
+        <div style="flex:1;padding:12px 14px;background:#fef2f2;border-right:1px solid #e2e8f0">
+          <p style="font-size:11px;font-weight:700;color:#dc2626;margin-bottom:6px">TEXTO ACTUAL</p>
+          <p style="font-size:13px;color:#991b1b;text-decoration:line-through;line-height:1.6">${r.original}</p>
+        </div>
+        <div style="flex:1;padding:12px 14px;background:#f0fdf4">
+          <p style="font-size:11px;font-weight:700;color:#16a34a;margin-bottom:6px">TEXTO SUGERIDO</p>
+          <p style="font-size:13px;color:#166534;line-height:1.6">${r.suggested}</p>
+        </div>
+      </div>
+    </div>
+  `).join("");
+
+  const ndaSection = results.ndaCheck ? `
+    <h2 style="font-size:18px;font-weight:700;margin:28px 0 14px;color:#1e293b">Checklist NDA</h2>
+    ${results.ndaCheck.map(item => {
+      const ico = item.status === "pass" ? "✅" : item.status === "fail" ? "❌" : "⚠️";
+      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9">
+        <span style="font-size:16px">${ico}</span>
+        <div><p style="font-weight:600;font-size:14px;color:#1e293b">${item.label}</p><p style="font-size:12px;color:#64748b;margin-top:2px">${item.obs}</p></div>
+      </div>`;
+    }).join("")}
+  ` : "";
+
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LexFlow · Análisis ${docType}</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#334155;line-height:1.6;padding:40px;max-width:900px;margin:0 auto;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:14px}th{text-align:left;padding:10px 14px;background:#f1f5f9;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;font-weight:600}
+@media print{body{padding:20px}}</style>
+</head><body>
+<div style="display:flex;align-items:center;justify-content:between;margin-bottom:30px;padding-bottom:20px;border-bottom:2px solid #e2e8f0">
+  <div style="flex:1">
+    <h1 style="font-size:22px;font-weight:800;color:#0f172a">Análisis de Contrato · ${docType}</h1>
+    <p style="font-size:13px;color:#64748b;margin-top:4px">Generado por LexFlow Colombia · ${date}</p>
+  </div>
+  <div style="text-align:center;padding:14px 20px;border-radius:12px;background:${riskColor}11;border:1px solid ${riskColor}33">
+    <p style="font-size:28px;font-weight:800;color:${riskColor}">${results.score}</p>
+    <p style="font-size:11px;font-weight:600;color:${riskColor}">${riskLabel}</p>
+  </div>
+</div>
+${results.simple ? `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;margin-bottom:24px;font-size:14px;color:#92400e;line-height:1.7">
+  <p style="font-weight:700;margin-bottom:6px">💡 Resumen en lenguaje simple</p>${results.simple}
+</div>` : ""}
+<h2 style="font-size:18px;font-weight:700;margin:0 0 14px;color:#1e293b">Matriz de Riesgos</h2>
+<table style="margin-bottom:28px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">
+  <thead><tr><th style="width:35%">Cláusula</th><th style="width:12%;text-align:center">Riesgo</th><th>Observación</th></tr></thead>
+  <tbody>${matrixRows}</tbody>
+</table>
+<h2 style="font-size:18px;font-weight:700;margin:0 0 14px;color:#1e293b">Sugerencias Redline</h2>
+${redlineItems}
+${ndaSection}
+<div style="margin-top:32px;padding-top:16px;border-top:1px solid #e2e8f0;text-align:center;color:#94a3b8;font-size:11px">
+  LexFlow Colombia · Motor de Análisis Legal IA · Este documento es orientativo y no constituye asesoría legal.
+</div>
+</body></html>`;
+};
+
+// ─── SIMPLE DIFF UTILITY ─────────────────────────────────────────────────────
+
+const computeTextDiff = (textA, textB) => {
+  const linesA = textA.split("\n").map(l => l.trim()).filter(Boolean);
+  const linesB = textB.split("\n").map(l => l.trim()).filter(Boolean);
+  const setB = new Set(linesB);
+  const setA = new Set(linesA);
+  return {
+    removed: linesA.filter(l => !setB.has(l)),
+    added: linesB.filter(l => !setA.has(l)),
+    unchanged: linesA.filter(l => setB.has(l)),
+  };
 };
 
 // ─── JURISPRUDENCIA DATA ──────────────────────────────────────────────────────
@@ -1139,7 +1225,7 @@ const SignModal = ({ onClose, docType }) => {
   );
 };
 
-// ─── CONTRATOS MODULE ─────────────────────────────────────────────────────────
+// ─── CONTRATOS MODULE (UPGRADED) ─────────────────────────────────────────────
 
 const ContratosModule = () => {
   const [docType,    setDocType]    = useState("NDA");
@@ -1151,13 +1237,67 @@ const ContratosModule = () => {
   const [showSimple, setShowSimple] = useState(false);
   const [showModal,  setShowModal]  = useState(false);
 
+  // ── NEW: File upload state ──
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [dragOver,     setDragOver]     = useState(false);
+
+  // ── NEW: Redline view mode ──
+  const [redlineView, setRedlineView] = useState("sideBySide");
+
+  // ── NEW: Compare mode ──
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareText, setCompareText] = useState("");
+
+  // ── NEW: Export state ──
+  const [exporting, setExporting] = useState(false);
+
   const handleDocTypeChange = (t) => {
     setDocType(t);
     setText(SAMPLE_TEXT[t]);
     setResults(null);
     setShowSimple(false);
+    setUploadedFile(null);
+    setCompareMode(false);
+    setCompareText("");
   };
 
+  // ── NEW: File upload handler ──
+  const handleFile = (file) => {
+    if (!file) return;
+    setUploadedFile({ name: file.name, size: file.size, type: file.type });
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const raw = ev.target.result;
+      if (file.type === "text/plain" || file.name.endsWith(".txt")) {
+        setText(raw);
+      } else {
+        // For PDF/DOCX in demo mode, simulate extraction from the raw text
+        const cleaned = raw.replace(/[^\x20-\x7E\xC0-\xFF\n\r]/g, " ").replace(/ {3,}/g, "\n").trim();
+        setText(cleaned.length > 100
+          ? cleaned.substring(0, 4000)
+          : `[Contenido extraído de: ${file.name}]\n\n${SAMPLE_TEXT[docType]}`);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    handleFile(e.dataTransfer?.files?.[0]);
+  };
+
+  const handleFileInput = (e) => {
+    handleFile(e.target?.files?.[0]);
+    e.target.value = "";
+  };
+
+  const clearUpload = () => {
+    setUploadedFile(null);
+    setText(SAMPLE_TEXT[docType]);
+  };
+
+  // ── Analyze ──
   const analyze = () => {
     if (analyzing || !text.trim()) return;
     setAnalyzing(true);
@@ -1178,19 +1318,43 @@ const ContratosModule = () => {
     }, 520);
   };
 
+  // ── NEW: Export handler ──
+  const handleExport = () => {
+    if (!results) return;
+    setExporting(true);
+    setTimeout(() => {
+      const html = generateExportReport(docType, results, text);
+      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `LexFlow_Analisis_${docType.replace(/\s/g, "_")}_${new Date().toISOString().slice(0, 10)}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setExporting(false);
+    }, 600);
+  };
+
   const scoreColor = (s) => s >= 71 ? "#22c55e" : s >= 41 ? "#f59e0b" : "#ef4444";
   const scoreLabel = (s) => s >= 71 ? "Riesgo Bajo" : s >= 41 ? "Riesgo Medio" : "Riesgo Alto";
 
+  // ── Build tabs (with new compare tab) ──
   const tabs = results ? [
     { id: "matrix",  label: "Matriz de Riesgos", count: results.matrix.length },
     { id: "redline", label: "Redline",           count: results.redlines.length },
     ...(results.ndaCheck ? [{ id: "nda", label: "Checklist NDA", count: results.ndaCheck.length }] : []),
+    { id: "compare", label: "Comparar Versiones", count: null },
   ] : [];
+
+  // ── Compare diff computation ──
+  const diff = (compareMode && compareText.trim()) ? computeTextDiff(text, compareText) : null;
 
   return (
     <div className="flex flex-col flex-1" style={{ minHeight: 0 }}>
 
-      {/* Module Header */}
+      {/* Module Header — with NEW export + compare buttons */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 flex-shrink-0"
         style={{ backgroundColor: "#0c1422" }}>
         <div className="flex items-center gap-3">
@@ -1200,21 +1364,40 @@ const ContratosModule = () => {
           </div>
           <div>
             <h2 className="text-white font-semibold">Revisión de Contratos & NDA</h2>
-            <p className="text-slate-500 text-xs">Motor de análisis IA · Matriz de Riesgo · Redline · Checklist Colombia</p>
+            <p className="text-slate-500 text-xs">Motor de análisis IA · Upload · Redline · Comparar · Exportar</p>
           </div>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          disabled={!results}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
-          style={{
-            backgroundColor: results ? "#3b82f6" : "#1a2535",
-            color: results ? "#fff" : "#475569",
-            border: results ? "none" : "1px solid #263345",
-            cursor: results ? "pointer" : "not-allowed",
-          }}>
-          <Send size={13} /> Solicitar Firma
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Export button */}
+          <button
+            onClick={handleExport}
+            disabled={!results || exporting}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{
+              backgroundColor: results ? "rgba(16,185,129,0.14)" : "#1a2535",
+              color: results ? "#34d399" : "#475569",
+              border: results ? "1px solid rgba(16,185,129,0.32)" : "1px solid #263345",
+              cursor: results ? "pointer" : "not-allowed",
+            }}>
+            {exporting
+              ? <><div className="w-3.5 h-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" /> Exportando...</>
+              : <><FileDown size={13} /> Exportar Informe</>
+            }
+          </button>
+          {/* Solicitar Firma button */}
+          <button
+            onClick={() => setShowModal(true)}
+            disabled={!results}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{
+              backgroundColor: results ? "#3b82f6" : "#1a2535",
+              color: results ? "#fff" : "#475569",
+              border: results ? "none" : "1px solid #263345",
+              cursor: results ? "pointer" : "not-allowed",
+            }}>
+            <Send size={13} /> Solicitar Firma
+          </button>
+        </div>
       </div>
 
       {/* Two-panel body */}
@@ -1222,8 +1405,8 @@ const ContratosModule = () => {
 
         {/* ── LEFT: Input panel ── */}
         <div className="flex flex-col border-r border-slate-800 flex-shrink-0 overflow-y-auto"
-          style={{ width: 280, backgroundColor: "#090f1a" }}>
-          <div className="p-5 space-y-5">
+          style={{ width: 296, backgroundColor: "#090f1a" }}>
+          <div className="p-5 space-y-4">
 
             {/* Doc type */}
             <div>
@@ -1243,19 +1426,69 @@ const ContratosModule = () => {
               </div>
             </div>
 
+            {/* ── NEW: File Upload Drop Zone ── */}
+            <div>
+              <p className="text-slate-500 text-xs uppercase tracking-wider font-medium mb-2">Cargar Documento</p>
+              {!uploadedFile ? (
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={handleDrop}
+                  className="relative rounded-xl p-4 text-center transition-all cursor-pointer"
+                  style={{
+                    border: `2px dashed ${dragOver ? "#3b82f6" : "#1e293b"}`,
+                    backgroundColor: dragOver ? "rgba(59,130,246,0.06)" : "transparent",
+                  }}
+                  onClick={() => document.getElementById("lexflow-file-input").click()}>
+                  <input id="lexflow-file-input" type="file" className="hidden"
+                    accept=".pdf,.docx,.doc,.txt,.rtf"
+                    onChange={handleFileInput} />
+                  <Upload size={22} style={{ color: dragOver ? "#60a5fa" : "#334155", margin: "0 auto 8px" }} />
+                  <p className="text-xs" style={{ color: dragOver ? "#93c5fd" : "#64748b" }}>
+                    Arrastra un archivo aquí
+                  </p>
+                  <p className="text-xs mt-1" style={{ color: "#475569" }}>
+                    o <span style={{ color: "#60a5fa", textDecoration: "underline" }}>selecciona</span> · PDF, DOCX, TXT
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-xl p-3 flex items-center gap-3"
+                  style={{ backgroundColor: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.25)" }}>
+                  <div className="p-2 rounded-lg flex-shrink-0"
+                    style={{ backgroundColor: "rgba(59,130,246,0.15)" }}>
+                    <FileText size={14} style={{ color: "#60a5fa" }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-slate-200 text-xs font-medium truncate">{uploadedFile.name}</p>
+                    <p className="text-slate-500 text-xs">{(uploadedFile.size / 1024).toFixed(1)} KB</p>
+                  </div>
+                  <button onClick={clearUpload}
+                    className="p-1 hover:bg-slate-700 rounded-lg transition-colors flex-shrink-0">
+                    <Trash2 size={12} style={{ color: "#f87171" }} />
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Textarea */}
             <div>
               <p className="text-slate-500 text-xs uppercase tracking-wider font-medium mb-2">Texto del Contrato</p>
               <textarea
                 value={text}
                 onChange={e => setText(e.target.value)}
-                rows={16}
+                rows={12}
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-slate-300 text-xs leading-relaxed outline-none resize-none transition-colors"
                 style={{ caretColor: "#3b82f6", fontFamily: "ui-monospace, monospace" }}
                 onFocus={e => e.target.style.borderColor = "#3b82f6"}
                 onBlur={e => e.target.style.borderColor = "#334155"}
               />
-              <p className="text-slate-600 text-xs mt-1.5">{text.length} caracteres · datos de ejemplo precargados</p>
+              <p className="text-slate-600 text-xs mt-1.5">
+                {text.length} caracteres
+                {uploadedFile
+                  ? <span style={{ color: "#60a5fa" }}> · extraído de archivo</span>
+                  : " · datos de ejemplo precargados"
+                }
+              </p>
             </div>
 
             {/* Analyze button */}
@@ -1308,12 +1541,12 @@ const ContratosModule = () => {
                 <BookOpen size={36} style={{ color: "#3b82f6" }} />
               </div>
               <h3 className="text-white font-semibold text-lg">Listo para analizar</h3>
-              <p className="text-slate-500 text-sm max-w-xs leading-relaxed">
-                Selecciona un tipo de documento, revisa el texto de ejemplo y presiona{" "}
+              <p className="text-slate-500 text-sm max-w-sm leading-relaxed">
+                Carga un documento o selecciona un tipo de ejemplo, luego presiona{" "}
                 <span style={{ color: "#60a5fa", fontWeight: 600 }}>Analizar con IA</span>.
               </p>
               <div className="flex flex-wrap gap-2 justify-center mt-1">
-                {["Matriz de Riesgos", "Vista Redline", "Checklist NDA"].map(f => (
+                {["Cargar PDF/DOCX", "Matriz de Riesgos", "Redline Side-by-Side", "Comparar Versiones", "Exportar Informe"].map(f => (
                   <span key={f} className="text-xs px-3 py-1 rounded-full"
                     style={{ backgroundColor: "rgba(59,130,246,0.1)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.2)" }}>
                     {f}
@@ -1330,7 +1563,6 @@ const ContratosModule = () => {
               {/* Score card */}
               <div className="flex items-center gap-5 p-5 rounded-2xl"
                 style={{ backgroundColor: "#0f172a", border: "1px solid #1e293b" }}>
-                {/* SVG score ring */}
                 <div className="relative flex-shrink-0 flex items-center justify-center" style={{ width: 80, height: 80 }}>
                   <svg width="80" height="80" style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)" }}>
                     <circle cx="40" cy="40" r="33" fill="none" stroke="#1e293b" strokeWidth="7" />
@@ -1341,7 +1573,6 @@ const ContratosModule = () => {
                   </svg>
                   <span className="text-2xl font-bold text-white" style={{ position: "relative", zIndex: 1 }}>{results.score}</span>
                 </div>
-
                 <div className="flex-1 min-w-0">
                   <p className="text-xl font-bold" style={{ color: scoreColor(results.score) }}>
                     {scoreLabel(results.score)}
@@ -1362,7 +1593,6 @@ const ContratosModule = () => {
                     })()}
                   </div>
                 </div>
-
                 <button
                   onClick={() => setShowSimple(!showSimple)}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex-shrink-0"
@@ -1395,14 +1625,17 @@ const ContratosModule = () => {
                       color: tab === t.id ? "#e2e8f0" : "#64748b",
                       border: tab === t.id ? "1px solid #334155" : "1px solid transparent",
                     }}>
+                    {t.id === "compare" && <ArrowLeftRight size={13} />}
                     {t.label}
-                    <span className="text-xs px-1.5 py-0.5 rounded-full"
-                      style={{
-                        backgroundColor: tab === t.id ? "rgba(59,130,246,0.2)" : "rgba(100,116,139,0.15)",
-                        color: tab === t.id ? "#60a5fa" : "#64748b",
-                      }}>
-                      {t.count}
-                    </span>
+                    {t.count !== null && (
+                      <span className="text-xs px-1.5 py-0.5 rounded-full"
+                        style={{
+                          backgroundColor: tab === t.id ? "rgba(59,130,246,0.2)" : "rgba(100,116,139,0.15)",
+                          color: tab === t.id ? "#60a5fa" : "#64748b",
+                        }}>
+                        {t.count}
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
@@ -1435,9 +1668,34 @@ const ContratosModule = () => {
                 </div>
               )}
 
-              {/* ── Tab: Redline ── */}
+              {/* ── Tab: Redline (UPGRADED — side-by-side + toggle) ── */}
               {tab === "redline" && (
                 <div className="space-y-4">
+                  {/* View toggle */}
+                  <div className="flex items-center gap-2">
+                    <p className="text-slate-500 text-xs uppercase tracking-wider font-medium flex-1">
+                      {results.redlines.length} sugerencias Redline
+                    </p>
+                    <div className="flex gap-1 p-0.5 rounded-lg" style={{ backgroundColor: "#0f172a", border: "1px solid #1e293b" }}>
+                      <button onClick={() => setRedlineView("sideBySide")}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all"
+                        style={{
+                          backgroundColor: redlineView === "sideBySide" ? "#1e293b" : "transparent",
+                          color: redlineView === "sideBySide" ? "#e2e8f0" : "#64748b",
+                        }}>
+                        <ArrowLeftRight size={11} /> Side-by-Side
+                      </button>
+                      <button onClick={() => setRedlineView("stacked")}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all"
+                        style={{
+                          backgroundColor: redlineView === "stacked" ? "#1e293b" : "transparent",
+                          color: redlineView === "stacked" ? "#e2e8f0" : "#64748b",
+                        }}>
+                        <ListChecks size={11} /> Apilado
+                      </button>
+                    </div>
+                  </div>
+
                   {results.redlines.map((r, i) => (
                     <div key={i} className="rounded-xl overflow-hidden" style={{ border: "1px solid #1e293b" }}>
                       {/* Row header */}
@@ -1446,18 +1704,38 @@ const ContratosModule = () => {
                         <span className="text-slate-200 text-sm font-medium">{r.clause}</span>
                         <RiskBadge level={r.risk} />
                       </div>
-                      {/* Original */}
-                      <div className="px-4 py-3 border-b"
-                        style={{ borderColor: "#1e293b", backgroundColor: "rgba(239,68,68,0.04)" }}>
-                        <p className="text-xs font-semibold mb-1.5" style={{ color: "#f87171" }}>▼ TEXTO ACTUAL</p>
-                        <p className="text-sm leading-relaxed line-through" style={{ color: "#fca5a5", textDecorationColor: "#f87171" }}>{r.original}</p>
-                      </div>
-                      {/* Suggested */}
-                      <div className="px-4 py-3"
-                        style={{ backgroundColor: "rgba(34,197,94,0.04)" }}>
-                        <p className="text-xs font-semibold mb-1.5" style={{ color: "#4ade80" }}>▲ TEXTO SUGERIDO</p>
-                        <p className="text-sm leading-relaxed" style={{ color: "#86efac" }}>{r.suggested}</p>
-                      </div>
+
+                      {redlineView === "sideBySide" ? (
+                        /* ── SIDE-BY-SIDE VIEW (NEW) ── */
+                        <div className="flex" style={{ minHeight: 0 }}>
+                          <div className="flex-1 px-4 py-3 border-r"
+                            style={{ borderColor: "#1e293b", backgroundColor: "rgba(239,68,68,0.04)" }}>
+                            <p className="text-xs font-semibold mb-2" style={{ color: "#f87171" }}>◀ TEXTO ACTUAL</p>
+                            <p className="text-sm leading-relaxed line-through"
+                              style={{ color: "#fca5a5", textDecorationColor: "#f87171" }}>{r.original}</p>
+                          </div>
+                          <div className="flex-1 px-4 py-3"
+                            style={{ backgroundColor: "rgba(34,197,94,0.04)" }}>
+                            <p className="text-xs font-semibold mb-2" style={{ color: "#4ade80" }}>▶ TEXTO SUGERIDO</p>
+                            <p className="text-sm leading-relaxed" style={{ color: "#86efac" }}>{r.suggested}</p>
+                          </div>
+                        </div>
+                      ) : (
+                        /* ── STACKED VIEW (original) ── */
+                        <>
+                          <div className="px-4 py-3 border-b"
+                            style={{ borderColor: "#1e293b", backgroundColor: "rgba(239,68,68,0.04)" }}>
+                            <p className="text-xs font-semibold mb-1.5" style={{ color: "#f87171" }}>▼ TEXTO ACTUAL</p>
+                            <p className="text-sm leading-relaxed line-through"
+                              style={{ color: "#fca5a5", textDecorationColor: "#f87171" }}>{r.original}</p>
+                          </div>
+                          <div className="px-4 py-3"
+                            style={{ backgroundColor: "rgba(34,197,94,0.04)" }}>
+                            <p className="text-xs font-semibold mb-1.5" style={{ color: "#4ade80" }}>▲ TEXTO SUGERIDO</p>
+                            <p className="text-sm leading-relaxed" style={{ color: "#86efac" }}>{r.suggested}</p>
+                          </div>
+                        </>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -1483,6 +1761,123 @@ const ContratosModule = () => {
                       </div>
                     );
                   })}
+                </div>
+              )}
+
+              {/* ── Tab: Comparar Versiones (NEW) ── */}
+              {tab === "compare" && (
+                <div className="space-y-4">
+                  <div className="p-4 rounded-xl"
+                    style={{ backgroundColor: "#0f172a", border: "1px solid #1e293b" }}>
+                    <div className="flex items-center gap-3 mb-3">
+                      <ArrowLeftRight size={16} style={{ color: "#a78bfa" }} />
+                      <div>
+                        <p className="text-white text-sm font-semibold">Comparar Versiones del Contrato</p>
+                        <p className="text-slate-500 text-xs">Pega la segunda versión para ver las diferencias entre ambas.</p>
+                      </div>
+                    </div>
+                    <textarea
+                      value={compareText}
+                      onChange={e => setCompareText(e.target.value)}
+                      placeholder="Pega aquí la segunda versión del contrato para comparar…"
+                      rows={8}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-slate-300 text-xs leading-relaxed outline-none resize-none transition-colors"
+                      style={{ caretColor: "#a78bfa", fontFamily: "ui-monospace, monospace" }}
+                      onFocus={e => e.target.style.borderColor = "#8b5cf6"}
+                      onBlur={e => e.target.style.borderColor = "#334155"}
+                    />
+                    {compareText.trim() && (
+                      <p className="text-slate-500 text-xs mt-1.5">{compareText.length} caracteres en versión B</p>
+                    )}
+                  </div>
+
+                  {/* Diff results */}
+                  {diff && (
+                    <div className="space-y-3">
+                      {/* Summary stats */}
+                      <div className="flex gap-3">
+                        <div className="flex-1 p-3 rounded-xl text-center"
+                          style={{ backgroundColor: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                          <p className="text-2xl font-bold" style={{ color: "#f87171" }}>{diff.removed.length}</p>
+                          <p className="text-xs" style={{ color: "#fca5a5" }}>Líneas eliminadas</p>
+                        </div>
+                        <div className="flex-1 p-3 rounded-xl text-center"
+                          style={{ backgroundColor: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.2)" }}>
+                          <p className="text-2xl font-bold" style={{ color: "#4ade80" }}>{diff.added.length}</p>
+                          <p className="text-xs" style={{ color: "#86efac" }}>Líneas agregadas</p>
+                        </div>
+                        <div className="flex-1 p-3 rounded-xl text-center"
+                          style={{ backgroundColor: "rgba(100,116,139,0.06)", border: "1px solid rgba(100,116,139,0.2)" }}>
+                          <p className="text-2xl font-bold text-slate-300">{diff.unchanged.length}</p>
+                          <p className="text-xs text-slate-500">Sin cambios</p>
+                        </div>
+                      </div>
+
+                      {/* Side-by-side diff display */}
+                      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #1e293b" }}>
+                        <div className="flex border-b" style={{ borderColor: "#1e293b", backgroundColor: "#0f172a" }}>
+                          <div className="flex-1 px-4 py-2.5 border-r" style={{ borderColor: "#1e293b" }}>
+                            <p className="text-xs font-semibold text-slate-400">VERSIÓN A (Original)</p>
+                          </div>
+                          <div className="flex-1 px-4 py-2.5">
+                            <p className="text-xs font-semibold text-slate-400">VERSIÓN B (Nueva)</p>
+                          </div>
+                        </div>
+                        <div className="flex" style={{ minHeight: 0 }}>
+                          {/* Left: Version A with removed highlighted */}
+                          <div className="flex-1 p-4 border-r overflow-y-auto"
+                            style={{ borderColor: "#1e293b", maxHeight: 400 }}>
+                            {text.split("\n").filter(Boolean).map((line, i) => {
+                              const isRemoved = diff.removed.includes(line.trim());
+                              return (
+                                <p key={i} className="text-xs leading-relaxed py-0.5 px-2 rounded"
+                                  style={{
+                                    backgroundColor: isRemoved ? "rgba(239,68,68,0.1)" : "transparent",
+                                    color: isRemoved ? "#fca5a5" : "#94a3b8",
+                                    textDecoration: isRemoved ? "line-through" : "none",
+                                    textDecorationColor: "#ef4444",
+                                    fontFamily: "ui-monospace, monospace",
+                                  }}>
+                                  {line}
+                                </p>
+                              );
+                            })}
+                          </div>
+                          {/* Right: Version B with added highlighted */}
+                          <div className="flex-1 p-4 overflow-y-auto" style={{ maxHeight: 400 }}>
+                            {compareText.split("\n").filter(Boolean).map((line, i) => {
+                              const isAdded = diff.added.includes(line.trim());
+                              return (
+                                <p key={i} className="text-xs leading-relaxed py-0.5 px-2 rounded"
+                                  style={{
+                                    backgroundColor: isAdded ? "rgba(34,197,94,0.1)" : "transparent",
+                                    color: isAdded ? "#86efac" : "#94a3b8",
+                                    fontFamily: "ui-monospace, monospace",
+                                  }}>
+                                  {isAdded && <span style={{ color: "#22c55e", marginRight: 4 }}>+</span>}
+                                  {line}
+                                </p>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Empty compare state */}
+                  {!compareText.trim() && (
+                    <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
+                      <div className="w-14 h-14 rounded-xl flex items-center justify-center"
+                        style={{ backgroundColor: "rgba(139,92,246,0.08)", border: "1.5px dashed rgba(139,92,246,0.28)" }}>
+                        <FilePlus2 size={26} style={{ color: "#a78bfa" }} />
+                      </div>
+                      <p className="text-slate-400 text-sm">Pega la segunda versión del contrato arriba</p>
+                      <p className="text-slate-600 text-xs max-w-xs">
+                        LexFlow comparará ambas versiones línea por línea y destacará los cambios.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -2488,41 +2883,49 @@ export default function LexFlowColombia() {
   }, []);
 
   return (
-    <div className="flex h-screen bg-slate-950 text-white overflow-hidden"
-      style={{ fontFamily: "'Manrope', system-ui, -apple-system, sans-serif" }}>
+    <div className="flex w-full h-screen text-white overflow-hidden"
+      style={{ fontFamily: "'Manrope', system-ui, -apple-system, sans-serif", background: "#080C1A" }}>
 
       {/* ── SIDEBAR ── */}
-      <aside className="bg-slate-900 border-r border-slate-800 flex flex-col transition-all duration-300 flex-shrink-0"
-        style={{ width: collapsed ? 64 : 224 }}>
+      <aside className="border-r border-slate-800 flex flex-col transition-all duration-300 flex-shrink-0"
+        style={{ width: collapsed ? 64 : 224, background: "linear-gradient(180deg, #0A0F2E 0%, #0d1424 60%, #0f172a 100%)" }}>
 
         {/* Logo */}
         <div className="flex items-center gap-3 px-4 py-5 border-b border-slate-800">
-          {/* LexFlow wave icon — matches brand kit */}
+          {/* LexFlow brand icon — 3-wave flowing ribbon */}
           <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "linear-gradient(145deg, #0E1EAB 0%, #1a1a3e 100%)", border: "1px solid rgba(100,70,229,0.4)" }}>
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            style={{
+              background: "linear-gradient(145deg, #0B1240 0%, #1a1060 100%)",
+              border: "1px solid rgba(9,200,212,0.4)",
+              boxShadow: "0 0 18px rgba(100,70,229,0.55), 0 0 6px rgba(9,200,212,0.35), inset 0 1px 0 rgba(255,255,255,0.06)"
+            }}>
+            <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="1">
+                <linearGradient id="lxGrad1" x1="0" y1="0" x2="21" y2="0" gradientUnits="userSpaceOnUse">
                   <stop offset="0%" stopColor="#09C8D4"/>
-                  <stop offset="100%" stopColor="#6446E5"/>
+                  <stop offset="100%" stopColor="#c4b5fd"/>
                 </linearGradient>
               </defs>
-              {/* Double S-wave ribbon — LexFlow brand icon */}
-              <path d="M2 15 C5 15 7 7 11 7 C15 7 17 15 20 15"
-                stroke="url(#waveGrad)" strokeWidth="2.8" strokeLinecap="round" fill="none"/>
-              <path d="M2 10 C5 10 7 2 11 2 C15 2 17 10 20 10"
-                stroke="url(#waveGrad)" strokeWidth="2.8" strokeLinecap="round" fill="none" strokeOpacity="0.5"/>
+              {/* Wave 1 — top, full opacity */}
+              <path d="M1.5 5 C4.5 5 4.5 2 8.5 2 C12.5 2 13 5 16 5 C17.5 5 18.5 4.2 19.5 3.5"
+                stroke="url(#lxGrad1)" strokeWidth="2" strokeLinecap="round" fill="none"/>
+              {/* Wave 2 — middle, 65% */}
+              <path d="M1.5 10.5 C4.5 10.5 4.5 7.5 8.5 7.5 C12.5 7.5 13 10.5 16 10.5 C17.5 10.5 18.5 9.7 19.5 9"
+                stroke="url(#lxGrad1)" strokeWidth="2" strokeLinecap="round" fill="none" strokeOpacity="0.65"/>
+              {/* Wave 3 — bottom, 35% */}
+              <path d="M1.5 16 C4.5 16 4.5 13 8.5 13 C12.5 13 13 16 16 16 C17.5 16 18.5 15.2 19.5 14.5"
+                stroke="url(#lxGrad1)" strokeWidth="2" strokeLinecap="round" fill="none" strokeOpacity="0.35"/>
             </svg>
           </div>
           {!collapsed && (
             <div className="flex flex-col">
               <p className="font-extrabold text-sm leading-tight tracking-tight"
-                style={{ fontFamily: "'Manrope', sans-serif" }}>
+                style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: "-0.01em" }}>
                 <span style={{ color: "#6446E5" }}>{"{"}</span>
                 <span style={{ color: "#ffffff" }}>LexFlow</span>
                 <span style={{ color: "#09C8D4" }}>{"}"}</span>
               </p>
-              <p className="text-xs font-medium" style={{ color: "#09C8D4", opacity: 0.7, fontFamily: "'Manrope', sans-serif" }}>
+              <p className="text-xs font-medium" style={{ color: "#09C8D4", opacity: 0.75, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.01em" }}>
                 Run Smarter with AI
               </p>
             </div>
@@ -2538,7 +2941,7 @@ export default function LexFlowColombia() {
                   ? "text-white"
                   : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`}
-              style={module === id ? { background: "#6446E5" } : {}}>
+              style={module === id ? { background: "linear-gradient(90deg, #6446E5 0%, #0E1EAB 100%)", boxShadow: "0 0 12px rgba(100,70,229,0.4)" } : {}}>
               <Icon size={17} className="flex-shrink-0" />
               {!collapsed && <span className="text-sm font-medium">{label}</span>}
             </button>
@@ -2576,7 +2979,12 @@ export default function LexFlowColombia() {
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
         {/* HEADER */}
-        <header className="bg-slate-900 border-b border-slate-800 px-6 py-3 flex items-center gap-4 flex-shrink-0">
+        <header className="border-b border-slate-800 px-6 py-3 flex items-center gap-4 flex-shrink-0"
+          style={{
+            background: "#0d1117",
+            borderTop: "2px solid transparent",
+            borderImage: "linear-gradient(90deg, #6446E5, #09C8D4, #10B991) 1"
+          }}>
 
           {/* Jurisdiction selector */}
           <div className="relative">
