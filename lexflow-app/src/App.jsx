@@ -2562,7 +2562,7 @@ const ContratosModule = () => {
               </div>
               {/* Word-like Document Viewer — right panel */}
               {showViewer && results && (
-                <div className="flex flex-col border-l overflow-hidden" style={{ width: "100%", maxWidth: "50%", minWidth: 420, backgroundColor: "#0c1322", borderColor: "rgba(30,41,59,0.5)" }}>
+                <div className="flex flex-col border-l overflow-hidden" style={{ width: "50%", flexShrink: 0, backgroundColor: "#0c1322", borderColor: "rgba(30,41,59,0.5)" }}>
                   {/* Viewer Toolbar — Word-like */}
                   <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: "rgba(30,41,59,0.4)", backgroundColor: "rgba(15,23,42,0.8)" }}>
                     <div className="flex items-center gap-3">
@@ -2599,11 +2599,11 @@ const ContratosModule = () => {
                     <button onClick={() => document.execCommand("insertUnorderedList")} className="p-1.5 rounded hover:bg-slate-700/50" title="Lista"><List size={12} style={{ color: "#94a3b8" }} /></button>
                   </div>
                   {/* Word-like document page */}
-                  <div className="flex-1 overflow-y-auto" style={{ backgroundColor: "#1e293b", padding: "24px 32px" }}>
+                  <div className="flex-1 overflow-y-auto" style={{ backgroundColor: "#1e293b", padding: "20px 24px" }}>
                     <div style={{
-                      maxWidth: 680, margin: "0 auto", backgroundColor: "#ffffff", borderRadius: 4,
+                      maxWidth: 720, margin: "0 auto", backgroundColor: "#ffffff", borderRadius: 4,
                       boxShadow: "0 2px 20px rgba(0,0,0,0.4), 0 0 1px rgba(0,0,0,0.2)",
-                      padding: "60px 64px", minHeight: "calc(100vh - 200px)"
+                      padding: "48px 44px", minHeight: "calc(100vh - 200px)"
                     }}>
                       {/* Document header */}
                       <div style={{ borderBottom: "2px solid #e2e8f0", paddingBottom: 16, marginBottom: 24 }}>
