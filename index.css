@@ -60,14 +60,14 @@
   --lf-border-subtle: #334155;
   --lf-border-muted: rgba(51, 65, 85, 0.5);
 
-  --lf-accent: #6446E5;
-  --lf-accent-hover: #5338d1;
-  --lf-accent-light: rgba(100, 70, 229, 0.15);
+  --lf-accent: #4F46E5;
+  --lf-accent-hover: #4338CA;
+  --lf-accent-light: rgba(79, 70, 229, 0.15);
   --lf-accent2: #09C8D4;
   --lf-accent2-light: rgba(9, 200, 212, 0.15);
-  --lf-success: #10B991;
-  --lf-warning: #FFB510;
-  --lf-danger: #ef4444;
+  --lf-success: #10B981;
+  --lf-warning: #F59E0B;
+  --lf-danger: #EF4444;
 
   --lf-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --lf-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);

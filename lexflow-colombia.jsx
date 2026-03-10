@@ -129,6 +129,16 @@ const JURISDICTIONS = [
   { code: "CL", flag: "🇨🇱", name: "Chile"    },
 ];
 
+// Sidebar submenu items for each practice area (common functions shown under each)
+const SIDEBAR_FUNCTIONS = [
+  { id: "review", name: "Revisar Contrato / Documento", icon: Eye },
+  { id: "draft", name: "Elaborar Documento", icon: PenTool },
+  { id: "compare", name: "Comparar Versiones", icon: ArrowLeftRight },
+  { id: "clauses", name: "Biblioteca de Cláusulas", icon: BookOpen },
+  { id: "checklist", name: "Checklist de Revisión", icon: ListChecks },
+  { id: "export", name: "Exportar Informe", icon: FileDown },
+];
+
 const CONNECTORS = [
   { name: "DocuSign",   online: true,  sync: "5 min",  desc: "Flujos de firma activos" },
   { name: "Legis",      online: true,  sync: "12 min", desc: "Base jurídica sincronizada" },
@@ -1476,10 +1486,10 @@ const SignModal = ({ onClose, docType }) => {
 
 // ─── CONTRATOS MODULE (PRACTICE AREAS) ──────────────────────────────────────
 
-const ContratosModule = ({ initialPracticeArea = null }) => {
+const ContratosModule = ({ initialPracticeArea = null, initialFunction = null }) => {
   /* ── State ── */
   const [practiceArea, setPracticeArea] = useState(initialPracticeArea);
-  const [activeFunction, setActiveFunction] = useState(null);
+  const [activeFunction, setActiveFunction] = useState(initialFunction);
 
   /* Sync when top-level nav changes the practice area */
   useEffect(() => {
@@ -1510,6 +1520,8 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
   const [expandedRedline, setExpandedRedline] = useState(null);
   const [toast, setToast] = useState(null);
   const [funcPanelOpen, setFuncPanelOpen] = useState(true);
+  const [showDocTypeDropdown, setShowDocTypeDropdown] = useState(false);
+  const [step3Open, setStep3Open] = useState(false);
   const [generatingDoc, setGeneratingDoc] = useState(false);
   const [clauseSearch, setClauseSearch] = useState("");
   const [showViewer, setShowViewer] = useState(false);
@@ -2014,110 +2026,7 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
       {/* ── Main Body: Left Nav + Right Content ── */}
       <div className="flex flex-1" style={{ minHeight: 0 }}>
 
-        {/* ══════════════ LEFT PANEL — Functions (collapsible) ══════════════ */}
-        {currentPractice && activeFunction && (
-          <div className="flex flex-col flex-shrink-0 overflow-y-auto border-r"
-            style={{
-              width: funcPanelOpen ? 220 : 44,
-              backgroundColor: "var(--lf-bg-abyss)",
-              borderColor: "var(--lf-bg-elevated-border)",
-              transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-            }}>
-
-            {/* Toggle */}
-            <button onClick={() => setFuncPanelOpen(!funcPanelOpen)}
-              className="flex items-center justify-center py-3 border-b"
-              style={{ borderColor: "var(--lf-bg-elevated-border)", color: "var(--lf-text-faint)", cursor: "pointer", backgroundColor: "transparent" }}>
-              {funcPanelOpen ? (
-                <div className="flex items-center gap-2 px-3 w-full">
-                  <span style={{ fontSize: 10, color: "var(--lf-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, flex: 1 }}>Funciones</span>
-                  <ChevronLeft size={14} style={{ color: "var(--lf-text-faint)" }} />
-                </div>
-              ) : <ChevronRight size={16} />}
-            </button>
-
-            {/* Common functions */}
-            {funcPanelOpen ? (
-              <div className="px-3 py-3 space-y-0.5" style={{ animation: "lf-fadeUp 0.2s ease-out" }}>
-                <p style={{ color: "var(--lf-text-muted)", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600, marginBottom: 6, paddingLeft: 4 }}>Comunes</p>
-                {COMMON_FUNCTIONS.map((fn) => {
-                  const FnIcon = fn.icon;
-                  const isActive = activeFunction === fn.id;
-                  return (
-                    <button key={fn.id} onClick={() => { setActiveFunction(fn.id); setResults(null); }}
-                      className="w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 transition-all"
-                      style={{
-                        backgroundColor: isActive ? "rgba(59,130,246,0.1)" : "transparent",
-                        color: isActive ? "#93c5fd" : "var(--lf-text-muted)",
-                        border: isActive ? "1px solid rgba(59,130,246,0.2)" : "1px solid transparent",
-                        fontSize: 11.5,
-                      }}>
-                      <FnIcon size={12} style={{ opacity: isActive ? 1 : 0.6, flexShrink: 0 }} />
-                      <span style={{ fontWeight: isActive ? 600 : 400 }}>{fn.name}</span>
-                    </button>
-                  );
-                })}
-
-                {/* Practice-specific functions */}
-                <p style={{ color: currentPractice.color, fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600, marginBottom: 6, marginTop: 12, paddingLeft: 4 }}>
-                  {currentPractice.name}
-                </p>
-                {currentPractice.specificFunctions.map((fn) => {
-                  const FnIcon = fn.icon;
-                  const isActive = activeFunction === fn.id;
-                  return (
-                    <button key={fn.id} onClick={() => { setActiveFunction(fn.id); setResults(null); }}
-                      className="w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 transition-all"
-                      style={{
-                        backgroundColor: isActive ? `${currentPractice.color}15` : "transparent",
-                        color: isActive ? currentPractice.color : "var(--lf-text-muted)",
-                        border: isActive ? `1px solid ${currentPractice.color}25` : "1px solid transparent",
-                        fontSize: 11.5,
-                      }}>
-                      <FnIcon size={12} style={{ opacity: isActive ? 1 : 0.6, flexShrink: 0 }} />
-                      <span style={{ fontWeight: isActive ? 600 : 400 }}>{fn.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              /* Collapsed: icon-only buttons */
-              <div className="py-2 space-y-0.5 flex flex-col items-center">
-                {COMMON_FUNCTIONS.map((fn) => {
-                  const FnIcon = fn.icon;
-                  const isActive = activeFunction === fn.id;
-                  return (
-                    <button key={fn.id} onClick={() => { setActiveFunction(fn.id); setResults(null); }}
-                      title={fn.name}
-                      className="p-2 rounded-lg transition-all"
-                      style={{
-                        backgroundColor: isActive ? "rgba(59,130,246,0.1)" : "transparent",
-                        color: isActive ? "#93c5fd" : "var(--lf-text-muted)",
-                      }}>
-                      <FnIcon size={14} />
-                    </button>
-                  );
-                })}
-                <div style={{ height: 1, width: 20, backgroundColor: "var(--lf-bg-elevated-border)", margin: "4px 0" }} />
-                {currentPractice.specificFunctions.map((fn) => {
-                  const FnIcon = fn.icon;
-                  const isActive = activeFunction === fn.id;
-                  return (
-                    <button key={fn.id} onClick={() => { setActiveFunction(fn.id); setResults(null); }}
-                      title={fn.name}
-                      className="p-2 rounded-lg transition-all"
-                      style={{
-                        backgroundColor: isActive ? `${currentPractice.color}15` : "transparent",
-                        color: isActive ? currentPractice.color : "var(--lf-text-muted)",
-                      }}>
-                      <FnIcon size={14} />
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
+        {/* ══════════════ LEFT PANEL — Functions (REMOVED - now in sidebar) ══════════════ */}
 
         {/* ══════════════ RIGHT CONTENT AREA ══════════════ */}
         <div className="flex-1 overflow-y-auto" style={{ backgroundColor: "var(--lf-bg-deep)" }}>
@@ -2211,54 +2120,79 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                       Carga un documento o pega texto para obtener un análisis legal completo con IA.
                     </p>
 
-                    {/* Step 1 — Document type as horizontal pills */}
+                    {/* Step 1 — Document type as organized dropdown */}
                     <div style={{ width: "100%", marginBottom: 24 }}>
                       <p style={{ color: "var(--lf-text-muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.12em", fontWeight: 600, marginBottom: 10 }}>
                         <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: "50%", backgroundColor: `${currentPractice.color}20`, color: currentPractice.color, fontSize: 10, fontWeight: 700, marginRight: 6 }}>1</span>
                         Tipo de Documento
                       </p>
-                      <div className="flex flex-wrap gap-2">
-                        {currentPractice.docTypes.map(t => {
-                          const active = docType === t;
-                          return (
-                            <button key={t} onClick={() => handleDocTypeChange(t)}
-                              className="px-3.5 py-2 rounded-xl text-xs transition-all lf-hover-glow"
+                      <div style={{ position: "relative" }}>
+                        <button onClick={() => setShowDocTypeDropdown(!showDocTypeDropdown)}
+                          className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm transition-all lf-hover-glow"
+                          style={{
+                            backgroundColor: "var(--lf-bg-card-subtle)",
+                            border: `1px solid ${showDocTypeDropdown ? `${currentPractice.color}40` : "var(--lf-bg-elevated-border)"}`,
+                            color: "var(--lf-text-primary)",
+                            cursor: "pointer",
+                          }}
+                          ref={null}>
+                          <div className="flex items-center gap-2.5">
+                            <FileText size={14} style={{ color: currentPractice.color, flexShrink: 0 }} />
+                            <span style={{ fontSize: 13, fontWeight: 500 }}>{docType || "Seleccionar tipo..."}</span>
+                          </div>
+                          <ChevronDown size={14} style={{ color: "var(--lf-text-faint)", transform: showDocTypeDropdown ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }} />
+                        </button>
+                        {showDocTypeDropdown && (
+                          <div className="absolute left-0 right-0 mt-1 rounded-xl overflow-hidden"
+                            style={{
+                              backgroundColor: "var(--lf-bg-ink)",
+                              border: `1px solid ${currentPractice.color}25`,
+                              boxShadow: "0 12px 40px rgba(0,0,0,0.5)",
+                              zIndex: 50,
+                              maxHeight: 260,
+                              overflowY: "auto",
+                            }}>
+                            {currentPractice.docTypes.map((t, idx) => {
+                              const active = docType === t;
+                              return (
+                                <button key={t} onClick={() => { handleDocTypeChange(t); setShowDocTypeDropdown(false); }}
+                                  className="w-full text-left px-4 py-2.5 flex items-center gap-3 transition-all"
+                                  style={{
+                                    backgroundColor: active ? `${currentPractice.color}12` : "transparent",
+                                    color: active ? "var(--lf-text-primary)" : "var(--lf-text-muted)",
+                                    fontSize: 12.5,
+                                    borderBottom: idx < currentPractice.docTypes.length ? `1px solid var(--lf-bg-elevated-border)` : "none",
+                                  }}
+                                  onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = "var(--lf-bg-card-subtle)"; }}
+                                  onMouseLeave={e => { if (!active) e.currentTarget.style.backgroundColor = "transparent"; }}>
+                                  <FileText size={13} style={{ color: active ? currentPractice.color : "var(--lf-text-faint)", flexShrink: 0 }} />
+                                  <span style={{ fontWeight: active ? 600 : 400, flex: 1 }}>{t}</span>
+                                  {active && <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: currentPractice.color }} />}
+                                </button>
+                              );
+                            })}
+                            {/* Otro option */}
+                            <button onClick={() => { setDocType(customDocType || "Otro"); setText(SAMPLE_TEXT["NDA"] || ""); setShowDocTypeDropdown(false); }}
+                              className="w-full text-left px-4 py-2.5 flex items-center gap-3 transition-all"
                               style={{
-                                backgroundColor: active ? `${currentPractice.color}15` : "var(--lf-bg-card-subtle)",
-                                color: active ? "var(--lf-text-primary)" : "var(--lf-text-muted)",
-                                border: active ? `1px solid ${currentPractice.color}35` : "1px solid var(--lf-bg-elevated-border)",
-                                fontWeight: active ? 600 : 400, fontSize: 12,
-                              }}>
-                              {active && <span style={{ display: "inline-block", width: 5, height: 5, borderRadius: "50%", backgroundColor: currentPractice.color, marginRight: 6 }} />}
-                              {t}
+                                backgroundColor: !currentPractice.docTypes.includes(docType) ? `${currentPractice.color}12` : "transparent",
+                                color: !currentPractice.docTypes.includes(docType) ? "var(--lf-text-primary)" : "var(--lf-text-muted)",
+                                fontSize: 12.5,
+                                borderTop: `1px solid ${currentPractice.color}15`,
+                              }}
+                              onMouseEnter={e => { if (currentPractice.docTypes.includes(docType)) e.currentTarget.style.backgroundColor = "var(--lf-bg-card-subtle)"; }}
+                              onMouseLeave={e => { if (currentPractice.docTypes.includes(docType)) e.currentTarget.style.backgroundColor = "transparent"; }}>
+                              <PenTool size={13} style={{ color: "var(--lf-text-faint)", flexShrink: 0 }} />
+                              <span style={{ fontWeight: !currentPractice.docTypes.includes(docType) ? 600 : 400 }}>Otro (personalizado)</span>
                             </button>
-                          );
-                        })}
-                        {/* Otro pill */}
-                        {(() => {
-                          const isOtro = !currentPractice.docTypes.includes(docType);
-                          return (
-                            <>
-                              <button onClick={() => { setDocType(customDocType || "Otro"); setText(SAMPLE_TEXT["NDA"] || ""); }}
-                                className="px-3.5 py-2 rounded-xl text-xs transition-all lf-hover-glow"
-                                style={{
-                                  backgroundColor: isOtro ? `${currentPractice.color}15` : "var(--lf-bg-card-subtle)",
-                                  color: isOtro ? "var(--lf-text-primary)" : "var(--lf-text-muted)",
-                                  border: isOtro ? `1px solid ${currentPractice.color}35` : "1px solid var(--lf-bg-elevated-border)",
-                                  fontWeight: isOtro ? 600 : 400, fontSize: 12,
-                                }}>
-                                {isOtro && <span style={{ display: "inline-block", width: 5, height: 5, borderRadius: "50%", backgroundColor: currentPractice.color, marginRight: 6 }} />}
-                                Otro
-                              </button>
-                              {isOtro && (
-                                <input type="text" value={customDocType} onChange={e => { setCustomDocType(e.target.value); setDocType(e.target.value || "Otro"); }}
-                                  placeholder="Nombre del documento..."
-                                  className="px-3 py-2 rounded-xl text-xs outline-none"
-                                  style={{ backgroundColor: "var(--lf-bg-card-subtle)", border: `1px solid ${currentPractice.color}25`, color: "var(--lf-text-primary)", fontSize: 12, width: 180 }} />
-                              )}
-                            </>
-                          );
-                        })()}
+                          </div>
+                        )}
+                        {!currentPractice.docTypes.includes(docType) && (
+                          <input type="text" value={customDocType} onChange={e => { setCustomDocType(e.target.value); setDocType(e.target.value || "Otro"); }}
+                            placeholder="Nombre del documento..."
+                            className="w-full mt-2 px-4 py-2.5 rounded-xl text-xs outline-none"
+                            style={{ backgroundColor: "var(--lf-bg-card-subtle)", border: `1px solid ${currentPractice.color}25`, color: "var(--lf-text-primary)", fontSize: 12 }} />
+                        )}
                       </div>
                     </div>
 
@@ -2266,7 +2200,7 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                     <div style={{ width: "100%", marginBottom: 24 }}>
                       <p style={{ color: "var(--lf-text-muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.12em", fontWeight: 600, marginBottom: 10 }}>
                         <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: "50%", backgroundColor: `${currentPractice.color}20`, color: currentPractice.color, fontSize: 10, fontWeight: 700, marginRight: 6 }}>2</span>
-                        Cargar Documento o Pegar Texto
+                        Cargar Documento
                       </p>
                       {!uploadedFile ? (
                         <div onDragOver={(e) => { e.preventDefault(); setDragOver(true); }} onDragLeave={() => setDragOver(false)} onDrop={handleDrop}
@@ -2295,21 +2229,30 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                       )}
                     </div>
 
-                    {/* Step 3 — Text input (always visible, not collapsible) */}
+                    {/* Step 3 — Text input (collapsed by default) */}
                     <div style={{ width: "100%", marginBottom: 28 }}>
-                      <div className="flex items-center justify-between" style={{ marginBottom: 10 }}>
-                        <p style={{ color: "var(--lf-text-muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.12em", fontWeight: 600 }}>
+                      <button onClick={() => setStep3Open(!step3Open)}
+                        className="flex items-center justify-between w-full transition-all"
+                        style={{ marginBottom: step3Open ? 10 : 0, cursor: "pointer", background: "none", border: "none", padding: 0 }}>
+                        <p style={{ color: "var(--lf-text-muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.12em", fontWeight: 600, margin: 0 }}>
                           <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: "50%", backgroundColor: `${currentPractice.color}20`, color: currentPractice.color, fontSize: 10, fontWeight: 700, marginRight: 6 }}>3</span>
-                          Texto del Documento
+                          Revisar cláusula o texto específico
                         </p>
-                        {uploadedFile && <span style={{ color: currentPractice.color, fontSize: 10, fontWeight: 500 }}>Cargado desde archivo</span>}
-                      </div>
-                      <textarea value={text} onChange={e => setText(e.target.value)} rows={8}
-                        placeholder="Pega aquí el texto del contrato, cláusula o documento que deseas revisar..."
-                        className="w-full rounded-2xl p-4 text-sm leading-relaxed outline-none resize-none transition-all"
-                        style={{ backgroundColor: "var(--lf-bg-card-subtle)", border: `1px solid ${text.trim() ? `${currentPractice.color}30` : "var(--lf-bg-elevated-dim)"}`, color: "var(--lf-text-primary)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 12, lineHeight: 1.7, minHeight: 160 }} />
-                      {text.trim() && (
-                        <p style={{ color: "var(--lf-text-faint)", fontSize: 10, marginTop: 6, textAlign: "right" }}>{text.length.toLocaleString()} caracteres</p>
+                        <div className="flex items-center gap-2">
+                          {uploadedFile && !step3Open && <span style={{ color: currentPractice.color, fontSize: 10, fontWeight: 500 }}>Cargado desde archivo</span>}
+                          <ChevronDown size={14} style={{ color: "var(--lf-text-faint)", transform: step3Open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }} />
+                        </div>
+                      </button>
+                      {step3Open && (
+                        <div style={{ animation: "lf-fadeUp 0.2s ease-out" }}>
+                          <textarea value={text} onChange={e => setText(e.target.value)} rows={8}
+                            placeholder="Pega aquí el texto del contrato, cláusula o documento que deseas revisar..."
+                            className="w-full rounded-2xl p-4 text-sm leading-relaxed outline-none resize-none transition-all"
+                            style={{ backgroundColor: "var(--lf-bg-card-subtle)", border: `1px solid ${text.trim() ? `${currentPractice.color}30` : "var(--lf-bg-elevated-dim)"}`, color: "var(--lf-text-primary)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 12, lineHeight: 1.7, minHeight: 160 }} />
+                          {text.trim() && (
+                            <p style={{ color: "var(--lf-text-faint)", fontSize: 10, marginTop: 6, textAlign: "right" }}>{text.length.toLocaleString()} caracteres</p>
+                          )}
+                        </div>
                       )}
                     </div>
 
@@ -2363,7 +2306,7 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                   className="flex items-center gap-2 px-3 py-2.5 border-b lf-hover-lift"
                   style={{ borderColor: "var(--lf-bg-elevated-border)", backgroundColor: "var(--lf-bg-card-subtle)" }}>
                   {inputPanelOpen ? <ChevronLeft size={13} style={{ color: "var(--lf-text-muted)" }} /> : <ChevronRight size={13} style={{ color: "var(--lf-text-muted)" }} />}
-                  {inputPanelOpen && <span style={{ color: "var(--lf-text-secondary)", fontSize: 11, fontWeight: 500 }}>Configuración</span>}
+                  {inputPanelOpen && <span style={{ color: "var(--lf-text-secondary)", fontSize: 11, fontWeight: 500 }}>Tipo de documento</span>}
                 </button>
                 {inputPanelOpen && <div className="p-5 space-y-5">
                   {/* Doc type selector */}
@@ -4305,6 +4248,8 @@ function LexFlowShell() {
   const [showJur,   setShowJur]   = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [searchVal, setSearchVal] = useState("");
+  const [expandedNav, setExpandedNav] = useState(null);
+  const [selectedFunction, setSelectedFunction] = useState(null);
 
   useEffect(() => {
     const link = document.createElement("link");
@@ -4366,7 +4311,11 @@ function LexFlowShell() {
 
         {/* Navigation */}
         <nav className="flex-1 py-3 px-2 overflow-y-auto">
-          {NAV.map(({ id, label, Icon, color }, idx) => (
+          {NAV.map(({ id, label, Icon, color }, idx) => {
+            const isPractice = ["laboral","comercial","penal","civil","tributario","pi","compliance-reg","empresas"].includes(id);
+            const isExpanded = expandedNav === id;
+            const isActive = module === id;
+            return (
             <React.Fragment key={id}>
               {/* Divider after Dashboard */}
               {idx === 1 && (
@@ -4382,20 +4331,54 @@ function LexFlowShell() {
                   {collapsed && <div className="border-t border-slate-700/50 my-1" />}
                 </div>
               )}
-              <button onClick={() => setModule(id)} title={collapsed ? label : undefined}
+              <button onClick={() => {
+                  setModule(id);
+                  if (isPractice && !collapsed) {
+                    setExpandedNav(isExpanded ? null : id);
+                    setSelectedFunction(null);
+                  } else {
+                    setExpandedNav(null);
+                    setSelectedFunction(null);
+                  }
+                }} title={collapsed ? label : undefined}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-left mb-0.5 ${
-                  module === id
+                  isActive
                     ? "text-white"
                     : "text-slate-400 hover:bg-slate-800/60 hover:text-white"
                 }`}
-                style={module === id
+                style={isActive
                   ? { background: color ? `linear-gradient(90deg, ${color}33 0%, ${color}15 100%)` : "linear-gradient(90deg, #6446E5 0%, #0E1EAB 100%)", boxShadow: color ? `0 0 12px ${color}25` : "0 0 12px rgba(100,70,229,0.4)", borderLeft: color ? `2px solid ${color}` : "2px solid #6446E5" }
                   : { borderLeft: "2px solid transparent" }}>
-                <Icon size={16} className="flex-shrink-0" style={module === id && color ? { color } : {}} />
-                {!collapsed && <span className="text-[13px] font-medium">{label}</span>}
+                <Icon size={16} className="flex-shrink-0" style={isActive && color ? { color } : {}} />
+                {!collapsed && <span className="text-[13px] font-medium flex-1">{label}</span>}
+                {!collapsed && isPractice && (
+                  <ChevronDown size={12} className="flex-shrink-0 transition-transform" style={{ color: "var(--lf-text-faint)", transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }} />
+                )}
               </button>
+              {/* Submenu for practice areas */}
+              {!collapsed && isPractice && isExpanded && (
+                <div className="ml-5 pl-3 mb-1 space-y-0.5" style={{ borderLeft: `1px solid ${color || "#6446E5"}30` }}>
+                  {SIDEBAR_FUNCTIONS.map(fn => {
+                    const FnIcon = fn.icon;
+                    const fnActive = isActive && selectedFunction === fn.id;
+                    return (
+                      <button key={fn.id} onClick={(e) => { e.stopPropagation(); setModule(id); setSelectedFunction(fn.id); }}
+                        className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-left transition-all"
+                        style={{
+                          backgroundColor: fnActive ? `${color || "#6446E5"}18` : "transparent",
+                          color: fnActive ? (color || "#93c5fd") : "var(--lf-text-muted)",
+                          fontSize: 11.5,
+                        }}>
+                        <FnIcon size={12} style={{ opacity: fnActive ? 1 : 0.5, flexShrink: 0 }} />
+                        <span style={{ fontWeight: fnActive ? 600 : 400 }}>{fn.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </React.Fragment>
-          ))}
+            );
+          })}
         </nav>
 
         {/* Collapse toggle */}
@@ -4484,7 +4467,7 @@ function LexFlowShell() {
             : module === "firmas"
             ? <FirmasModule />
             : ["laboral","comercial","penal","civil","tributario","pi","compliance-reg","empresas"].includes(module)
-            ? <ContratosModule key={module} initialPracticeArea={module === "compliance-reg" ? "compliance" : module} />
+            ? <ContratosModule key={module + (selectedFunction || "")} initialPracticeArea={module === "compliance-reg" ? "compliance" : module} initialFunction={selectedFunction} />
             : <div className="flex-1 overflow-y-auto"><ModulePlaceholder id={module} /></div>
           }
         </main>
