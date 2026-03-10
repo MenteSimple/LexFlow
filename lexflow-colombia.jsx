@@ -12,19 +12,19 @@ import {
   Upload, Mail, Wifi, WifiOff, ArrowLeftRight, FileDown, Eye, Trash2, FilePlus2,
   Users, Lightbulb, ChevronLeft, BarChart3, Sparkles, ScrollText, ClipboardCheck, Target,
   RefreshCw, AlignLeft, AlignCenter, AlignRight, List, Save,
-  Sun, Moon, Monitor
+  Sun, Moon, Monitor, Settings, LogOut, Palette, ArrowLeft
 } from "lucide-react";
 
 // ─── THEME SYSTEM ────────────────────────────────────────────────────────────
 
-const ThemeContext = createContext({ theme: "dark", resolvedTheme: "dark", setTheme: () => {} });
+const ThemeContext = createContext({ theme: "light", resolvedTheme: "light", setTheme: () => {} });
 const useTheme = () => useContext(ThemeContext);
 
 const ThemeProvider = ({ children }) => {
   const [theme, setThemeState] = useState(() => {
-    try { return localStorage.getItem("lf-theme") || "system"; } catch { return "system"; }
+    try { return localStorage.getItem("lf-theme") || "light"; } catch { return "light"; }
   });
-  const [resolvedTheme, setResolved] = useState("dark");
+  const [resolvedTheme, setResolved] = useState("light");
 
   const applyTheme = useCallback((newResolved) => {
     const html = document.documentElement;
@@ -1329,6 +1329,128 @@ const Dashboard = ({ onNav }) => {
 
 // ─── MODULE PLACEHOLDER ───────────────────────────────────────────────────────
 
+// ─── SETTINGS PAGE ────────────────────────────────────────────────────────────
+
+const SettingsPage = () => {
+  const { theme, setTheme } = useTheme();
+  const sections = [
+    { id: "general", icon: Settings, title: "General", desc: "Idioma, jurisdicción por defecto, zona horaria",
+      items: [
+        { label: "Idioma de la interfaz", value: "Español", type: "select" },
+        { label: "Jurisdicción por defecto", value: "Colombia", type: "select" },
+        { label: "Zona horaria", value: "América/Bogotá (UTC-5)", type: "select" },
+      ]},
+    { id: "appearance", icon: Palette, title: "Apariencia", desc: "Tema, densidad de interfaz, tamaño de fuente",
+      items: [
+        { label: "Tema", value: theme, type: "theme" },
+        { label: "Densidad de interfaz", value: "Normal", type: "select" },
+        { label: "Tamaño de fuente", value: "Mediano", type: "select" },
+      ]},
+    { id: "ai", icon: Sparkles, title: "Análisis IA", desc: "Configuración del motor de análisis",
+      items: [
+        { label: "Nivel de detalle por defecto", value: "Completo", type: "select" },
+        { label: "Idioma de los análisis", value: "Español", type: "select" },
+      ]},
+    { id: "notifications", icon: Bell, title: "Notificaciones", desc: "Alertas y recordatorios",
+      items: [
+        { label: "Alertas de vencimiento de contratos", value: true, type: "toggle" },
+        { label: "Recordatorios de firmas pendientes", value: true, type: "toggle" },
+        { label: "Resumen semanal por email", value: false, type: "toggle" },
+      ]},
+    { id: "documents", icon: FileText, title: "Documentos", desc: "Formato de exportación, plantillas",
+      items: [
+        { label: "Formato de exportación por defecto", value: "PDF", type: "select" },
+        { label: "Incluir marca de agua", value: false, type: "toggle" },
+        { label: "Plantilla de informes", value: "Profesional", type: "select" },
+      ]},
+    { id: "integrations", icon: Wifi, title: "Integraciones", desc: "Conexiones con servicios externos",
+      items: [
+        { label: "Google Drive", value: "No conectado", type: "connect" },
+        { label: "Microsoft 365", value: "No conectado", type: "connect" },
+      ]},
+    { id: "team", icon: Users, title: "Equipo y Permisos", desc: "Gestión de usuarios y roles",
+      items: [
+        { label: "Miembros del equipo", value: "1 usuario activo", type: "info" },
+        { label: "Rol actual", value: "Socio Senior (Administrador)", type: "info" },
+      ]},
+  ];
+
+  const [activeSection, setActiveSection] = useState("general");
+  const currentSection = sections.find(s => s.id === activeSection);
+
+  return (
+    <div className="flex-1 overflow-y-auto" style={{ background: "var(--lf-bg-app)" }}>
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: "32px 24px" }}>
+        <h1 className="text-2xl font-bold mb-1" style={{ color: "var(--lf-text-primary)" }}>Configuración</h1>
+        <p className="text-sm mb-8" style={{ color: "var(--lf-text-muted)" }}>Personaliza tu experiencia en LexFlow</p>
+
+        <div className="flex gap-8">
+          {/* Left nav */}
+          <div style={{ width: 220, flexShrink: 0 }}>
+            <div className="space-y-1">
+              {sections.map(s => {
+                const SIcon = s.icon;
+                const isActive = activeSection === s.id;
+                return (
+                  <button key={s.id} onClick={() => setActiveSection(s.id)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all"
+                    style={{
+                      backgroundColor: isActive ? "var(--lf-accent-light)" : "transparent",
+                      color: isActive ? "var(--lf-accent)" : "var(--lf-text-secondary)",
+                      fontWeight: isActive ? 600 : 400,
+                      fontSize: 13,
+                    }}>
+                    <SIcon size={16} style={{ opacity: isActive ? 1 : 0.6 }} />
+                    {s.title}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right content */}
+          <div className="flex-1">
+            {currentSection && (
+              <div className="rounded-2xl p-6" style={{ backgroundColor: "var(--lf-bg-card)", border: "1px solid var(--lf-border)" }}>
+                <div className="flex items-center gap-3 mb-1">
+                  <currentSection.icon size={20} style={{ color: "var(--lf-accent)" }} />
+                  <h2 className="text-lg font-bold" style={{ color: "var(--lf-text-primary)" }}>{currentSection.title}</h2>
+                </div>
+                <p className="text-sm mb-6" style={{ color: "var(--lf-text-muted)", marginLeft: 32 }}>{currentSection.desc}</p>
+
+                <div className="space-y-0">
+                  {currentSection.items.map((item, i) => (
+                    <div key={i} className="flex items-center justify-between py-4 px-1"
+                      style={{ borderTop: i > 0 ? "1px solid var(--lf-border)" : "none" }}>
+                      <span className="text-sm" style={{ color: "var(--lf-text-primary)" }}>{item.label}</span>
+                      {item.type === "theme" ? (
+                        <ThemeToggle />
+                      ) : item.type === "toggle" ? (
+                        <div className="w-10 h-5 rounded-full relative cursor-pointer transition-colors"
+                          style={{ backgroundColor: item.value ? "#6446E5" : "var(--lf-bg-elevated-dim)" }}>
+                          <div className="w-4 h-4 rounded-full bg-white absolute top-0.5 transition-all"
+                            style={{ left: item.value ? 22 : 2 }} />
+                        </div>
+                      ) : item.type === "connect" ? (
+                        <button className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                          style={{ backgroundColor: "var(--lf-accent-light)", color: "var(--lf-accent)" }}>
+                          Conectar
+                        </button>
+                      ) : (
+                        <span className="text-sm" style={{ color: "var(--lf-text-muted)" }}>{item.value}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ModulePlaceholder = ({ id }) => {
   const m = MODULES[id];
   if (!m) return null;
@@ -2245,13 +2367,10 @@ const ContratosModule = ({ initialPracticeArea = null, initialFunction = null })
                       </button>
                       {step3Open && (
                         <div style={{ animation: "lf-fadeUp 0.2s ease-out" }}>
-                          <textarea value={text} onChange={e => setText(e.target.value)} rows={8}
-                            placeholder="Pega aquí el texto del contrato, cláusula o documento que deseas revisar..."
+                          <textarea value={text} onChange={e => setText(e.target.value)} rows={5}
+                            placeholder="Copia y pega aquí el texto a revisar"
                             className="w-full rounded-2xl p-4 text-sm leading-relaxed outline-none resize-none transition-all"
-                            style={{ backgroundColor: "var(--lf-bg-card-subtle)", border: `1px solid ${text.trim() ? `${currentPractice.color}30` : "var(--lf-bg-elevated-dim)"}`, color: "var(--lf-text-primary)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 12, lineHeight: 1.7, minHeight: 160 }} />
-                          {text.trim() && (
-                            <p style={{ color: "var(--lf-text-faint)", fontSize: 10, marginTop: 6, textAlign: "right" }}>{text.length.toLocaleString()} caracteres</p>
-                          )}
+                            style={{ backgroundColor: "var(--lf-bg-card-subtle)", border: `1px solid ${text.trim() ? `${currentPractice.color}30` : "var(--lf-bg-elevated-dim)"}`, color: "var(--lf-text-primary)", fontSize: 13, lineHeight: 1.6, minHeight: 100 }} />
                         </div>
                       )}
                     </div>
@@ -4250,6 +4369,7 @@ function LexFlowShell() {
   const [searchVal, setSearchVal] = useState("");
   const [expandedNav, setExpandedNav] = useState(null);
   const [selectedFunction, setSelectedFunction] = useState(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
     const link = document.createElement("link");
@@ -4381,11 +4501,27 @@ function LexFlowShell() {
           })}
         </nav>
 
-        {/* Collapse toggle */}
-        <button onClick={() => setCollapsed(!collapsed)}
-          className="p-4 border-t border-slate-800 text-slate-500 hover:text-white transition-colors flex justify-center">
-          <Menu size={17} />
-        </button>
+        {/* Bottom actions */}
+        <div className="mt-auto" style={{ borderTop: "1px solid var(--lf-border)" }}>
+          {/* Settings shortcut */}
+          <button onClick={() => { setModule("settings"); setCollapsed(false); }} title="Configuración"
+            className="w-full flex items-center gap-3 px-3 py-2.5 transition-colors"
+            style={{ color: "var(--lf-text-muted)", justifyContent: collapsed ? "center" : "flex-start" }}
+            onMouseEnter={e => e.currentTarget.style.color = "var(--lf-text-primary)"}
+            onMouseLeave={e => e.currentTarget.style.color = "var(--lf-text-muted)"}>
+            <Settings size={16} className="flex-shrink-0" />
+            {!collapsed && <span style={{ fontSize: 13, fontWeight: 500 }}>Configuración</span>}
+          </button>
+          {/* Collapse toggle */}
+          <button onClick={() => setCollapsed(!collapsed)} title={collapsed ? "Expandir menú" : "Colapsar menú"}
+            className="w-full flex items-center gap-3 px-3 py-2.5 transition-colors"
+            style={{ color: "var(--lf-text-muted)", justifyContent: collapsed ? "center" : "flex-start" }}
+            onMouseEnter={e => e.currentTarget.style.color = "var(--lf-text-primary)"}
+            onMouseLeave={e => e.currentTarget.style.color = "var(--lf-text-muted)"}>
+            <ArrowLeft size={16} className="flex-shrink-0" style={{ transform: collapsed ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.3s ease" }} />
+            {!collapsed && <span style={{ fontSize: 13, fontWeight: 500 }}>Colapsar</span>}
+          </button>
+        </div>
       </aside>
 
       {/* ── MAIN COLUMN ── */}
@@ -4439,21 +4575,72 @@ function LexFlowShell() {
 
           {/* Right cluster */}
           <div className="ml-auto flex items-center gap-3">
-            <ThemeToggle />
-            <button className="relative p-2 hover:bg-slate-800 rounded-lg transition-colors">
-              <Bell size={17} className="text-slate-400" />
+            <button className="relative p-2 rounded-lg transition-colors" style={{ color: "var(--lf-text-muted)" }}
+              onMouseEnter={e => e.currentTarget.style.background = "var(--lf-bg-elevated-dim)"}
+              onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+              <Bell size={17} />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
                 style={{ backgroundColor: "#ef4444" }} />
             </button>
-            <div className="flex items-center gap-2.5 pl-4 border-l border-slate-800">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                style={{ background: "linear-gradient(135deg, #6446E5 0%, #09C8D4 100%)" }}>
-                A
-              </div>
-              <div className="hidden lg:block">
-                <p className="text-slate-200 text-sm font-medium leading-tight">Andres S.</p>
-                <p className="text-slate-500 text-xs">Socio Senior</p>
-              </div>
+            {/* User avatar + dropdown */}
+            <div className="relative pl-4" style={{ borderLeft: "1px solid var(--lf-border)" }}>
+              <button onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-2.5 transition-colors rounded-lg px-2 py-1"
+                style={{ background: showUserMenu ? "var(--lf-bg-elevated-dim)" : "transparent" }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 text-white"
+                  style={{ background: "linear-gradient(135deg, #6446E5 0%, #09C8D4 100%)" }}>
+                  A
+                </div>
+                <div className="hidden lg:block text-left">
+                  <p className="text-sm font-medium leading-tight" style={{ color: "var(--lf-text-primary)" }}>Andres S.</p>
+                  <p className="text-xs" style={{ color: "var(--lf-text-muted)" }}>Socio Senior</p>
+                </div>
+                <ChevronDown size={13} style={{ color: "var(--lf-text-faint)", transform: showUserMenu ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+              </button>
+              {showUserMenu && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
+                  <div className="absolute right-0 top-full mt-2 w-64 rounded-xl shadow-2xl z-50 overflow-hidden"
+                    style={{ backgroundColor: "var(--lf-bg-card)", border: "1px solid var(--lf-border)" }}>
+                    {/* User info header */}
+                    <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--lf-border)" }}>
+                      <p className="text-sm font-semibold" style={{ color: "var(--lf-text-primary)" }}>Andres Saldarriaga</p>
+                      <p className="text-xs" style={{ color: "var(--lf-text-muted)" }}>asalda@lexflow.co</p>
+                    </div>
+                    {/* Theme selector */}
+                    <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--lf-border)" }}>
+                      <p className="text-xs font-semibold mb-2" style={{ color: "var(--lf-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Tema</p>
+                      <ThemeToggle />
+                    </div>
+                    {/* Menu items */}
+                    <div className="py-1">
+                      {[
+                        { icon: User, label: "Mi perfil", action: () => { setShowUserMenu(false); } },
+                        { icon: Settings, label: "Configuración", action: () => { setModule("settings"); setShowUserMenu(false); } },
+                      ].map(item => (
+                        <button key={item.label} onClick={item.action}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors text-left"
+                          style={{ color: "var(--lf-text-secondary)" }}
+                          onMouseEnter={e => e.currentTarget.style.background = "var(--lf-bg-elevated-dim)"}
+                          onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                          <item.icon size={15} style={{ opacity: 0.7 }} />
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div style={{ borderTop: "1px solid var(--lf-border)" }}>
+                      <button onClick={() => setShowUserMenu(false)}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors text-left"
+                        style={{ color: "#ef4444" }}
+                        onMouseEnter={e => e.currentTarget.style.background = "var(--lf-bg-elevated-dim)"}
+                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                        <LogOut size={15} style={{ opacity: 0.7 }} />
+                        Cerrar sesión
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </header>
@@ -4462,6 +4649,8 @@ function LexFlowShell() {
         <main className="flex-1 overflow-hidden flex flex-col">
           {module === "dashboard"
             ? <div className="flex-1 overflow-y-auto"><Dashboard onNav={setModule} /></div>
+            : module === "settings"
+            ? <SettingsPage />
             : module === "jurisprudencia"
             ? <JurisprudenciaModule />
             : module === "firmas"
