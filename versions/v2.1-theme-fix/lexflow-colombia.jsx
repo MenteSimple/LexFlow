@@ -1815,22 +1815,6 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
   const handleFile = (file) => {
     if (!file) return;
     setUploadedFile({ name: file.name, size: file.size, type: file.type });
-    /* ── Auto-detect document type from filename ── */
-    const fname = file.name.toLowerCase();
-    const detectionMap = [
-      { keywords: ["nda", "confidencialidad", "no.divulgacion", "no divulgacion", "non.disclosure"], type: "NDA" },
-      { keywords: ["servicio", "service", "prestacion"], type: "Contrato de Servicios" },
-      { keywords: ["laboral", "trabajo", "empleo", "employment"], type: "Contrato Laboral" },
-      { keywords: ["arriendo", "arrendamiento", "alquiler", "lease", "rent"], type: "Contrato de Arrendamiento" },
-      { keywords: ["compraventa", "venta", "sale", "purchase"], type: "Compraventa" },
-      { keywords: ["licencia", "license", "software"], type: "Licencia de Software" },
-      { keywords: ["poder", "mandato", "representacion"], type: "Poder / Mandato" },
-    ];
-    const detected = detectionMap.find(d => d.keywords.some(k => fname.includes(k)));
-    if (detected && currentPractice?.docTypes?.includes(detected.type)) {
-      setDocType(detected.type);
-      showToast(`Tipo detectado: ${detected.type}`, "info");
-    }
     const reader = new FileReader();
     reader.onload = (ev) => {
       const raw = ev.target.result;
@@ -2197,166 +2181,7 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
           {/* ── State 2: Active function — REVIEW (full analysis engine) ── */}
           {currentPractice && activeFunction === "review" && (
             <div className="flex flex-1" style={{ minHeight: 0 }}>
-
-              {/* ═══ NEW: Centered input experience (no results yet, not analyzing) ═══ */}
-              {!results && !analyzing && (
-                <div className="flex-1 overflow-y-auto" style={{ backgroundColor: "var(--lf-bg-deep)" }}>
-                  <div className="flex flex-col items-center justify-center min-h-full px-6 py-12 lf-fadeUp" style={{ maxWidth: 620, margin: "0 auto" }}>
-                    {/* Header */}
-                    <div style={{ width: 72, height: 72, borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center", background: `${currentPractice.color}0D`, border: `1.5px dashed ${currentPractice.color}30`, marginBottom: 16 }}>
-                      <FileSearch size={32} style={{ color: currentPractice.color }} />
-                    </div>
-                    <h3 className="text-white font-bold" style={{ fontSize: 20, marginBottom: 6 }}>Revisar Contrato / Documento</h3>
-                    <p style={{ color: "var(--lf-text-muted)", fontSize: 13, marginBottom: 32, textAlign: "center", maxWidth: 420 }}>
-                      Carga un documento o pega texto para obtener un análisis legal completo con IA.
-                    </p>
-
-                    {/* Step 1 — Document type as horizontal pills */}
-                    <div style={{ width: "100%", marginBottom: 24 }}>
-                      <p style={{ color: "var(--lf-text-muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.12em", fontWeight: 600, marginBottom: 10 }}>
-                        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: "50%", backgroundColor: `${currentPractice.color}20`, color: currentPractice.color, fontSize: 10, fontWeight: 700, marginRight: 6 }}>1</span>
-                        Tipo de Documento
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {currentPractice.docTypes.map(t => {
-                          const active = docType === t;
-                          return (
-                            <button key={t} onClick={() => handleDocTypeChange(t)}
-                              className="px-3.5 py-2 rounded-xl text-xs transition-all lf-hover-glow"
-                              style={{
-                                backgroundColor: active ? `${currentPractice.color}15` : "var(--lf-bg-card-subtle)",
-                                color: active ? "var(--lf-text-primary)" : "var(--lf-text-muted)",
-                                border: active ? `1px solid ${currentPractice.color}35` : "1px solid var(--lf-bg-elevated-border)",
-                                fontWeight: active ? 600 : 400, fontSize: 12,
-                              }}>
-                              {active && <span style={{ display: "inline-block", width: 5, height: 5, borderRadius: "50%", backgroundColor: currentPractice.color, marginRight: 6 }} />}
-                              {t}
-                            </button>
-                          );
-                        })}
-                        {/* Otro pill */}
-                        {(() => {
-                          const isOtro = !currentPractice.docTypes.includes(docType);
-                          return (
-                            <>
-                              <button onClick={() => { setDocType(customDocType || "Otro"); setText(SAMPLE_TEXT["NDA"] || ""); }}
-                                className="px-3.5 py-2 rounded-xl text-xs transition-all lf-hover-glow"
-                                style={{
-                                  backgroundColor: isOtro ? `${currentPractice.color}15` : "var(--lf-bg-card-subtle)",
-                                  color: isOtro ? "var(--lf-text-primary)" : "var(--lf-text-muted)",
-                                  border: isOtro ? `1px solid ${currentPractice.color}35` : "1px solid var(--lf-bg-elevated-border)",
-                                  fontWeight: isOtro ? 600 : 400, fontSize: 12,
-                                }}>
-                                {isOtro && <span style={{ display: "inline-block", width: 5, height: 5, borderRadius: "50%", backgroundColor: currentPractice.color, marginRight: 6 }} />}
-                                Otro
-                              </button>
-                              {isOtro && (
-                                <input type="text" value={customDocType} onChange={e => { setCustomDocType(e.target.value); setDocType(e.target.value || "Otro"); }}
-                                  placeholder="Nombre del documento..."
-                                  className="px-3 py-2 rounded-xl text-xs outline-none"
-                                  style={{ backgroundColor: "var(--lf-bg-card-subtle)", border: `1px solid ${currentPractice.color}25`, color: "var(--lf-text-primary)", fontSize: 12, width: 180 }} />
-                              )}
-                            </>
-                          );
-                        })()}
-                      </div>
-                    </div>
-
-                    {/* Step 2 — Upload area (full width) */}
-                    <div style={{ width: "100%", marginBottom: 24 }}>
-                      <p style={{ color: "var(--lf-text-muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.12em", fontWeight: 600, marginBottom: 10 }}>
-                        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: "50%", backgroundColor: `${currentPractice.color}20`, color: currentPractice.color, fontSize: 10, fontWeight: 700, marginRight: 6 }}>2</span>
-                        Cargar Documento o Pegar Texto
-                      </p>
-                      {!uploadedFile ? (
-                        <div onDragOver={(e) => { e.preventDefault(); setDragOver(true); }} onDragLeave={() => setDragOver(false)} onDrop={handleDrop}
-                          className="relative rounded-2xl p-8 text-center transition-all cursor-pointer lf-hover-lift"
-                          style={{ border: `2px dashed ${dragOver ? currentPractice.color : "var(--lf-bg-elevated-dim)"}`, backgroundColor: dragOver ? `${currentPractice.color}08` : "var(--lf-bg-card-faint)" }}
-                          onClick={() => document.getElementById("lexflow-file-input").click()}>
-                          <input id="lexflow-file-input" type="file" className="hidden" accept=".pdf,.docx,.doc,.txt,.rtf" onChange={handleFileInput} />
-                          <Upload size={28} style={{ color: dragOver ? currentPractice.color : "var(--lf-text-faint)", margin: "0 auto 12px" }} />
-                          <p className="text-white font-semibold" style={{ fontSize: 14 }}>Arrastra un archivo aquí</p>
-                          <p style={{ color: "var(--lf-text-faint)", fontSize: 12, marginTop: 6 }}>o <span style={{ color: currentPractice.color, fontWeight: 600 }}>haz clic para seleccionar</span> · PDF, DOCX, TXT</p>
-                        </div>
-                      ) : (
-                        <div className="rounded-2xl p-4 flex items-center gap-4 lf-scaleIn"
-                          style={{ background: `linear-gradient(135deg, ${currentPractice.color}0D 0%, ${currentPractice.color}06 100%)`, border: `1px solid ${currentPractice.color}25` }}>
-                          <div className="p-3 rounded-xl" style={{ backgroundColor: `${currentPractice.color}15` }}>
-                            <FileText size={20} style={{ color: currentPractice.color }} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white font-semibold truncate" style={{ fontSize: 13 }}>{uploadedFile.name}</p>
-                            <p style={{ color: "var(--lf-text-muted)", fontSize: 11, marginTop: 2 }}>{(uploadedFile.size / 1024).toFixed(1)} KB · Listo para análisis</p>
-                          </div>
-                          <button onClick={clearUpload} className="p-2 rounded-xl lf-hover-lift" style={{ backgroundColor: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)" }}>
-                            <Trash2 size={14} style={{ color: "#f87171" }} />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Step 3 — Text input (always visible, not collapsible) */}
-                    <div style={{ width: "100%", marginBottom: 28 }}>
-                      <div className="flex items-center justify-between" style={{ marginBottom: 10 }}>
-                        <p style={{ color: "var(--lf-text-muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.12em", fontWeight: 600 }}>
-                          <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: "50%", backgroundColor: `${currentPractice.color}20`, color: currentPractice.color, fontSize: 10, fontWeight: 700, marginRight: 6 }}>3</span>
-                          Texto del Documento
-                        </p>
-                        {uploadedFile && <span style={{ color: currentPractice.color, fontSize: 10, fontWeight: 500 }}>Cargado desde archivo</span>}
-                      </div>
-                      <textarea value={text} onChange={e => setText(e.target.value)} rows={8}
-                        placeholder="Pega aquí el texto del contrato, cláusula o documento que deseas revisar..."
-                        className="w-full rounded-2xl p-4 text-sm leading-relaxed outline-none resize-none transition-all"
-                        style={{ backgroundColor: "var(--lf-bg-card-subtle)", border: `1px solid ${text.trim() ? `${currentPractice.color}30` : "var(--lf-bg-elevated-dim)"}`, color: "var(--lf-text-primary)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 12, lineHeight: 1.7, minHeight: 160 }} />
-                      {text.trim() && (
-                        <p style={{ color: "var(--lf-text-faint)", fontSize: 10, marginTop: 6, textAlign: "right" }}>{text.length.toLocaleString()} caracteres</p>
-                      )}
-                    </div>
-
-                    {/* CTA — Analyze button (prominent, centered) */}
-                    <button onClick={analyze} disabled={!text.trim()}
-                      className="w-full py-4 rounded-2xl text-sm font-bold flex items-center justify-center gap-3 lf-hover-lift transition-all"
-                      style={{
-                        maxWidth: 400,
-                        background: !text.trim() ? "var(--lf-disabled-bg)" : `linear-gradient(135deg, ${currentPractice.color} 0%, ${currentPractice.color}cc 100%)`,
-                        color: !text.trim() ? "var(--lf-text-faint)" : "#fff",
-                        cursor: !text.trim() ? "not-allowed" : "pointer",
-                        boxShadow: !text.trim() ? "none" : `0 8px 32px ${currentPractice.color}55`,
-                        fontSize: 14, position: "relative", overflow: "hidden",
-                      }}>
-                      <Zap size={17} /> Analizar con IA
-                    </button>
-                    <p style={{ color: "var(--lf-text-faint)", fontSize: 11, marginTop: 10, textAlign: "center" }}>
-                      El análisis revisa riesgos, obligaciones, cumplimiento normativo y genera recomendaciones.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* ═══ Analyzing state — full-width spinner ═══ */}
-              {analyzing && (
-                <div className="flex-1 overflow-y-auto" style={{ backgroundColor: "var(--lf-bg-deep)" }}>
-                  <div className="flex flex-col items-center justify-center h-full gap-6 lf-fadeUp" style={{ padding: "0 48px" }}>
-                    <div style={{ position: "relative", width: 80, height: 80 }}>
-                      <div className="w-20 h-20 border-4 rounded-full animate-spin" style={{ borderColor: `${currentPractice.color}22`, borderTopColor: currentPractice.color }} />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span style={{ color: currentPractice.color, fontSize: 14, fontWeight: 700 }}>{Math.round(analyzeProgress)}%</span>
-                      </div>
-                    </div>
-                    <p className="text-white font-semibold" style={{ fontSize: 16 }}>{loadMsg}</p>
-                    <div style={{ width: "100%", maxWidth: 320 }}>
-                      <div style={{ height: 4, borderRadius: 4, backgroundColor: "var(--lf-bg-elevated-trans)", overflow: "hidden" }}>
-                        <div style={{ height: "100%", width: `${analyzeProgress}%`, backgroundColor: currentPractice.color, borderRadius: 4, transition: "width 0.5s ease" }} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* ═══ Results mode — collapsible input sidebar + results area ═══ */}
-              {!analyzing && results && (
-              <>
-              {/* Input sub-panel — collapsible (only shown after results) */}
+              {/* Input sub-panel — collapsible */}
               <div className="flex flex-col flex-shrink-0 overflow-y-auto border-r transition-all"
                 style={{ width: inputPanelOpen ? 300 : 44, backgroundColor: "var(--lf-bg-ink)", borderColor: "var(--lf-bg-elevated-border)" }}>
                 <button onClick={() => setInputPanelOpen(!inputPanelOpen)}
@@ -2387,6 +2212,7 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                           </button>
                         );
                       })}
+                      {/* "Otro" option */}
                       {(() => {
                         const isOtro = !currentPractice.docTypes.includes(docType);
                         return (
@@ -2443,16 +2269,30 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                     )}
                   </div>
 
-                  {/* Quick text input — always visible in sidebar */}
+                  {/* Quick text input for clause review — collapsible */}
                   <div>
-                    <p style={{ color: "var(--lf-text-muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600, marginBottom: 8 }}>Texto del Documento</p>
-                    <textarea value={text} onChange={e => setText(e.target.value)} rows={5}
-                      placeholder="Pega aquí una cláusula, artículo o texto específico para revisar..."
-                      className="w-full rounded-xl p-3.5 text-xs leading-relaxed outline-none resize-none"
-                      style={{ backgroundColor: "var(--lf-bg-card-subtle)", border: "1px solid var(--lf-bg-elevated-dim)", color: "var(--lf-text-primary)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 11.5, lineHeight: 1.7 }} />
+                    <button onClick={() => setShowTextInput(!showTextInput)} className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl lf-hover-lift"
+                      style={{ backgroundColor: showTextInput ? `${currentPractice.color}08` : "var(--lf-bg-card-dim)", border: `1px solid ${showTextInput ? `${currentPractice.color}20` : "var(--lf-bg-elevated-trans)"}` }}>
+                      <div className="flex items-center gap-2">
+                        <PenTool size={12} style={{ color: showTextInput ? currentPractice.color : "var(--lf-text-faint)" }} />
+                        <span style={{ color: showTextInput ? "var(--lf-text-primary)" : "var(--lf-text-secondary)", fontSize: 11.5, fontWeight: 500 }}>Pegar texto para revisión</span>
+                      </div>
+                      <ChevronDown size={13} style={{ color: "var(--lf-text-faint)", transform: showTextInput ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }} />
+                    </button>
+                    {showTextInput && (
+                      <div className="mt-2 lf-fadeUp">
+                        <p style={{ color: "var(--lf-text-faint)", fontSize: 11, marginBottom: 8, lineHeight: 1.5 }}>
+                          Pega una cláusula o texto específico para análisis rápido.
+                        </p>
+                        <textarea value={text} onChange={e => setText(e.target.value)} rows={5}
+                          placeholder="Pega aquí una cláusula, artículo o texto específico para revisar..."
+                          className="w-full rounded-xl p-3.5 text-xs leading-relaxed outline-none resize-none"
+                          style={{ backgroundColor: "var(--lf-bg-card-subtle)", border: "1px solid var(--lf-bg-elevated-dim)", color: "var(--lf-text-primary)", fontFamily: "'JetBrains Mono', ui-monospace, monospace", fontSize: 11.5, lineHeight: 1.7 }} />
+                      </div>
+                    )}
                   </div>
 
-                  {/* Re-analyze button */}
+                  {/* Analyze button */}
                   <button onClick={analyze} disabled={analyzing || !text.trim()}
                     className="w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2.5 lf-hover-lift"
                     style={{
@@ -2462,7 +2302,11 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                       boxShadow: analyzing || !text.trim() ? "none" : `0 6px 24px ${currentPractice.color}55`,
                       fontSize: 13, position: "relative", overflow: "hidden",
                     }}>
-                    <Zap size={15} /> Re-analizar
+                    {analyzing ? (
+                      <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /><span>Analizando...</span>
+                        <div style={{ position: "absolute", bottom: 0, left: 0, height: 3, width: `${analyzeProgress}%`, backgroundColor: "rgba(255,255,255,0.4)", transition: "width 0.4s ease" }} />
+                      </>
+                    ) : <><Zap size={15} /> Analizar con IA</>}
                   </button>
                 </div>}
               </div>
@@ -2471,6 +2315,32 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
               <div className="flex flex-1" style={{ minHeight: 0 }}>
               {/* Results sub-panel */}
               <div className="flex-1 overflow-y-auto" style={{ backgroundColor: "var(--lf-bg-deep)" }}>
+                {analyzing && (
+                  <div className="flex flex-col items-center justify-center h-full gap-6 lf-fadeUp" style={{ padding: "0 48px" }}>
+                    <div style={{ position: "relative", width: 80, height: 80 }}>
+                      <div className="w-20 h-20 border-4 rounded-full animate-spin" style={{ borderColor: `${currentPractice.color}22`, borderTopColor: currentPractice.color }} />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span style={{ color: currentPractice.color, fontSize: 14, fontWeight: 700 }}>{Math.round(analyzeProgress)}%</span>
+                      </div>
+                    </div>
+                    <p className="text-white font-semibold" style={{ fontSize: 16 }}>{loadMsg}</p>
+                    <div style={{ width: "100%", maxWidth: 320 }}>
+                      <div style={{ height: 4, borderRadius: 4, backgroundColor: "var(--lf-bg-elevated-trans)", overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${analyzeProgress}%`, backgroundColor: currentPractice.color, borderRadius: 4, transition: "width 0.5s ease" }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!analyzing && !results && (
+                  <div className="flex flex-col items-center justify-center h-full gap-5 text-center px-16 lf-fadeUp">
+                    <div style={{ width: 80, height: 80, borderRadius: 22, display: "flex", alignItems: "center", justifyContent: "center", background: `${currentPractice.color}0D`, border: `1.5px dashed ${currentPractice.color}30` }}>
+                      <Eye size={36} style={{ color: currentPractice.color }} />
+                    </div>
+                    <h3 className="text-white font-bold" style={{ fontSize: 18 }}>Listo para Revisar</h3>
+                    <p style={{ color: "var(--lf-text-muted)", fontSize: 13, maxWidth: 360 }}>Carga un documento y presiona <span style={{ color: currentPractice.color, fontWeight: 600 }}>Analizar con IA</span> para obtener el análisis completo.</p>
+                  </div>
+                )}
 
                 {!analyzing && results && (
                   <div className="p-6 space-y-5">
@@ -3135,8 +3005,6 @@ const ContratosModule = ({ initialPracticeArea = null }) => {
                 </div>
               )}
               </div>{/* close Results + Viewer container */}
-              </>
-              )}
             </div>
           )}
 
