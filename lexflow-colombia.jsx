@@ -12,7 +12,10 @@ import {
   Upload, Mail, Wifi, WifiOff, ArrowLeftRight, FileDown, Eye, Trash2, FilePlus2,
   Users, Lightbulb, ChevronLeft, BarChart3, Sparkles, ScrollText, ClipboardCheck, Target,
   RefreshCw, AlignLeft, AlignCenter, AlignRight, List, Save,
-  Sun, Moon, Monitor, Settings, LogOut, Palette, ArrowLeft
+  Sun, Moon, Monitor, Settings, LogOut, Palette, ArrowLeft,
+  Gavel, HeartPulse, Calculator, Globe, Landmark, TrendingUp,
+  FileCheck, ShieldAlert, Database, Truck, Receipt, Banknote,
+  Handshake, Network, Home, Package, Stamp, CreditCard
 } from "lucide-react";
 
 // ─── THEME SYSTEM ────────────────────────────────────────────────────────────
@@ -138,6 +141,236 @@ const SIDEBAR_FUNCTIONS = [
   { id: "checklist", name: "Checklist de Revisión", icon: ListChecks },
   { id: "export", name: "Exportar Informe", icon: FileDown },
 ];
+
+// ─── PRACTICE-SPECIFIC FUNCTIONS (Section A per practice) ─────────────────────
+const PRACTICE_FUNCTIONS = {
+  laboral: [
+    { id: "liquidacion",   name: "Liquidar Prestaciones",      icon: Calculator,   desc: "Cesantías, primas, vacaciones" },
+    { id: "despido",       name: "Evaluar Despido",            icon: ShieldAlert,  desc: "Justa causa / Indemnización" },
+    { id: "estabilidad",   name: "Fuero de Estabilidad",       icon: Shield,       desc: "Reforzada por salud, maternidad" },
+    { id: "jornada",       name: "Auditar Jornada",            icon: Clock,        desc: "Horas extra, recargos, turnos" },
+    { id: "sst",           name: "Checklist SST",              icon: HeartPulse,   desc: "SG-SST / ARL / COPASST" },
+  ],
+  comercial: [
+    { id: "garantias",     name: "Revisar Garantías",          icon: ShieldCheck,  desc: "Vicios ocultos, saneamiento" },
+    { id: "pagares",       name: "Generar Pagaré / Letra",     icon: Receipt,      desc: "Títulos valor + endoso" },
+    { id: "societario",    name: "Actas Societarias",          icon: Building2,    desc: "Junta, asamblea, reformas" },
+    { id: "compraventa",   name: "Compraventa Mercantil",      icon: Handshake,    desc: "Condiciones, precio, entrega" },
+  ],
+  penal: [
+    { id: "denuncia",      name: "Redactar Denuncia",          icon: FileText,     desc: "Querella / denuncia penal" },
+    { id: "prescripcion",  name: "Calcular Prescripción",      icon: Clock,        desc: "Términos según delito" },
+    { id: "preacuerdo",    name: "Evaluar Preacuerdo",         icon: Handshake,    desc: "Negociación con fiscalía" },
+    { id: "medidas",       name: "Medidas Cautelares",         icon: ShieldAlert,  desc: "Detención, libertad, cauciones" },
+  ],
+  civil: [
+    { id: "demanda",       name: "Elaborar Demanda",           icon: Gavel,        desc: "Ordinario, verbal, ejecutivo" },
+    { id: "terminos",      name: "Controlar Términos",         icon: Clock,        desc: "Caducidad y prescripción" },
+    { id: "bienes",        name: "Registro de Bienes",         icon: Home,         desc: "Inmuebles, vehículos, otros" },
+    { id: "ejecutivo",     name: "Proceso Ejecutivo",          icon: Banknote,     desc: "Títulos, embargo, secuestro" },
+    { id: "sucesiones",    name: "Sucesiones",                 icon: Users,        desc: "Inventario, partición" },
+  ],
+  tributario: [
+    { id: "declaraciones", name: "Preparar Declaración",       icon: FileCheck,    desc: "Renta, IVA, retención" },
+    { id: "plazos",        name: "Calendario Fiscal",          icon: Clock,        desc: "Vencimientos DIAN" },
+    { id: "beneficios",    name: "Beneficios Tributarios",     icon: TrendingUp,   desc: "Zona franca, incentivos" },
+    { id: "requerimientos",name: "Responder Requerimiento",    icon: Mail,         desc: "DIAN, Secretaría" },
+    { id: "precios",       name: "Precios de Transferencia",   icon: Globe,        desc: "Vinculados económicos" },
+  ],
+  pi: [
+    { id: "registro",      name: "Registrar Marca / Patente",  icon: Stamp,        desc: "SIC, OMPI, Madrid" },
+    { id: "vigilancia",    name: "Vigilancia Tecnológica",     icon: Search,       desc: "Monitoreo de registros" },
+    { id: "licencia",      name: "Contratos de Licencia",      icon: FileText,     desc: "Regalías, territorio, plazo" },
+    { id: "infraccion",    name: "Análisis de Infracción",     icon: AlertTriangle,desc: "Competencia desleal, plagio" },
+  ],
+  "compliance-reg": [
+    { id: "sagrilaft",     name: "SAGRILAFT / PTEE",           icon: ShieldCheck,  desc: "Matrices LA/FT" },
+    { id: "pep",           name: "Consulta PEP",               icon: Users,        desc: "Personas expuestas políticamente" },
+    { id: "debida",        name: "Debida Diligencia",          icon: Search,       desc: "KYC / KYB ampliada" },
+    { id: "reportes",      name: "Reportes UIAF",              icon: FileDown,     desc: "ROS, ausencia de reporte" },
+    { id: "programas",     name: "Programa de Cumplimiento",   icon: ClipboardCheck, desc: "Oficial, políticas, capacitación" },
+  ],
+  empresas: [
+    { id: "constitucion",  name: "Constituir Sociedad",        icon: Building2,    desc: "SAS, Ltda, S.A." },
+    { id: "kyb",           name: "Screening KYB",              icon: Database,     desc: "RUES, listas restrictivas" },
+    { id: "reformas",      name: "Reformas Estatutarias",      icon: FileText,     desc: "Capital, objeto, fusiones" },
+    { id: "contratos-emp", name: "Contratos Empresariales",    icon: Briefcase,    desc: "Joint venture, asociación" },
+    { id: "gobierno",      name: "Gobierno Corporativo",       icon: Landmark,     desc: "Junta directiva, comités" },
+  ],
+};
+
+// ─── PRACTICE PAGE DATA (KPIs, portfolio, intel per area) ──────────────────
+const PRACTICE_PAGE_DATA = {
+  laboral: {
+    title: "Derecho Laboral",
+    subtitle: "Gestión de relaciones laborales, contratos y prestaciones — CST & Seguridad Social",
+    kpis: [
+      { label: "Contratos Activos", value: "47", trend: "+3", color: "#f59e0b" },
+      { label: "Liquidaciones Pendientes", value: "5", trend: "-2", color: "#ef4444" },
+      { label: "Fueros Activos", value: "8", trend: "0", color: "#8b5cf6" },
+      { label: "Score Cumplimiento SST", value: "87%", trend: "+4%", color: "#22c55e" },
+    ],
+    portfolio: [
+      { id: "L001", title: "Contrato Laboral — Juan Pérez", type: "Indefinido", risk: "alto", date: "2025-03-01", status: "revisión" },
+      { id: "L002", title: "Liquidación Prestaciones — María López", type: "Liquidación", risk: "medio", date: "2025-02-28", status: "en proceso" },
+      { id: "L003", title: "Demanda Laboral — Sindicato vs. CorpXYZ", type: "Litigio", risk: "alto", date: "2025-02-20", status: "activo" },
+      { id: "L004", title: "Contrato Obra — Proyecto Andino", type: "Obra/Labor", risk: "bajo", date: "2025-03-05", status: "firmado" },
+      { id: "L005", title: "Reglamento Interno de Trabajo", type: "Regulatorio", risk: "medio", date: "2025-01-15", status: "borrador" },
+    ],
+    intel: [
+      { title: "Ley 2191/2022 — Desconexión Laboral", desc: "Derecho a no ser contactado fuera de jornada. Multas de 1-5 SMMLV.", tag: "Legislación", date: "Vigente" },
+      { title: "Decreto 649/2022 — Teletrabajo", desc: "Reglamenta modalidades de trabajo remoto y auxilio de conectividad.", tag: "Regulación", date: "Vigente" },
+      { title: "SU-420/19 — Estabilidad Reforzada", desc: "No requiere calificación PCL. Indemnización de 180 días.", tag: "Jurisprudencia", date: "2019" },
+    ],
+    normative: "CST Art. 22-75 (Contratos) · Art. 127-157 (Salario y Prestaciones) · Art. 161-168 (Jornada) · Ley 100/1993 (Seguridad Social) · Decreto 1072/2015 (SG-SST)"
+  },
+  comercial: {
+    title: "Derecho Comercial",
+    subtitle: "Contratos mercantiles, títulos valor, sociedades y operaciones comerciales — C.Co.",
+    kpis: [
+      { label: "Contratos Vigentes", value: "32", trend: "+5", color: "#3b82f6" },
+      { label: "Valor Portafolio", value: "$2.4B", trend: "+$180M", color: "#22c55e" },
+      { label: "Vencimientos 30d", value: "6", trend: "+1", color: "#f59e0b" },
+      { label: "Score Riesgo", value: "72", trend: "+3", color: "#3b82f6" },
+    ],
+    portfolio: [
+      { id: "C001", title: "Compraventa Mercantil — DistribuidoraSAS", type: "Compraventa", risk: "alto", date: "2025-03-01", status: "revisión" },
+      { id: "C002", title: "Contrato de Distribución — RetailCO", type: "Distribución", risk: "medio", date: "2025-02-15", status: "firmado" },
+      { id: "C003", title: "Contrato de Franquicia — BrandX", type: "Franquicia", risk: "bajo", date: "2025-01-20", status: "activo" },
+      { id: "C004", title: "Contrato de Agencia — LogísticaPlus", type: "Agencia", risk: "medio", date: "2025-03-04", status: "borrador" },
+    ],
+    intel: [
+      { title: "Ley 2294/2023 — Nuevo PND", desc: "Impactos en contratación estatal y TLC vigentes.", tag: "Legislación", date: "2023" },
+      { title: "Art. 934 C.Co. — Vicios Ocultos", desc: "Responsabilidad del vendedor por vicios no aparentes.", tag: "Normativa", date: "Vigente" },
+    ],
+    normative: "C.Co. Art. 1-9 (Actos de Comercio) · Art. 619-821 (Títulos Valor) · Art. 864-980 (Obligaciones Mercantiles) · Ley 1116/2006 (Insolvencia)"
+  },
+  penal: {
+    title: "Derecho Penal",
+    subtitle: "Gestión de procesos penales, denuncias, preacuerdos y medidas cautelares — C.P. & C.P.P.",
+    kpis: [
+      { label: "Procesos Activos", value: "14", trend: "+2", color: "#ef4444" },
+      { label: "Audiencias 30d", value: "9", trend: "+3", color: "#f59e0b" },
+      { label: "Preacuerdos Pendientes", value: "3", trend: "0", color: "#8b5cf6" },
+      { label: "Prescripciones Próximas", value: "2", trend: "-1", color: "#ef4444" },
+    ],
+    portfolio: [
+      { id: "P001", title: "Caso — Estafa Financiera GlobalCorp", type: "Estafa", risk: "alto", date: "2025-02-10", status: "instrucción" },
+      { id: "P002", title: "Denuncia — Hurto Calificado Bodega Sur", type: "Hurto", risk: "medio", date: "2025-03-02", status: "indagación" },
+      { id: "P003", title: "Preacuerdo — Peculado Municipio Norte", type: "Peculado", risk: "alto", date: "2025-01-30", status: "negociación" },
+    ],
+    intel: [
+      { title: "Ley 906/2004 — Sistema Penal Acusatorio", desc: "Marco procesal para audiencias orales y preacuerdos.", tag: "Normativa", date: "Vigente" },
+      { title: "Sentencia SP-123/2024", desc: "Nueva línea sobre prescripción en delitos financieros.", tag: "Jurisprudencia", date: "2024" },
+    ],
+    normative: "Ley 599/2000 (C.P.) · Ley 906/2004 (C.P.P.) · Ley 1142/2007 (Reforma) · Art. 82-86 C.P. (Prescripción)"
+  },
+  civil: {
+    title: "Derecho Civil",
+    subtitle: "Procesos civiles, responsabilidad, bienes, sucesiones y obligaciones — C.C. & C.G.P.",
+    kpis: [
+      { label: "Procesos Activos", value: "23", trend: "+1", color: "#8b5cf6" },
+      { label: "Valor en Litigio", value: "$890M", trend: "+$45M", color: "#f59e0b" },
+      { label: "Términos Próximos", value: "7", trend: "+2", color: "#ef4444" },
+      { label: "Ejecutivos en Cobro", value: "11", trend: "-1", color: "#22c55e" },
+    ],
+    portfolio: [
+      { id: "CV001", title: "Proceso Ejecutivo — Pagaré ABC Corp", type: "Ejecutivo", risk: "bajo", date: "2025-03-01", status: "cobro" },
+      { id: "CV002", title: "Responsabilidad Civil — Accidente Vial", type: "Resp. Civil", risk: "alto", date: "2025-02-18", status: "pruebas" },
+      { id: "CV003", title: "Sucesión — Familia Rodríguez", type: "Sucesión", risk: "medio", date: "2025-01-10", status: "inventario" },
+      { id: "CV004", title: "Arrendamiento — Local 4B Chapinero", type: "Arrendamiento", risk: "medio", date: "2025-03-05", status: "revisión" },
+    ],
+    intel: [
+      { title: "Ley 1564/2012 — CGP", desc: "Código General del Proceso — oralidad y términos.", tag: "Normativa", date: "Vigente" },
+      { title: "Art. 2536 C.C. — Prescripción", desc: "Ordinaria 10 años, especiales según tipo de acción.", tag: "Normativa", date: "Vigente" },
+    ],
+    normative: "C.C. Art. 1494-2063 (Obligaciones) · Art. 2341-2360 (Resp. Civil) · Ley 1564/2012 (C.G.P.) · Ley 820/2003 (Arrendamiento)"
+  },
+  tributario: {
+    title: "Derecho Tributario",
+    subtitle: "Declaraciones, planeación fiscal, beneficios tributarios y requerimientos — E.T. & DIAN",
+    kpis: [
+      { label: "Clientes Activos", value: "38", trend: "+4", color: "#10b981" },
+      { label: "Declaraciones Pendientes", value: "12", trend: "+8", color: "#ef4444" },
+      { label: "Ahorro Fiscal Generado", value: "$320M", trend: "+$45M", color: "#22c55e" },
+      { label: "Requerimientos DIAN", value: "3", trend: "-1", color: "#f59e0b" },
+    ],
+    portfolio: [
+      { id: "T001", title: "Declaración Renta — TechCorp SAS 2024", type: "Renta", risk: "bajo", date: "2025-04-15", status: "preparación" },
+      { id: "T002", title: "Requerimiento DIAN — IndustrialXYZ", type: "Requerimiento", risk: "alto", date: "2025-03-10", status: "respuesta" },
+      { id: "T003", title: "Planeación Fiscal — Grupo Andino", type: "Planeación", risk: "medio", date: "2025-02-01", status: "en proceso" },
+      { id: "T004", title: "Precios Transferencia — ExportCO", type: "Transfer Pricing", risk: "medio", date: "2025-06-30", status: "recolección" },
+    ],
+    intel: [
+      { title: "Reforma Tributaria 2022 (Ley 2277)", desc: "Cambios en tarifa renta, dividendos, zonas francas.", tag: "Legislación", date: "2023" },
+      { title: "Calendario DIAN 2025", desc: "Vencimientos declaración renta personas jurídicas abril-mayo.", tag: "Regulación", date: "2025" },
+    ],
+    normative: "E.T. Art. 1-920 · Ley 2277/2022 (Reforma) · Decreto 1625/2016 (Reglamentario) · Resoluciones DIAN vigentes"
+  },
+  pi: {
+    title: "Propiedad Intelectual",
+    subtitle: "Marcas, patentes, derechos de autor, licencias y vigilancia tecnológica — Dec. Andino 486",
+    kpis: [
+      { label: "Marcas Registradas", value: "24", trend: "+2", color: "#06b6d4" },
+      { label: "Solicitudes Pendientes", value: "6", trend: "+1", color: "#f59e0b" },
+      { label: "Licencias Activas", value: "9", trend: "0", color: "#22c55e" },
+      { label: "Alertas de Infracción", value: "2", trend: "+1", color: "#ef4444" },
+    ],
+    portfolio: [
+      { id: "PI001", title: "Marca 'InnoTech' — Clase 9 SIC", type: "Marca", risk: "bajo", date: "2025-01-20", status: "registrada" },
+      { id: "PI002", title: "Patente — Proceso Industrial ABC", type: "Patente", risk: "medio", date: "2025-03-01", status: "examen" },
+      { id: "PI003", title: "Licencia Software — CloudServ", type: "Licencia", risk: "bajo", date: "2025-02-15", status: "activa" },
+      { id: "PI004", title: "Oposición — Marca confusible 'InoTek'", type: "Oposición", risk: "alto", date: "2025-03-08", status: "trámite" },
+    ],
+    intel: [
+      { title: "Decisión Andina 486", desc: "Régimen común de Propiedad Industrial en la CAN.", tag: "Normativa", date: "Vigente" },
+      { title: "Ley 23/1982 — Derechos de Autor", desc: "Protección de obras literarias, artísticas y software.", tag: "Normativa", date: "Vigente" },
+    ],
+    normative: "Dec. Andino 486 (PI Industrial) · Ley 23/1982 (Derechos de Autor) · Dec. 2591/2000 (SIC) · Protocolo Madrid (Marcas Internacionales)"
+  },
+  "compliance-reg": {
+    title: "Compliance & Regulatorio",
+    subtitle: "SAGRILAFT, PTEE, debida diligencia, PEP y reportes UIAF — Circular Externa 100-000016",
+    kpis: [
+      { label: "Clientes Evaluados", value: "156", trend: "+12", color: "#f43f5e" },
+      { label: "Alertas Activas", value: "7", trend: "-3", color: "#ef4444" },
+      { label: "PEP Identificados", value: "4", trend: "+1", color: "#f59e0b" },
+      { label: "Score Cumplimiento", value: "92%", trend: "+2%", color: "#22c55e" },
+    ],
+    portfolio: [
+      { id: "CMP001", title: "Debida Diligencia — Proveedor NuevoCO", type: "KYC/KYB", risk: "medio", date: "2025-03-05", status: "en proceso" },
+      { id: "CMP002", title: "Reporte ROS — Operación Sospechosa", type: "UIAF", risk: "alto", date: "2025-03-01", status: "pendiente" },
+      { id: "CMP003", title: "Actualización Matriz SAGRILAFT", type: "SAGRILAFT", risk: "medio", date: "2025-02-20", status: "revisión" },
+      { id: "CMP004", title: "Capacitación Anual — Equipo Legal", type: "Capacitación", risk: "bajo", date: "2025-04-01", status: "programada" },
+    ],
+    intel: [
+      { title: "Circular 100-000016 Supersociedades", desc: "Lineamientos SAGRILAFT para empresas obligadas.", tag: "Regulación", date: "Vigente" },
+      { title: "Listas OFAC actualizadas", desc: "Verificación permanente contra listas restrictivas SDN.", tag: "Compliance", date: "Semanal" },
+    ],
+    normative: "Ley 1121/2006 (LA/FT) · Circular 100-000016 (SAGRILAFT) · Decreto 1674/2016 (PTEE) · Res. UIAF 2025"
+  },
+  empresas: {
+    title: "Derecho Empresarial",
+    subtitle: "Constitución, gobierno corporativo, fusiones, KYB y reformas estatutarias — Ley 1258/2008",
+    kpis: [
+      { label: "Sociedades Gestionadas", value: "18", trend: "+2", color: "#f97316" },
+      { label: "Reformas en Trámite", value: "3", trend: "+1", color: "#f59e0b" },
+      { label: "Due Diligence Activos", value: "2", trend: "0", color: "#3b82f6" },
+      { label: "Score Gobierno Corp.", value: "78%", trend: "+5%", color: "#22c55e" },
+    ],
+    portfolio: [
+      { id: "E001", title: "Constitución SAS — StartupDigital", type: "Constitución", risk: "bajo", date: "2025-03-01", status: "en trámite" },
+      { id: "E002", title: "Fusión — GrupoA + GrupoB", type: "M&A", risk: "alto", date: "2025-02-15", status: "due diligence" },
+      { id: "E003", title: "Reforma Estatutaria — IndustrialCO", type: "Reforma", risk: "medio", date: "2025-03-08", status: "borrador" },
+      { id: "E004", title: "Acta Junta Directiva — HoldingXYZ", type: "Gobierno Corp.", risk: "bajo", date: "2025-03-10", status: "programada" },
+    ],
+    intel: [
+      { title: "Ley 1258/2008 — Régimen SAS", desc: "Marco flexible para sociedades por acciones simplificadas.", tag: "Normativa", date: "Vigente" },
+      { title: "Decreto 398/2020 — RUES Digital", desc: "Simplificación de registro mercantil electrónico.", tag: "Regulación", date: "Vigente" },
+    ],
+    normative: "Ley 1258/2008 (SAS) · C.Co. Art. 98-514 (Sociedades) · Ley 222/1995 (Reforma Societaria) · Ley 1116/2006 (Insolvencia)"
+  },
+};
 
 const CONNECTORS = [
   { name: "DocuSign",   online: true,  sync: "5 min",  desc: "Flujos de firma activos" },
@@ -4361,6 +4594,161 @@ export default function LexFlowColombia() {
   );
 }
 
+/* ══════════════════════════════════════════════════════════════════════════════
+   PRACTICE PAGE — Universal 5-zone template for every practice area
+   Zone 1: KPIs  |  Zone 2: Quick Actions  |  Zone 3: Portfolio Table
+   Zone 4: Intel Feed  |  Zone 5: Normative Context
+   ══════════════════════════════════════════════════════════════════════════════ */
+function PracticePage({ practiceId, onSelectFunction }) {
+  const data = PRACTICE_PAGE_DATA[practiceId];
+  const practiceNav = NAV.find(n => n.id === practiceId);
+  const color = practiceNav?.color || "#6446E5";
+  const specificFns = PRACTICE_FUNCTIONS[practiceId] || [];
+  const [portfolioFilter, setPortfolioFilter] = useState("all");
+
+  if (!data) return <div className="p-8 text-center" style={{ color: "var(--lf-text-muted)" }}>No hay datos disponibles para esta práctica.</div>;
+
+  const filteredPortfolio = portfolioFilter === "all"
+    ? data.portfolio
+    : data.portfolio.filter(p => p.risk === portfolioFilter);
+
+  const riskColorMap = { alto: "#ef4444", medio: "#f59e0b", bajo: "#22c55e" };
+
+  return (
+    <div className="flex-1 overflow-y-auto">
+      {/* ── Header ── */}
+      <div className="px-6 pt-5 pb-4 border-b flex items-center justify-between flex-shrink-0"
+        style={{ borderColor: "var(--lf-border)", background: "var(--lf-bg-surface)" }}>
+        <div>
+          <h2 className="font-semibold text-lg flex items-center gap-2" style={{ color: "var(--lf-text-primary)" }}>
+            {practiceNav && <practiceNav.Icon size={20} style={{ color }} />}
+            {data.title}
+          </h2>
+          <p className="text-xs mt-0.5" style={{ color: "var(--lf-text-muted)" }}>{data.subtitle}</p>
+        </div>
+      </div>
+
+      <div className="p-6 space-y-6">
+        {/* ── Zone 1: KPIs ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {data.kpis.map((kpi, i) => (
+            <div key={i} className="rounded-xl border p-4" style={{ borderColor: "var(--lf-border)", background: "var(--lf-bg-card)" }}>
+              <p className="text-xs font-medium mb-1" style={{ color: "var(--lf-text-muted)" }}>{kpi.label}</p>
+              <p className="text-2xl font-bold" style={{ color: kpi.color || color }}>{kpi.value}</p>
+              {kpi.trend && (
+                <p className="text-[11px] mt-1 flex items-center gap-1" style={{ color: kpi.trend.startsWith("+") || kpi.trend.startsWith("↑") ? "#22c55e" : kpi.trend.startsWith("-") || kpi.trend.startsWith("↓") ? "#ef4444" : "var(--lf-text-faint)" }}>
+                  <TrendingUp size={10} />{kpi.trend}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* ── Zone 2: Quick Actions ── */}
+        <div>
+          <h3 className="text-xs uppercase tracking-widest font-semibold mb-3" style={{ color: "var(--lf-text-faint)" }}>Acciones Rápidas</h3>
+          <div className="flex flex-wrap gap-2">
+            {specificFns.map(fn => {
+              const FnIcon = fn.icon;
+              return (
+                <button key={fn.id} onClick={() => onSelectFunction && onSelectFunction(fn.id)}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-all hover:scale-[1.02]"
+                  style={{ background: `${color}15`, color, border: `1px solid ${color}30` }}
+                  title={fn.desc}>
+                  <FnIcon size={13} />{fn.name}
+                </button>
+              );
+            })}
+            {SIDEBAR_FUNCTIONS.map(fn => {
+              const FnIcon = fn.icon;
+              return (
+                <button key={fn.id} onClick={() => onSelectFunction && onSelectFunction(fn.id)}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-all hover:scale-[1.02]"
+                  style={{ background: "var(--lf-bg-elevated-trans)", color: "var(--lf-text-secondary)", border: "1px solid var(--lf-border)" }}>
+                  <FnIcon size={13} />{fn.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── Zone 3: Portfolio Table + Zone 4: Intel Feed — side by side on lg ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Portfolio Table (2/3) */}
+          <div className="lg:col-span-2 rounded-xl border overflow-hidden" style={{ borderColor: "var(--lf-border)", background: "var(--lf-bg-card)" }}>
+            <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: "var(--lf-border)" }}>
+              <h3 className="text-sm font-semibold" style={{ color: "var(--lf-text-primary)" }}>Portafolio Activo</h3>
+              <div className="flex gap-1">
+                {["all","alto","medio","bajo"].map(f => (
+                  <button key={f} onClick={() => setPortfolioFilter(f)}
+                    className="px-2.5 py-1 rounded-md text-[10px] font-medium transition-all"
+                    style={{
+                      background: portfolioFilter === f ? `${color}20` : "transparent",
+                      color: portfolioFilter === f ? color : "var(--lf-text-muted)",
+                      border: portfolioFilter === f ? `1px solid ${color}40` : "1px solid transparent"
+                    }}>
+                    {f === "all" ? "Todos" : f.charAt(0).toUpperCase() + f.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="divide-y" style={{ borderColor: "var(--lf-border)" }}>
+              {filteredPortfolio.length === 0 && (
+                <p className="text-center py-8 text-xs" style={{ color: "var(--lf-text-muted)" }}>Sin asuntos en esta categoría</p>
+              )}
+              {filteredPortfolio.map(item => (
+                <div key={item.id} className="flex items-center gap-4 px-5 py-3 hover:bg-white/[0.02] transition-colors cursor-pointer">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate" style={{ color: "var(--lf-text-primary)" }}>{item.title}</p>
+                    <p className="text-[11px] mt-0.5" style={{ color: "var(--lf-text-muted)" }}>{item.type}</p>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                    style={{ background: `${riskColorMap[item.risk] || "#64748b"}20`, color: riskColorMap[item.risk] || "#64748b" }}>
+                    {item.risk.toUpperCase()}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-medium"
+                    style={{ background: item.status === "activo" ? "rgba(34,197,94,0.12)" : item.status === "en revisión" ? "rgba(245,158,11,0.12)" : "rgba(100,116,139,0.12)", color: item.status === "activo" ? "#22c55e" : item.status === "en revisión" ? "#f59e0b" : "#94a3b8" }}>
+                    {item.status}
+                  </span>
+                  <span className="text-[10px] w-20 text-right" style={{ color: "var(--lf-text-faint)" }}>{item.date}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Intel Feed (1/3) */}
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--lf-border)", background: "var(--lf-bg-card)" }}>
+            <div className="px-5 py-3 border-b" style={{ borderColor: "var(--lf-border)" }}>
+              <h3 className="text-sm font-semibold" style={{ color: "var(--lf-text-primary)" }}>Intel & Novedades</h3>
+            </div>
+            <div className="divide-y" style={{ borderColor: "var(--lf-border)" }}>
+              {data.intel.map((item, i) => (
+                <div key={i} className="px-5 py-3.5 hover:bg-white/[0.02] transition-colors cursor-pointer">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase" style={{ background: `${color}20`, color }}>{item.tag}</span>
+                    <span className="text-[10px]" style={{ color: "var(--lf-text-faint)" }}>{item.date}</span>
+                  </div>
+                  <p className="text-xs font-medium leading-snug" style={{ color: "var(--lf-text-primary)" }}>{item.title}</p>
+                  <p className="text-[11px] mt-1 leading-relaxed" style={{ color: "var(--lf-text-muted)" }}>{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Zone 5: Normative Context ── */}
+        <div className="rounded-xl border px-5 py-3.5 flex items-start gap-3" style={{ borderColor: "var(--lf-border)", background: "var(--lf-bg-card)" }}>
+          <Landmark size={16} className="flex-shrink-0 mt-0.5" style={{ color }} />
+          <div>
+            <p className="text-xs font-semibold mb-0.5" style={{ color: "var(--lf-text-primary)" }}>Marco Normativo</p>
+            <p className="text-[11px] leading-relaxed" style={{ color: "var(--lf-text-muted)" }}>{data.normative}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function LexFlowShell() {
   const [module,    setModule]    = useState("dashboard");
   const [jur,       setJur]       = useState(JURISDICTIONS[0]);
@@ -4455,7 +4843,7 @@ function LexFlowShell() {
                   setModule(id);
                   if (isPractice && !collapsed) {
                     setExpandedNav(isExpanded ? null : id);
-                    setSelectedFunction(null);
+                    setSelectedFunction("__overview__");
                   } else {
                     setExpandedNav(null);
                     setSelectedFunction(null);
@@ -4475,9 +4863,45 @@ function LexFlowShell() {
                   <ChevronDown size={12} className="flex-shrink-0 transition-transform" style={{ color: "var(--lf-text-faint)", transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }} />
                 )}
               </button>
-              {/* Submenu for practice areas */}
+              {/* Submenu for practice areas — Section A: specific + Section B: common */}
               {!collapsed && isPractice && isExpanded && (
                 <div className="ml-5 pl-3 mb-1 space-y-0.5" style={{ borderLeft: `1px solid ${color || "#6446E5"}30` }}>
+                  {/* — Practice overview (landing page) — */}
+                  <button onClick={(e) => { e.stopPropagation(); setModule(id); setSelectedFunction("__overview__"); }}
+                    className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-left transition-all"
+                    style={{
+                      backgroundColor: isActive && selectedFunction === "__overview__" ? `${color || "#6446E5"}18` : "transparent",
+                      color: isActive && selectedFunction === "__overview__" ? (color || "#93c5fd") : "var(--lf-text-muted)",
+                      fontSize: 11.5,
+                    }}>
+                    <LayoutDashboard size={12} style={{ opacity: isActive && selectedFunction === "__overview__" ? 1 : 0.5, flexShrink: 0 }} />
+                    <span style={{ fontWeight: isActive && selectedFunction === "__overview__" ? 600 : 400 }}>Vista General</span>
+                  </button>
+                  {/* — Section A: Practice-specific functions — */}
+                  {PRACTICE_FUNCTIONS[id] && PRACTICE_FUNCTIONS[id].length > 0 && (
+                    <>
+                      <p className="text-[9px] uppercase tracking-widest font-semibold pt-2 pb-0.5 px-2.5" style={{ color: `${color || "#6446E5"}80` }}>Específicas</p>
+                      {PRACTICE_FUNCTIONS[id].map(fn => {
+                        const FnIcon = fn.icon;
+                        const fnActive = isActive && selectedFunction === fn.id;
+                        return (
+                          <button key={fn.id} onClick={(e) => { e.stopPropagation(); setModule(id); setSelectedFunction(fn.id); }}
+                            className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-left transition-all"
+                            title={fn.desc}
+                            style={{
+                              backgroundColor: fnActive ? `${color || "#6446E5"}18` : "transparent",
+                              color: fnActive ? (color || "#93c5fd") : "var(--lf-text-muted)",
+                              fontSize: 11.5,
+                            }}>
+                            <FnIcon size={12} style={{ opacity: fnActive ? 1 : 0.5, flexShrink: 0 }} />
+                            <span style={{ fontWeight: fnActive ? 600 : 400 }}>{fn.name}</span>
+                          </button>
+                        );
+                      })}
+                    </>
+                  )}
+                  {/* — Section B: Common tools — */}
+                  <p className="text-[9px] uppercase tracking-widest font-semibold pt-2 pb-0.5 px-2.5" style={{ color: "var(--lf-text-faint)" }}>Herramientas</p>
                   {SIDEBAR_FUNCTIONS.map(fn => {
                     const FnIcon = fn.icon;
                     const fnActive = isActive && selectedFunction === fn.id;
@@ -4655,6 +5079,8 @@ function LexFlowShell() {
             ? <JurisprudenciaModule />
             : module === "firmas"
             ? <FirmasModule />
+            : ["laboral","comercial","penal","civil","tributario","pi","compliance-reg","empresas"].includes(module) && selectedFunction === "__overview__"
+            ? <PracticePage key={module} practiceId={module} onSelectFunction={(fnId) => setSelectedFunction(fnId)} />
             : ["laboral","comercial","penal","civil","tributario","pi","compliance-reg","empresas"].includes(module)
             ? <ContratosModule key={module + (selectedFunction || "")} initialPracticeArea={module === "compliance-reg" ? "compliance" : module} initialFunction={selectedFunction} />
             : <div className="flex-1 overflow-y-auto"><ModulePlaceholder id={module} /></div>

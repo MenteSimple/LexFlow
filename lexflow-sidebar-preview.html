@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexFlow — Sidebar + Practice Page Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #0b0f1a; --surface: #111827; --card: #151c2e; --elevated: rgba(30,40,65,0.6); --border: #1e293b; --text: #e2e8f0; --text-sec: #94a3b8; --text-muted: #64748b; --text-faint: #475569; --accent: #6446E5; --teal: #09C8D4; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Manrope',system-ui,sans-serif; background:var(--bg); color:var(--text); display:flex; height:100vh; overflow:hidden; }
+
+  /* ── SIDEBAR ── */
+  .sidebar { width:260px; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; }
+  .sidebar-brand { padding:16px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .sidebar-brand .logo { width:32px; height:32px; background:linear-gradient(135deg,#6446E5,#09C8D4); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:14px; }
+  .sidebar-brand .name { font-size:14px; font-weight:800; letter-spacing:-0.01em; }
+  .sidebar-brand .name .b1 { color:#6446E5; }
+  .sidebar-brand .name .b2 { color:#09C8D4; }
+  .sidebar-brand .sub { font-size:10px; color:#09C8D4; opacity:.75; font-weight:600; }
+
+  .nav-section { padding:10px 8px; flex:1; overflow-y:auto; }
+  .nav-label { padding:8px 12px 4px; font-size:9.5px; text-transform:uppercase; letter-spacing:0.1em; font-weight:700; color:var(--text-faint); }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:500; color:var(--text-sec); border-left:2px solid transparent; margin-bottom:2px; transition:all .15s; }
+  .nav-item:hover { background:rgba(100,116,139,.08); color:var(--text); }
+  .nav-item.active { color:white; border-left-color:var(--accent); }
+  .nav-item .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .nav-item .chevron { margin-left:auto; font-size:10px; color:var(--text-faint); transition:transform .2s; }
+  .nav-item.active .chevron { transform:rotate(180deg); }
+
+  /* Submenu */
+  .submenu { margin-left:22px; padding-left:12px; border-left:1px solid rgba(100,70,229,.2); margin-bottom:4px; }
+  .submenu .sub-label { font-size:9px; text-transform:uppercase; letter-spacing:0.1em; font-weight:700; padding:8px 10px 3px; }
+  .submenu .sub-label.specific { color:rgba(245,158,11,.6); }
+  .submenu .sub-label.common { color:var(--text-faint); }
+  .sub-item { display:flex; align-items:center; gap:8px; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:11.5px; color:var(--text-muted); transition:all .15s; }
+  .sub-item:hover { color:var(--text-sec); background:rgba(100,116,139,.06); }
+  .sub-item.active { color:#f59e0b; background:rgba(245,158,11,.08); font-weight:600; }
+  .sub-item .ico { font-size:11px; opacity:.5; flex-shrink:0; }
+  .sub-item.active .ico { opacity:1; }
+
+  /* ── MAIN CONTENT ── */
+  .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+  .header-bar { padding:12px 24px; border-bottom:1px solid var(--border); border-top:2px solid transparent; border-image:linear-gradient(90deg,#6446E5,#09C8D4,#10B991) 1; background:var(--surface); }
+
+  .content { flex:1; overflow-y:auto; }
+  .page-header { padding:20px 24px 16px; border-bottom:1px solid var(--border); }
+  .page-header h2 { font-size:18px; font-weight:700; display:flex; align-items:center; gap:8px; }
+  .page-header .sub { font-size:12px; color:var(--text-muted); margin-top:2px; }
+
+  .zones { padding:24px; display:flex; flex-direction:column; gap:24px; }
+
+  /* KPI cards */
+  .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .kpi { border:1px solid var(--border); background:var(--card); border-radius:12px; padding:16px; }
+  .kpi .label { font-size:11px; color:var(--text-muted); font-weight:500; margin-bottom:4px; }
+  .kpi .value { font-size:24px; font-weight:800; }
+  .kpi .trend { font-size:10px; margin-top:4px; display:flex; align-items:center; gap:3px; }
+  .kpi .trend.up { color:#22c55e; }
+  .kpi .trend.down { color:#ef4444; }
+
+  /* Quick actions */
+  .actions-row { display:flex; flex-wrap:wrap; gap:8px; }
+  .action-btn { display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid; transition:all .15s; }
+  .action-btn:hover { transform:scale(1.02); }
+  .action-btn.specific { background:rgba(245,158,11,.08); color:#f59e0b; border-color:rgba(245,158,11,.25); }
+  .action-btn.common { background:var(--elevated); color:var(--text-sec); border-color:var(--border); }
+
+  .section-label { font-size:10px; text-transform:uppercase; letter-spacing:.1em; font-weight:700; color:var(--text-faint); margin-bottom:12px; }
+
+  /* Portfolio + Intel layout */
+  .split-layout { display:grid; grid-template-columns:2fr 1fr; gap:24px; }
+  .panel { border:1px solid var(--border); background:var(--card); border-radius:12px; overflow:hidden; }
+  .panel-header { padding:12px 20px; border-bottom:1px solid var(--border); font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:space-between; }
+  .filter-pills { display:flex; gap:4px; }
+  .pill { padding:4px 10px; border-radius:6px; font-size:10px; font-weight:600; cursor:pointer; border:1px solid transparent; color:var(--text-muted); }
+  .pill.active { background:rgba(245,158,11,.12); color:#f59e0b; border-color:rgba(245,158,11,.3); }
+  .row { display:flex; align-items:center; gap:16px; padding:12px 20px; border-bottom:1px solid rgba(30,41,59,.5); transition:background .1s; }
+  .row:hover { background:rgba(255,255,255,.015); }
+  .row:last-child { border-bottom:none; }
+  .row .title { font-size:13px; font-weight:600; flex:1; min-width:0; }
+  .row .type { font-size:10.5px; color:var(--text-muted); margin-top:1px; }
+  .badge { padding:2px 8px; border-radius:99px; font-size:10px; font-weight:700; text-transform:uppercase; }
+  .badge.alto { background:rgba(239,68,68,.12); color:#ef4444; }
+  .badge.medio { background:rgba(245,158,11,.12); color:#f59e0b; }
+  .badge.bajo { background:rgba(34,197,94,.12); color:#22c55e; }
+  .badge.status { font-weight:500; text-transform:none; }
+  .badge.activo { background:rgba(34,197,94,.12); color:#22c55e; }
+  .badge.revision { background:rgba(245,158,11,.12); color:#f59e0b; }
+  .date-col { font-size:10px; color:var(--text-faint); width:80px; text-align:right; }
+
+  /* Intel */
+  .intel-item { padding:14px 20px; border-bottom:1px solid rgba(30,41,59,.5); cursor:pointer; transition:background .1s; }
+  .intel-item:hover { background:rgba(255,255,255,.015); }
+  .intel-item:last-child { border-bottom:none; }
+  .intel-meta { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+  .intel-tag { padding:2px 6px; border-radius:4px; font-size:8px; font-weight:800; text-transform:uppercase; background:rgba(245,158,11,.15); color:#f59e0b; }
+  .intel-date { font-size:10px; color:var(--text-faint); }
+  .intel-title { font-size:12px; font-weight:600; line-height:1.3; }
+  .intel-desc { font-size:11px; color:var(--text-muted); margin-top:4px; line-height:1.4; }
+
+  /* Normative */
+  .normative { border:1px solid var(--border); background:var(--card); border-radius:12px; padding:14px 20px; display:flex; align-items:flex-start; gap:12px; }
+  .normative .n-icon { color:#f59e0b; flex-shrink:0; font-size:16px; margin-top:2px; }
+  .normative .n-title { font-size:12px; font-weight:700; margin-bottom:2px; }
+  .normative .n-text { font-size:11px; color:var(--text-muted); line-height:1.5; }
+
+  /* Annotation boxes */
+  .annotation { position:absolute; background:linear-gradient(135deg,#6446E5,#09C8D4); color:white; padding:4px 10px; border-radius:6px; font-size:10px; font-weight:700; pointer-events:none; z-index:10; white-space:nowrap; }
+  .annotation::after { content:''; position:absolute; width:0; height:0; }
+  .ann-right::after { left:100%; top:50%; transform:translateY(-50%); border:5px solid transparent; border-left-color:#6446E5; }
+  .ann-left::after { right:100%; top:50%; transform:translateY(-50%); border:5px solid transparent; border-right-color:#09C8D4; }
+
+  /* Subtle pulse on new elements */
+  @keyframes subtle-in { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+  .submenu, .zones > * { animation: subtle-in .3s ease-out both; }
+  .zones > *:nth-child(2) { animation-delay:.05s; }
+  .zones > *:nth-child(3) { animation-delay:.1s; }
+  .zones > *:nth-child(4) { animation-delay:.15s; }
+  .zones > *:nth-child(5) { animation-delay:.2s; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">Lx</div>
+    <div>
+      <div class="name"><span class="b1">{</span>LexFlow<span class="b2">}</span></div>
+      <div class="sub">Run Smarter with AI</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <!-- Dashboard -->
+    <div class="nav-item" style="opacity:.5;">
+      <span class="dot" style="background:#6446E5;"></span> Dashboard
+    </div>
+
+    <div class="nav-label">Áreas de Práctica</div>
+
+    <!-- Laboral — ACTIVE & EXPANDED -->
+    <div class="nav-item active" style="background:linear-gradient(90deg,rgba(245,158,11,.2),rgba(245,158,11,.06)); border-left-color:#f59e0b; box-shadow:0 0 12px rgba(245,158,11,.15);">
+      <span class="dot" style="background:#f59e0b;"></span>
+      <span style="color:white;">Laboral</span>
+      <span class="chevron">▲</span>
+    </div>
+
+    <!-- SUBMENU — new two-section layout -->
+    <div class="submenu">
+      <!-- Vista General -->
+      <div class="sub-item active">
+        <span class="ico">📊</span> Vista General
+      </div>
+
+      <!-- Section A: Specific -->
+      <div class="sub-label specific">Específicas</div>
+      <div class="sub-item">
+        <span class="ico">🧮</span> Liquidar Prestaciones
+      </div>
+      <div class="sub-item">
+        <span class="ico">🛡️</span> Evaluar Despido
+      </div>
+      <div class="sub-item">
+        <span class="ico">📋</span> Checklist SST
+      </div>
+      <div class="sub-item">
+        <span class="ico">🏛️</span> Consultar Convención
+      </div>
+      <div class="sub-item">
+        <span class="ico">📈</span> Proyectar Indemnización
+      </div>
+
+      <!-- Section B: Common -->
+      <div class="sub-label common">Herramientas</div>
+      <div class="sub-item">
+        <span class="ico">🔍</span> Revisar Contrato
+      </div>
+      <div class="sub-item">
+        <span class="ico">✏️</span> Redactar
+      </div>
+      <div class="sub-item">
+        <span class="ico">⚖️</span> Comparar Versiones
+      </div>
+      <div class="sub-item">
+        <span class="ico">📄</span> Cláusulas
+      </div>
+      <div class="sub-item">
+        <span class="ico">✅</span> Checklist
+      </div>
+      <div class="sub-item">
+        <span class="ico">📤</span> Exportar
+      </div>
+    </div>
+
+    <!-- Comercial — collapsed -->
+    <div class="nav-item">
+      <span class="dot" style="background:#3b82f6;"></span> Comercial
+      <span class="chevron">▼</span>
+    </div>
+    <!-- Penal — collapsed -->
+    <div class="nav-item">
+      <span class="dot" style="background:#ef4444;"></span> Penal
+      <span class="chevron">▼</span>
+    </div>
+    <!-- Civil — collapsed -->
+    <div class="nav-item">
+      <span class="dot" style="background:#8b5cf6;"></span> Civil
+      <span class="chevron">▼</span>
+    </div>
+    <!-- Tributario — collapsed -->
+    <div class="nav-item">
+      <span class="dot" style="background:#10b981;"></span> Tributario
+      <span class="chevron">▼</span>
+    </div>
+    <!-- PI — collapsed -->
+    <div class="nav-item">
+      <span class="dot" style="background:#06b6d4;"></span> Propiedad Int.
+      <span class="chevron">▼</span>
+    </div>
+    <!-- Compliance — collapsed -->
+    <div class="nav-item">
+      <span class="dot" style="background:#f43f5e;"></span> Compliance
+      <span class="chevron">▼</span>
+    </div>
+    <!-- Empresas — collapsed -->
+    <div class="nav-item">
+      <span class="dot" style="background:#f97316;"></span> Empresas
+      <span class="chevron">▼</span>
+    </div>
+
+    <div class="nav-label">Herramientas</div>
+    <div class="nav-item">
+      <span class="dot" style="background:#a78bfa;"></span> Jurisprudencia
+    </div>
+    <div class="nav-item">
+      <span class="dot" style="background:#0E1EAB;"></span> Firmas
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ MAIN ═══════════════════════ -->
+<div class="main">
+  <div class="header-bar" style="display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:13px;font-weight:600;">🇨🇴 Colombia</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span style="font-size:12px;color:var(--text-muted);">🔍 Buscar en LexFlow…</span>
+      <span style="font-size:12px;color:var(--text-muted);">🔔</span>
+      <span style="font-size:12px;color:var(--text-muted);">AS</span>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h2><span style="color:#f59e0b;">⚖️</span> Derecho Laboral y Seguridad Social</h2>
+      <p class="sub">Contratos de trabajo · Nómina · SST · Pensiones · Relaciones sindicales</p>
+    </div>
+
+    <div class="zones">
+      <!-- Zone 1: KPIs -->
+      <div>
+        <div class="section-label">Indicadores Clave</div>
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="label">Contratos Activos</div>
+            <div class="value" style="color:#f59e0b;">87</div>
+            <div class="trend up">↑ +12 este mes</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Procesos Judiciales</div>
+            <div class="value" style="color:#ef4444;">14</div>
+            <div class="trend down">↑ +3 vs trimestre ant.</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Cumplimiento SST</div>
+            <div class="value" style="color:#22c55e;">92%</div>
+            <div class="trend up">↑ +5pp</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Vencimientos 30d</div>
+            <div class="value" style="color:#f59e0b;">6</div>
+            <div class="trend" style="color:var(--text-faint);">Próximos a renovar</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zone 2: Quick Actions -->
+      <div>
+        <div class="section-label">Acciones Rápidas</div>
+        <div class="actions-row">
+          <div class="action-btn specific">🧮 Liquidar Prestaciones</div>
+          <div class="action-btn specific">🛡️ Evaluar Despido</div>
+          <div class="action-btn specific">📋 Checklist SST</div>
+          <div class="action-btn specific">🏛️ Consultar Convención</div>
+          <div class="action-btn specific">📈 Proyectar Indemnización</div>
+          <div class="action-btn common">🔍 Revisar Contrato</div>
+          <div class="action-btn common">✏️ Redactar</div>
+          <div class="action-btn common">⚖️ Comparar</div>
+        </div>
+      </div>
+
+      <!-- Zone 3 + 4: Portfolio + Intel -->
+      <div class="split-layout">
+        <!-- Portfolio Table -->
+        <div class="panel">
+          <div class="panel-header">
+            Portafolio Activo
+            <div class="filter-pills">
+              <div class="pill active">Todos</div>
+              <div class="pill">Alto</div>
+              <div class="pill">Medio</div>
+              <div class="pill">Bajo</div>
+            </div>
+          </div>
+          <div class="row">
+            <div style="flex:1;min-width:0;">
+              <div class="title">Demanda colectiva Sindicato ABC</div>
+              <div class="type">Proceso Judicial</div>
+            </div>
+            <span class="badge alto">ALTO</span>
+            <span class="badge status activo">activo</span>
+            <span class="date-col">2025-03-01</span>
+          </div>
+          <div class="row">
+            <div style="flex:1;min-width:0;">
+              <div class="title">Contrato CTO — TechCorp S.A.S.</div>
+              <div class="type">Contrato Individual</div>
+            </div>
+            <span class="badge medio">MEDIO</span>
+            <span class="badge status revision">en revisión</span>
+            <span class="date-col">2025-02-15</span>
+          </div>
+          <div class="row">
+            <div style="flex:1;min-width:0;">
+              <div class="title">Reglamento Interno de Trabajo</div>
+              <div class="type">Documento Interno</div>
+            </div>
+            <span class="badge bajo">BAJO</span>
+            <span class="badge status activo">activo</span>
+            <span class="date-col">2025-01-20</span>
+          </div>
+          <div class="row">
+            <div style="flex:1;min-width:0;">
+              <div class="title">Acuerdo de Teletrabajo — Grupo Éxito</div>
+              <div class="type">Otrosí</div>
+            </div>
+            <span class="badge bajo">BAJO</span>
+            <span class="badge status activo">activo</span>
+            <span class="date-col">2025-01-10</span>
+          </div>
+        </div>
+
+        <!-- Intel Feed -->
+        <div class="panel">
+          <div class="panel-header">Intel & Novedades</div>
+          <div class="intel-item">
+            <div class="intel-meta">
+              <span class="intel-tag">Reforma</span>
+              <span class="intel-date">2025-03-05</span>
+            </div>
+            <div class="intel-title">Ponencia aprobada: reducción jornada nocturna desde las 7pm</div>
+            <div class="intel-desc">Comisión Séptima aprueba modificación del Art. 160 CST. Impacto en recargos nocturnos.</div>
+          </div>
+          <div class="intel-item">
+            <div class="intel-meta">
+              <span class="intel-tag">Sentencia</span>
+              <span class="intel-date">2025-02-28</span>
+            </div>
+            <div class="intel-title">CSJ SL-2025-0042: estabilidad laboral reforzada en incapacidades superiores a 180 días</div>
+            <div class="intel-desc">La Corte unifica criterio sobre protección a trabajadores con dictamen de pérdida de capacidad.</div>
+          </div>
+          <div class="intel-item">
+            <div class="intel-meta">
+              <span class="intel-tag">MinTrabajo</span>
+              <span class="intel-date">2025-02-20</span>
+            </div>
+            <div class="intel-title">Nueva resolución: plazos actualización SG-SST 2025</div>
+            <div class="intel-desc">Resolución 0312 ampliada. Plazo máximo 30 de junio para PYMES.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zone 5: Normative -->
+      <div class="normative">
+        <span class="n-icon">🏛️</span>
+        <div>
+          <div class="n-title">Marco Normativo</div>
+          <div class="n-text">CST Arts. 1-488 · Ley 50/1990 · Ley 789/2002 · Ley 1010/2006 (Acoso) · Ley 1562/2012 (Riesgos Laborales) · Decreto 1072/2015 (SG-SST) · Resolución 0312/2019 · Reforma Laboral 2024 (en trámite)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
